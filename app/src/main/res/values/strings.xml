@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">PetCare</string>
+    <string name="login_title">Welcome back</string>
+    <string name="login_subtitle">Sign in to manage your pets and their care.</string>
+    <string name="register_title">Create your account</string>
+    <string name="register_subtitle">Start keeping your pet’s care in one place.</string>
+    <string name="full_name">Full name</string>
+    <string name="email_address">Email address</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="create_account">Create account</string>
+    <string name="new_to_petcare">New to PetCare?</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="sign_up">Sign up</string>
+    <string name="sign_in_instead">Sign in instead</string>
+    <string name="error_name_required">Enter your name.</string>
+    <string name="error_email_required">Enter your email address.</string>
+    <string name="error_email_invalid">Enter a valid email address.</string>
+    <string name="error_password_required">Enter your password.</string>
+    <string name="error_password_short">Use at least 6 characters.</string>
+    <string name="error_password_confirmation_required">Confirm your password.</string>
+    <string name="error_passwords_do_not_match">Passwords do not match.</string>
 </resources>

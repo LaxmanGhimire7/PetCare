@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.petcare.databinding.FragmentLoginBinding
+import android.util.Patterns
 
 class LoginFragment : Fragment() {
 
@@ -21,8 +23,48 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.signInButton.setOnClickListener {
+            if (isValidInput()) {
+                findNavController().navigate(com.example.petcare.R.id.action_login_to_home)
+            }
+        }
+
+        binding.signUpButton.setOnClickListener {
+            findNavController().navigate(com.example.petcare.R.id.action_login_to_register)
+        }
+    }
+
+    private fun isValidInput(): Boolean {
+        val email = binding.emailInput.text?.toString()?.trim().orEmpty()
+        val password = binding.passwordInput.text?.toString().orEmpty()
+
+        binding.emailLayout.error = when {
+            email.isEmpty() -> getString(com.example.petcare.R.string.error_email_required)
+            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
+                getString(com.example.petcare.R.string.error_email_invalid)
+            }
+            else -> null
+        }
+        binding.passwordLayout.error = when {
+            password.isEmpty() -> getString(com.example.petcare.R.string.error_password_required)
+            password.length < MINIMUM_PASSWORD_LENGTH -> {
+                getString(com.example.petcare.R.string.error_password_short)
+            }
+            else -> null
+        }
+
+        return binding.emailLayout.error == null && binding.passwordLayout.error == null
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private companion object {
+        const val MINIMUM_PASSWORD_LENGTH = 6
     }
 }
