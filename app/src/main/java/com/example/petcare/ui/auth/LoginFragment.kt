@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.petcare.R
+import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.databinding.FragmentLoginBinding
 import android.util.Patterns
 
@@ -28,7 +30,7 @@ class LoginFragment : Fragment() {
 
         binding.signInButton.setOnClickListener {
             if (isValidInput()) {
-                findNavController().navigate(com.example.petcare.R.id.action_login_to_home)
+                signIn()
             }
         }
 
@@ -57,6 +59,17 @@ class LoginFragment : Fragment() {
         }
 
         return binding.emailLayout.error == null && binding.passwordLayout.error == null
+    }
+
+    private fun signIn() {
+        val email = binding.emailInput.text?.toString().orEmpty()
+        val password = binding.passwordInput.text?.toString().orEmpty()
+
+        if (AuthPreferences(requireContext()).signIn(email, password)) {
+            findNavController().navigate(R.id.action_login_to_home)
+        } else {
+            binding.passwordLayout.error = getString(R.string.error_invalid_credentials)
+        }
     }
 
     override fun onDestroyView() {

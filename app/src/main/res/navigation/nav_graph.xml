@@ -60,9 +60,51 @@
         android:label="Home Dashboard"
         tools:layout="@layout/fragment_home_dashboard">
         <action
+            android:id="@+id/action_home_to_add_pet"
+            app:destination="@id/addPetFragment" />
+        <action
+            android:id="@+id/action_home_to_edit_pet"
+            app:destination="@id/editPetFragment" />
+        <action
+            android:id="@+id/action_home_to_add_care_task"
+            app:destination="@id/addCareTaskFragment" />
+        <action
+            android:id="@+id/action_home_to_edit_care_task"
+            app:destination="@id/editCareTaskFragment" />
+        <action
             android:id="@+id/action_home_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addPetFragment"
+        android:name="com.example.petcare.ui.pets.AddPetFragment"
+        android:label="Add pet"
+        tools:layout="@layout/fragment_add_pet" />
+
+    <fragment
+        android:id="@+id/editPetFragment"
+        android:name="com.example.petcare.ui.pets.EditPetFragment"
+        android:label="Edit pet"
+        tools:layout="@layout/fragment_add_pet">
+        <argument android:name="petId" app:argType="long" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addCareTaskFragment"
+        android:name="com.example.petcare.ui.care.AddCareTaskFragment"
+        android:label="Add care task"
+        tools:layout="@layout/fragment_add_care_task" />
+
+    <fragment
+        android:id="@+id/editCareTaskFragment"
+        android:name="com.example.petcare.ui.care.EditCareTaskFragment"
+        android:label="Edit care task"
+        tools:layout="@layout/fragment_add_care_task">
+        <argument
+            android:name="careTaskId"
+            app:argType="long" />
     </fragment>
 </navigation>

@@ -8,6 +8,7 @@ import android.util.Patterns
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.databinding.FragmentRegisterBinding
 
 class RegisterFragment : Fragment() {
@@ -29,7 +30,7 @@ class RegisterFragment : Fragment() {
 
         binding.createAccountButton.setOnClickListener {
             if (isValidInput()) {
-                findNavController().navigate(R.id.action_register_to_home)
+                register()
             }
         }
 
@@ -73,6 +74,18 @@ class RegisterFragment : Fragment() {
             binding.emailLayout.error == null &&
             binding.passwordLayout.error == null &&
             binding.confirmPasswordLayout.error == null
+    }
+
+    private fun register() {
+        val name = binding.nameInput.text?.toString()?.trim().orEmpty()
+        val email = binding.emailInput.text?.toString()?.trim().orEmpty()
+        val password = binding.passwordInput.text?.toString().orEmpty()
+
+        if (AuthPreferences(requireContext()).register(name, email, password)) {
+            findNavController().navigate(R.id.action_register_to_home)
+        } else {
+            binding.emailLayout.error = getString(R.string.error_account_already_exists)
+        }
     }
 
     override fun onDestroyView() {

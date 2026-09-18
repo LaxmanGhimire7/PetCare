@@ -65,23 +65,8 @@ dependencies {
     // WorkManager
     implementation(libs.androidx.work.runtime)
 
-    // Networking (Retrofit & Moshi)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.moshi)
-    implementation(libs.moshi.kotlin)
-
-    // Hardware & Maps
-    implementation(libs.play.services.maps)
-    implementation(libs.play.services.location)
-
-    // Image Loading
+    // Image loading
     implementation(libs.coil)
-
-    // Logging
-    implementation(libs.timber)
-
-    // Charts
-    implementation(libs.mpandroidchart)
 
     // Testing
     testImplementation(libs.junit)
