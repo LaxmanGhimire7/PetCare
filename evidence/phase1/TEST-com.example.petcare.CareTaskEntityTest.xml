@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.petcare.CareTaskEntityTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-19T10:02:45.555Z" hostname="LAXMAN" time="0.013">
+  <properties/>
+  <testcase name="newTaskUsesTheDefaultReminderAndIsIncomplete" classname="com.example.petcare.CareTaskEntityTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

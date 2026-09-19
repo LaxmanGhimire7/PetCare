@@ -14,6 +14,13 @@ class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) :
         title: String,
         dueDateEpochDay: Long,
         reminderMinutesOfDay: Int,
+        category: String,
+        frequency: String,
+        requiredSupplies: String,
+        notes: String,
+        latitude: Double?,
+        longitude: Double?,
+        placeId: Long?,
         onSaved: (CareTaskEntity) -> Unit
     ) {
         viewModelScope.launch {
@@ -22,7 +29,14 @@ class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) :
                     petId,
                     title,
                     dueDateEpochDay,
-                    reminderMinutesOfDay
+                    reminderMinutesOfDay,
+                    category,
+                    frequency,
+                    requiredSupplies,
+                    notes,
+                    latitude,
+                    longitude,
+                    placeId
                 )
             )
         }

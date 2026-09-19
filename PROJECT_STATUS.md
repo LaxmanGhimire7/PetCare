@@ -2,63 +2,78 @@
 
 Last updated: September 18, 2026
 
-## Completed foundation
+## Completed application
 
-- Android single-module project configured under the `app` module.
-- `MainActivity` is the launcher activity and hosts the application navigation container.
-- Material 3, AppCompat, ConstraintLayout, and AndroidX Core dependencies are configured.
-- View Binding is enabled for layouts.
-- A Material 3 PetCare color palette and light theme are defined.
-- The activity layout uses a `NavHostFragment` as the full-screen application container.
-- A navigation graph has been created with these destinations:
-  - Splash
-  - Login
-  - Register
-  - Home Dashboard
-- Navigation actions exist for Splash-to-Login, Splash-to-Home, Login-to-Register, Login-to-Home, Register-to-Login, Register-to-Home, and Home-to-Login.
-- Fragment classes exist for Splash, Login, Register, and Home Dashboard.
-- Each fragment uses View Binding and correctly clears its binding in `onDestroyView`.
-- Layout files exist for Splash, Login, Register, and Home Dashboard.
+- Native Android app built with Kotlin, XML layouts, Material 3, Navigation, View Binding, Room, Coroutines, WorkManager, and Coil.
+- Professional responsive light and dark themes, consistent cards, typography, icons, validation, empty states, and edge-to-edge system-bar handling.
+- Splash, local registration, login, persisted signed-in state, logout, and input validation.
+- Dashboard with personalized greeting, pet summaries, upcoming care, completed-care history, care tools, reminder settings, and clear first-use states.
 
-## Completed user flow
+## Pet profiles
 
-- The app opens on the Splash screen.
-- Splash waits 1.5 seconds and then opens Login.
-- The splash navigation coroutine is tied to the fragment view lifecycle, so it is cancelled when the view is destroyed.
-- Splash checks that it is still the active destination before navigating, preventing duplicate navigation.
-- Login has email and password fields, password visibility control, input autofill hints, and validation for a valid email and a six-character minimum password.
-- Register has full-name, email, password, and password-confirmation fields with validation and clear field-level errors.
-- Login can open Register, and Register can return to Login.
-- Register saves one device-local account and signs the user in.
-- Login verifies the saved email and password before opening the Home Dashboard.
-- The signed-in state persists between launches, and Splash opens Dashboard for a signed-in user or Login otherwise.
-- This is local-only authentication: it does not create a server-backed account, synchronize between devices, or provide production-grade credential protection.
-- Dashboard greets the signed-in user, shows clear empty states for pets and upcoming care, and provides a working Sign out action.
-- Pet profiles can be added and edited with a name, animal type, optional health notes, and an optional on-device photo. They are stored locally with Room.
-- Dashboard lists saved pet profiles, including their health notes and photo when supplied, and lets the owner edit or remove a profile after confirmation.
-- Care tasks can be created for a saved pet with a due date. They are stored locally, sorted by due date, and shown on Dashboard.
-- Upcoming care tasks can be marked done. Completed tasks are retained locally and no longer appear in the upcoming list.
-- Dashboard includes a completed-care history, ordered by most recently scheduled date.
-- Care tasks can be deleted from the upcoming or completed list after confirmation.
-- Care tasks can be edited to change their title, pet, or due date while preserving their completion state.
-- Each unfinished care task has one local reminder on its due date. The owner chooses the time when adding or editing a task; the default is 9:00 AM. Creating or editing a task replaces its reminder; completing, deleting, or removing its pet cancels it.
+- Create, edit, and delete pet profiles.
+- Store name, animal type, breed, age, weight, dietary preferences, vaccination history, allergies, favourite toys, medical records, grooming routine, and health notes.
+- Select and persist multiple on-device pet photos. The first image is used as the dashboard profile image.
+- Existing profile data is preserved by Room migrations.
 
-## Implemented dependencies
+## Care plans and checklists
 
-- Room and KSP persist pet profiles and care tasks.
-- Navigation, Lifecycle, Coroutines, WorkManager, and Coil support the implemented app flows.
+- Create and edit care tasks with a pet, title, category, due date, reminder time, repeat frequency, required supplies, and instructions.
+- Categories include feeding, exercise, grooming, medication, healthcare, cleaning, and general care.
+- Frequencies include one time, daily, weekly, and monthly.
+- Mark tasks complete, retain completed history, edit tasks, and delete tasks with confirmation.
+- Completing a daily, weekly, or monthly task automatically generates and schedules its next occurrence.
+- Routine generator creates selected feeding, exercise, grooming, medication, and healthcare tasks for a pet.
+- Local WorkManager notifications are scheduled per task. Default reminder time is configurable.
 
-## Build verification
+## Delegation and gestures
 
-- `assembleDebug` completed successfully after using Android Studio's bundled JDK.
-- The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+- Share the full upcoming checklist through the device SMS app with pet names, dates, frequencies, and instructions.
+- Long-press an individual task to share it by SMS.
+- Swipe right on an upcoming task to complete it.
+- Swipe left to open task deletion confirmation.
+- Double-tap a task to edit it.
+- The dashboard displays the gesture guide directly above the checklist.
 
-## Remaining work
+## Expenses
 
-- Add global reminder preferences or multiple reminders per care task.
-- Decide which prepared integrations are required and implement them only when needed.
-- Complete the dark theme; it currently does not define the PetCare color overrides.
-- Replace hardcoded screen-title text with string resources and add accessible labels as forms are introduced.
-- Replace the template unit and instrumented tests with feature-focused tests.
-- Clean up IDE-specific `.idea` changes before committing.
-- Correct the system `JAVA_HOME` path or configure command-line Gradle to use Android Studio's bundled JDK.
+- Add expenses for a selected pet with category, amount, date, and note.
+- Categories cover food, grooming, veterinary care, medication, toys, and other costs.
+- Expense history shows localized currency and dates.
+- Summary shows total spending and individual totals for each pet.
+- Delete unwanted expense records.
+
+## Geotagged places and provider integration
+
+- Save veterinary clinics, grooming salons, dog parks, pet supply stores, and animal shelters.
+- Store address, optional latitude/longitude, opening hours, phone number, and booking website.
+- Open a saved place in a compatible map app using a `geo:` intent.
+- Open the dialer for a provider and its booking website in a browser.
+
+## Appointment import
+
+- Import `.ics` or calendar text files with Android's document picker.
+- Parse appointment title, date, description, and location.
+- Pre-fill a healthcare task so the user can choose the pet and confirm the imported appointment.
+- The picker does not require broad storage permission.
+
+## Persistence and migrations
+
+- Room database version 8 stores pets, care tasks, expenses, and service providers.
+- Explicit migrations preserve databases created by versions 1 through 7.
+- Deleting a pet cascades to its care tasks and expenses, and scheduled task reminders are cancelled.
+
+## Verification completed
+
+- `:app:assembleDebug` passes.
+- `:app:testDebugUnitTest` passes, including ICS appointment parsing.
+- `:app:lintDebug` passes with zero errors.
+- `:app:connectedDebugAndroidTest` passes all three emulator tests.
+- Device tests cover task completion/history, recurring-task generation, expense persistence, provider persistence, and Room relationships.
+- The APK was installed and launched on the Android emulator. Login, dashboard, and expense screens were visually checked with no runtime crash.
+- Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
+
+## Prototype scope
+
+- User accounts and application records are stored only on the device; there is no cloud synchronization or production authentication server.
+- Provider availability is represented by saved opening hours and booking links. Live appointment availability depends on the provider's external website.

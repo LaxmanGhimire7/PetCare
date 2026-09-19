@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Money and Places list shell with a summary, empty invitation, and add action. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_20">
+        <com.google.android.material.button.MaterialButton android:id="@+id/back_button"
+            style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="@string/cancel" />
+        <TextView android:id="@+id/title_text" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
+            android:textAppearance="?attr/textAppearanceHeadlineLarge" android:textColor="@color/on_surface"
+            android:textStyle="bold" />
+        <TextView android:id="@+id/subtitle_text" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8"
+            android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="@color/on_surface_variant" />
+        <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_24">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="@dimen/space_16">
+                <TextView android:id="@+id/summary_text" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="@color/on_surface" android:textStyle="bold" />
+                <TextView android:id="@+id/secondary_summary_text" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="@color/on_surface_variant" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton android:id="@+id/add_button"
+            style="@style/Widget.PetCare.Button.Primary" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_16" app:icon="@drawable/ic_add"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+        <LinearLayout android:id="@+id/place_map_panel"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_16" android:orientation="vertical"
+            android:visibility="gone">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.PetCare.TextInput"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/search_place_hint">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/place_search_input"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="textPostalAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.button.MaterialButton android:id="@+id/place_search_button"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/search_place" />
+            <FrameLayout android:id="@+id/place_map_frame"
+                android:layout_width="match_parent" android:layout_height="@dimen/place_map_height" />
+            <TextView android:id="@+id/place_map_unavailable"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:padding="@dimen/space_20" android:text="@string/map_unavailable"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:visibility="gone" />
+            <TextView android:id="@+id/place_location_status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8"
+                android:textAppearance="?attr/textAppearanceBodySmall" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/find_vets_button"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/find_vets_near_me" />
+        </LinearLayout>
+        <TextView android:id="@+id/empty_text" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_24" android:gravity="center"
+            android:padding="@dimen/space_24" android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="@color/on_surface_variant" />
+        <LinearLayout android:id="@+id/item_container" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

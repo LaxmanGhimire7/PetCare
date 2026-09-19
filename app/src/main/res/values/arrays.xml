@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="care_categories">
+        <item>Feeding</item>
+        <item>Exercise</item>
+        <item>Grooming</item>
+        <item>Medication</item>
+        <item>Healthcare</item>
+        <item>Cleaning</item>
+        <item>General</item>
+    </string-array>
+    <string-array name="care_frequencies">
+        <item>One time</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string-array name="expense_categories">
+        <item>Food</item>
+        <item>Grooming</item>
+        <item>Veterinary</item>
+        <item>Medication</item>
+        <item>Toys</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="provider_types">
+        <item>Veterinary clinic</item>
+        <item>Grooming salon</item>
+        <item>Dog park</item>
+        <item>Pet supply store</item>
+        <item>Animal shelter</item>
+    </string-array>
+</resources>

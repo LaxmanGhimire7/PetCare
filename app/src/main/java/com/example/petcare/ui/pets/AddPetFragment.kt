@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetRepository
+import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import coil.load
 
@@ -26,14 +27,21 @@ class AddPetFragment : Fragment() {
             PetRepository(PetCareDatabase.getInstance(requireContext()).petDao())
         )
     }
-    private var selectedPhotoUri: Uri? = null
-    private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let {
-            requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            selectedPhotoUri = it
+    private val selectedPhotoUris = mutableListOf<Uri>()
+    private var selectedColorIndex: Int? = null
+    private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        uris.forEach {
+            runCatching {
+                requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            if (it !in selectedPhotoUris) selectedPhotoUris += it
+        }
+        selectedPhotoUris.firstOrNull()?.let {
             binding.petPhotoPreview.visibility = View.VISIBLE
+            binding.petPhotoPreview.setPadding(0, 0, 0, 0)
             binding.petPhotoPreview.load(it)
         }
+        updatePhotoCount()
     }
 
     override fun onCreateView(
@@ -54,6 +62,9 @@ class AddPetFragment : Fragment() {
             }
         }
         binding.selectPhotoButton.setOnClickListener { photoPicker.launch(arrayOf("image/*")) }
+        PetColorPicker.bind(binding.petColorGroup, requireContext(), null) {
+            selectedColorIndex = it
+        }
 
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
@@ -83,10 +94,32 @@ class AddPetFragment : Fragment() {
         viewModel.addPet(
             name = binding.petNameInput.text?.toString()?.trim().orEmpty(),
             species = binding.petSpeciesInput.text?.toString()?.trim().orEmpty(),
+            breed = binding.petBreedInput.text?.toString()?.trim().orEmpty(),
+            age = binding.petAgeInput.text?.toString()?.trim().orEmpty(),
+            weight = binding.petWeightInput.text?.toString()?.trim().orEmpty(),
+            dietaryPreferences = binding.dietaryPreferencesInput.text?.toString()?.trim().orEmpty(),
+            vaccinationHistory = binding.vaccinationHistoryInput.text?.toString()?.trim().orEmpty(),
+            allergies = binding.allergiesInput.text?.toString()?.trim().orEmpty(),
+            favoriteToys = binding.favoriteToysInput.text?.toString()?.trim().orEmpty(),
+            medicalRecords = binding.medicalRecordsInput.text?.toString()?.trim().orEmpty(),
+            groomingRoutine = binding.groomingRoutineInput.text?.toString()?.trim().orEmpty(),
             healthNotes = binding.healthNotesInput.text?.toString()?.trim().orEmpty(),
-            photoUri = selectedPhotoUri?.toString()
+            photoUris = selectedPhotoUris.map(Uri::toString),
+            selectedColorIndex = selectedColorIndex
         ) { _ ->
             findNavController().navigateUp()
+        }
+    }
+
+    private fun updatePhotoCount() {
+        binding.photoCountText.text = if (selectedPhotoUris.isEmpty()) {
+            getString(R.string.profile_photo_subtitle)
+        } else {
+            resources.getQuantityString(
+                R.plurals.selected_photo_count,
+                selectedPhotoUris.size,
+                selectedPhotoUris.size
+            )
         }
     }
 

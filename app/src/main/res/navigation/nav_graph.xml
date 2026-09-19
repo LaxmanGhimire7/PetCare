@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.petcare.ui.auth.SplashFragment"
-        android:label="Splash"
+        android:label="@string/navigation_splash"
         tools:layout="@layout/fragment_splash">
         <action
             android:id="@+id/action_splash_to_login"
@@ -25,7 +25,7 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.petcare.ui.auth.LoginFragment"
-        android:label="Login"
+        android:label="@string/navigation_login"
         tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_login_to_register"
@@ -40,7 +40,7 @@
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.example.petcare.ui.auth.RegisterFragment"
-        android:label="Register"
+        android:label="@string/navigation_register"
         tools:layout="@layout/fragment_register">
         <action
             android:id="@+id/action_register_to_login"
@@ -57,8 +57,10 @@
     <fragment
         android:id="@+id/homeDashboardFragment"
         android:name="com.example.petcare.ui.home.HomeDashboardFragment"
-        android:label="Home Dashboard"
-        tools:layout="@layout/fragment_home_dashboard">
+        android:label="@string/navigation_dashboard"
+        tools:layout="@layout/fragment_today">
+        <argument android:name="taskId" app:argType="long" android:defaultValue="0L" />
+        <deepLink app:uri="petcare://task/{taskId}" />
         <action
             android:id="@+id/action_home_to_add_pet"
             app:destination="@id/addPetFragment" />
@@ -72,6 +74,13 @@
             android:id="@+id/action_home_to_edit_care_task"
             app:destination="@id/editCareTaskFragment" />
         <action
+            android:id="@+id/action_home_to_reminder_settings"
+            app:destination="@id/reminderSettingsFragment" />
+        <action android:id="@+id/action_home_to_routine_generator" app:destination="@id/routineGeneratorFragment" />
+        <action android:id="@+id/action_home_to_expenses" app:destination="@id/expenseListFragment" />
+        <action android:id="@+id/action_home_to_providers" app:destination="@id/providerListFragment" />
+        <action android:id="@+id/action_home_to_delegation" app:destination="@id/delegationPreviewFragment" />
+        <action
             android:id="@+id/action_home_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
@@ -79,15 +88,43 @@
     </fragment>
 
     <fragment
+        android:id="@+id/petListFragment"
+        android:name="com.example.petcare.ui.pets.PetListFragment"
+        android:label="@string/nav_pets"
+        tools:layout="@layout/fragment_pet_list">
+        <action android:id="@+id/action_pets_to_add_pet" app:destination="@id/addPetFragment" />
+        <action android:id="@+id/action_pets_to_edit_pet" app:destination="@id/editPetFragment" />
+        <action android:id="@+id/action_pets_to_pet_detail" app:destination="@id/petDetailFragment" />
+    </fragment>
+
+    <fragment android:id="@+id/petDetailFragment"
+        android:name="com.example.petcare.ui.pets.PetDetailFragment"
+        android:label="@string/pets_screen_title" tools:layout="@layout/fragment_pet_detail">
+        <argument android:name="petId" app:argType="long" />
+        <deepLink app:uri="petcare://pet/{petId}" />
+        <action android:id="@+id/action_pet_detail_to_edit" app:destination="@id/editPetFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.petcare.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings"
+        tools:layout="@layout/fragment_settings">
+        <action android:id="@+id/action_settings_to_reminder_settings" app:destination="@id/reminderSettingsFragment" />
+        <action android:id="@+id/action_settings_to_login" app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
         android:id="@+id/addPetFragment"
         android:name="com.example.petcare.ui.pets.AddPetFragment"
-        android:label="Add pet"
+        android:label="@string/add_pet"
         tools:layout="@layout/fragment_add_pet" />
 
     <fragment
         android:id="@+id/editPetFragment"
         android:name="com.example.petcare.ui.pets.EditPetFragment"
-        android:label="Edit pet"
+        android:label="@string/edit_pet_title"
         tools:layout="@layout/fragment_add_pet">
         <argument android:name="petId" app:argType="long" />
     </fragment>
@@ -95,16 +132,51 @@
     <fragment
         android:id="@+id/addCareTaskFragment"
         android:name="com.example.petcare.ui.care.AddCareTaskFragment"
-        android:label="Add care task"
-        tools:layout="@layout/fragment_add_care_task" />
+        android:label="@string/add_care_task"
+        tools:layout="@layout/fragment_add_care_task">
+        <argument android:name="importedTitle" app:argType="string" android:defaultValue="" />
+        <argument android:name="importedDateEpochDay" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="importedNotes" app:argType="string" android:defaultValue="" />
+        <argument android:name="importedTimeMinutes" app:argType="integer" android:defaultValue="-1" />
+        <argument android:name="importedClinic" app:argType="string" android:defaultValue="" />
+    </fragment>
 
     <fragment
         android:id="@+id/editCareTaskFragment"
         android:name="com.example.petcare.ui.care.EditCareTaskFragment"
-        android:label="Edit care task"
+        android:label="@string/edit_care_task_title"
         tools:layout="@layout/fragment_add_care_task">
         <argument
             android:name="careTaskId"
             app:argType="long" />
     </fragment>
+
+    <fragment
+        android:id="@+id/reminderSettingsFragment"
+        android:name="com.example.petcare.ui.settings.ReminderSettingsFragment"
+        android:label="@string/reminder_settings_title"
+        tools:layout="@layout/fragment_reminder_settings" />
+
+    <fragment android:id="@+id/routineGeneratorFragment" android:name="com.example.petcare.ui.routine.RoutineGeneratorFragment"
+        android:label="@string/navigation_routine_generator" tools:layout="@layout/fragment_routine_generator" />
+    <fragment android:id="@+id/expenseListFragment" android:name="com.example.petcare.ui.expenses.ExpenseListFragment"
+        android:label="@string/navigation_expenses" tools:layout="@layout/fragment_feature_list">
+        <action android:id="@+id/action_expenses_to_add_expense" app:destination="@id/addExpenseFragment" />
+    </fragment>
+    <fragment android:id="@+id/addExpenseFragment" android:name="com.example.petcare.ui.expenses.AddExpenseFragment"
+        android:label="@string/navigation_add_expense" tools:layout="@layout/fragment_add_expense" />
+    <fragment android:id="@+id/providerListFragment" android:name="com.example.petcare.ui.providers.ProviderListFragment"
+        android:label="@string/navigation_providers" tools:layout="@layout/fragment_feature_list">
+        <action android:id="@+id/action_providers_to_add_provider" app:destination="@id/addProviderFragment" />
+    </fragment>
+    <fragment android:id="@+id/addProviderFragment" android:name="com.example.petcare.ui.providers.AddProviderFragment"
+        android:label="@string/navigation_add_provider" tools:layout="@layout/fragment_add_provider">
+        <action android:id="@+id/action_add_provider_to_picker" app:destination="@id/placePickerFragment" />
+    </fragment>
+    <fragment android:id="@+id/placePickerFragment" android:name="com.example.petcare.ui.providers.PlacePickerFragment"
+        android:label="@string/pick_place_on_map" tools:layout="@layout/fragment_place_picker" />
+    <fragment android:id="@+id/delegationPreviewFragment"
+        android:name="com.example.petcare.ui.integration.DelegationPreviewFragment"
+        android:label="@string/delegation_preview_title"
+        tools:layout="@layout/fragment_delegation_preview" />
 </navigation>

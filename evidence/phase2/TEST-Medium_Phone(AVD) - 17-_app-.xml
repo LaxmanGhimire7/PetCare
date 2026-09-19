@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="4" failures="0" errors="0" skipped="0" time="1.27" timestamp="2026-09-19T10:25:12" hostname="localhost">
+  <testsuite name="com.example.petcare.PetCareDatabaseTest" tests="3" failures="0" errors="0" skipped="0" time="0.099" timestamp="2026-09-19T10:25:12" hostname="localhost">
+    <properties>
+      <property name="device" value="Medium_Phone(AVD) - 17" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="completingDailyTaskCreatesNextOccurrence" classname="com.example.petcare.PetCareDatabaseTest" time="0.08" />
+    <testcase name="expenseAndProviderTablesPersistPrototypeData" classname="com.example.petcare.PetCareDatabaseTest" time="0.01" />
+    <testcase name="careTaskAppearsForItsPetAndMovesToCompletedHistory" classname="com.example.petcare.PetCareDatabaseTest" time="0.009" />
+  </testsuite>
+  <testsuite name="com.example.petcare.PetColorMigrationTest" tests="1" failures="0" errors="0" skipped="0" time="0.061" timestamp="2026-09-19T10:25:12" hostname="localhost">
+    <properties>
+      <property name="device" value="Medium_Phone(AVD) - 17" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="migrationPreservesPetsAndAssignsColours" classname="com.example.petcare.PetColorMigrationTest" time="0.061" />
+  </testsuite>
+</testsuites>

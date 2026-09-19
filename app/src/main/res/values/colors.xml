@@ -1,22 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
-    <!-- Brand Directions -->
-    <color name="primary">#B5563A</color>
-    <color name="primary_container">#FFDBD1</color>
-    <color name="secondary">#6B8F71</color>
-    <color name="secondary_container">#E8F5E9</color>
-    <color name="tertiary">#4F6550</color>
-
-    <color name="surface">#FFFDFB</color>
-    <color name="surface_variant">#F5E0DB</color>
-    <color name="background">#FFFDFB</color>
-    <color name="surface_tint">#F6EFE7</color>
-
+    <color name="primary">#2E6B5E</color>
     <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#D7EBE4</color>
+    <color name="on_primary_container">#083D32</color>
+    <color name="secondary">#53665F</color>
     <color name="on_secondary">#FFFFFF</color>
-    <color name="on_surface">#201A18</color>
-    <color name="on_background">#201A18</color>
+    <color name="secondary_container">#E3EBE6</color>
+    <color name="on_secondary_container">#263D34</color>
+    <color name="tertiary">#5B6359</color>
+    <color name="background">#FAFAF8</color>
+    <color name="surface">#FAFAF8</color>
+    <color name="surface_container_low">#F7F7F4</color>
+    <color name="surface_container">#F1F1EE</color>
+    <color name="surface_container_high">#EAEAE6</color>
+    <color name="surface_variant">#F1F1EE</color>
+    <color name="on_surface">#16171A</color>
+    <color name="on_surface_variant">#5E635F</color>
+    <color name="on_background">#16171A</color>
+    <color name="outline">#858B85</color>
+    <color name="outline_variant">#DCDCD6</color>
+    <color name="error">#B3261E</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="hero_start">#E7F2EC</color>
+    <color name="hero_end">#F1F1EE</color>
+    <color name="on_hero">#16171A</color>
+    <color name="hero_muted">#5E635F</color>
+    <color name="hero_button">#2E6B5E</color>
+    <color name="tool_lavender">#F1F1EE</color>
+    <color name="tool_blue">#F1F1EE</color>
+    <color name="tool_coral">#F1F1EE</color>
+    <color name="tool_mint">#F1F1EE</color>
+    <color name="tool_sun">#F1F1EE</color>
+    <color name="mint">#2E6B5E</color>
+    <color name="sun">#725B2A</color>
+    <color name="shadow_tint">#1A16171A</color>
 </resources>

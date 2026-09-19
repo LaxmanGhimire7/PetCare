@@ -13,6 +13,9 @@ interface PetDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(pet: PetEntity): Long
 
+    @Query("SELECT COALESCE(MAX(id), 0) FROM pets")
+    suspend fun latestId(): Long
+
     @Query("SELECT * FROM pets WHERE id = :petId")
     suspend fun getById(petId: Long): PetEntity?
 

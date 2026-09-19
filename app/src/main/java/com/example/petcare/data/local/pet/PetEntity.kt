@@ -8,6 +8,26 @@ data class PetEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val species: String,
+    val colorIndex: Int = 0,
+    val breed: String = "",
+    val age: String = "",
+    val weight: String = "",
+    val dietaryPreferences: String = "",
+    val vaccinationHistory: String = "",
+    val allergies: String = "",
+    val favoriteToys: String = "",
+    val medicalRecords: String = "",
+    val groomingRoutine: String = "",
     val healthNotes: String = "",
-    val photoUri: String? = null
-)
+    val photoUri: String? = null,
+    val photoUris: String = ""
+) {
+    fun photos(): List<String> = photoUris
+        .split(PHOTO_SEPARATOR)
+        .filter(String::isNotBlank)
+        .ifEmpty { listOfNotNull(photoUri) }
+
+    companion object {
+        const val PHOTO_SEPARATOR = "|petcare-photo|"
+    }
+}

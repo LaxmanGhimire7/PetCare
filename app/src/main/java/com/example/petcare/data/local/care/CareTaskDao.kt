@@ -25,13 +25,19 @@ interface CareTaskDao {
     @Query("SELECT id FROM care_tasks WHERE petId = :petId")
     suspend fun getIdsForPet(petId: Long): List<Long>
 
+    @Query("SELECT * FROM care_tasks WHERE petId = :petId")
+    suspend fun getForPet(petId: Long): List<CareTaskEntity>
+
     @Update
     suspend fun update(careTask: CareTaskEntity)
 
     @Query(
         """
         SELECT care_tasks.id, care_tasks.petId, care_tasks.title, care_tasks.dueDateEpochDay,
-               pets.name AS petName
+               care_tasks.reminderMinutesOfDay, care_tasks.category, care_tasks.frequency,
+               care_tasks.requiredSupplies, care_tasks.notes, care_tasks.latitude,
+               care_tasks.longitude, care_tasks.placeId,
+               pets.name AS petName, pets.colorIndex AS petColorIndex
         FROM care_tasks
         INNER JOIN pets ON pets.id = care_tasks.petId
         WHERE care_tasks.isCompleted = 0
@@ -43,7 +49,10 @@ interface CareTaskDao {
     @Query(
         """
         SELECT care_tasks.id, care_tasks.petId, care_tasks.title, care_tasks.dueDateEpochDay,
-               pets.name AS petName
+               care_tasks.reminderMinutesOfDay, care_tasks.category, care_tasks.frequency,
+               care_tasks.requiredSupplies, care_tasks.notes, care_tasks.latitude,
+               care_tasks.longitude, care_tasks.placeId,
+               pets.name AS petName, pets.colorIndex AS petColorIndex
         FROM care_tasks
         INNER JOIN pets ON pets.id = care_tasks.petId
         WHERE care_tasks.isCompleted = 1

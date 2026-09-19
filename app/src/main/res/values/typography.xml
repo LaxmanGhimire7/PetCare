@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TextAppearance.PetCare.Display" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="fontFamily">@font/fraunces_semibold</item>
+        <item name="android:fontFamily">@font/fraunces_semibold</item>
+        <item name="android:textSize">32sp</item>
+        <item name="lineHeight">38sp</item>
+    </style>
+    <style name="TextAppearance.PetCare.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">@font/fraunces_semibold</item>
+        <item name="android:fontFamily">@font/fraunces_semibold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="lineHeight">30sp</item>
+    </style>
+    <style name="TextAppearance.PetCare.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/manrope_semibold</item>
+        <item name="android:fontFamily">@font/manrope_semibold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="lineHeight">24sp</item>
+    </style>
+    <style name="TextAppearance.PetCare.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">@font/manrope_regular</item>
+        <item name="android:fontFamily">@font/manrope_regular</item>
+        <item name="android:textSize">15sp</item>
+        <item name="lineHeight">22sp</item>
+    </style>
+    <style name="TextAppearance.PetCare.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/manrope_semibold</item>
+        <item name="android:fontFamily">@font/manrope_semibold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="lineHeight">16sp</item>
+    </style>
+    <style name="TextAppearance.PetCare.Numeric" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/manrope_semibold</item>
+        <item name="android:fontFamily">@font/manrope_semibold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="lineHeight">24sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+</resources>

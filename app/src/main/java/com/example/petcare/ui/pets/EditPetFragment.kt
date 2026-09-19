@@ -15,6 +15,7 @@ import com.example.petcare.R
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
+import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import kotlinx.coroutines.launch
 
@@ -23,14 +24,21 @@ class EditPetFragment : Fragment() {
     private val binding get() = _binding!!
     private val repository by lazy { PetRepository(PetCareDatabase.getInstance(requireContext()).petDao()) }
     private var pet: PetEntity? = null
-    private var photoUri: Uri? = null
-    private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let {
-            requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            photoUri = it
+    private var selectedColorIndex = 0
+    private val photoUris = mutableListOf<Uri>()
+    private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        uris.forEach {
+            runCatching {
+                requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            if (it !in photoUris) photoUris += it
+        }
+        photoUris.firstOrNull()?.let {
             binding.petPhotoPreview.visibility = View.VISIBLE
+            binding.petPhotoPreview.setPadding(0, 0, 0, 0)
             binding.petPhotoPreview.load(it)
         }
+        updatePhotoCount()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -41,6 +49,8 @@ class EditPetFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val id = arguments?.getLong("petId") ?: 0L
         if (id == 0L) { findNavController().navigateUp(); return }
+        binding.petFormTitle.setText(R.string.edit_pet_title)
+        binding.petFormSubtitle.setText(R.string.edit_pet_subtitle)
         binding.savePetButton.setText(R.string.save_changes)
         binding.selectPhotoButton.setOnClickListener { photoPicker.launch(arrayOf("image/*")) }
         binding.cancelButton.setOnClickListener { findNavController().navigateUp() }
@@ -50,8 +60,28 @@ class EditPetFragment : Fragment() {
             val savedPet = pet ?: run { findNavController().navigateUp(); return@launch }
             binding.petNameInput.setText(savedPet.name)
             binding.petSpeciesInput.setText(savedPet.species)
+            selectedColorIndex = savedPet.colorIndex
+            PetColorPicker.bind(binding.petColorGroup, requireContext(), selectedColorIndex) {
+                selectedColorIndex = it
+            }
+            binding.petBreedInput.setText(savedPet.breed)
+            binding.petAgeInput.setText(savedPet.age)
+            binding.petWeightInput.setText(savedPet.weight)
+            binding.dietaryPreferencesInput.setText(savedPet.dietaryPreferences)
+            binding.vaccinationHistoryInput.setText(savedPet.vaccinationHistory)
+            binding.allergiesInput.setText(savedPet.allergies)
+            binding.favoriteToysInput.setText(savedPet.favoriteToys)
+            binding.medicalRecordsInput.setText(savedPet.medicalRecords)
+            binding.groomingRoutineInput.setText(savedPet.groomingRoutine)
             binding.healthNotesInput.setText(savedPet.healthNotes)
-            savedPet.photoUri?.let { uri -> photoUri = Uri.parse(uri); binding.petPhotoPreview.visibility = View.VISIBLE; binding.petPhotoPreview.load(uri) }
+            photoUris.clear()
+            photoUris += savedPet.photos().map(Uri::parse)
+            photoUris.firstOrNull()?.let { uri ->
+                binding.petPhotoPreview.visibility = View.VISIBLE
+                binding.petPhotoPreview.setPadding(0, 0, 0, 0)
+                binding.petPhotoPreview.load(uri)
+            }
+            updatePhotoCount()
         }
     }
 
@@ -63,8 +93,33 @@ class EditPetFragment : Fragment() {
         binding.petSpeciesLayout.error = if (species.isEmpty()) getString(R.string.error_pet_species_required) else null
         if (name.isEmpty() || species.isEmpty()) return
         viewLifecycleOwner.lifecycleScope.launch {
-            repository.updatePet(savedPet.copy(name = name, species = species, healthNotes = binding.healthNotesInput.text?.toString()?.trim().orEmpty(), photoUri = photoUri?.toString()))
+            val storedPhotos = photoUris.map(Uri::toString)
+            repository.updatePet(savedPet.copy(
+                name = name,
+                species = species,
+                colorIndex = selectedColorIndex,
+                breed = binding.petBreedInput.text?.toString()?.trim().orEmpty(),
+                age = binding.petAgeInput.text?.toString()?.trim().orEmpty(),
+                weight = binding.petWeightInput.text?.toString()?.trim().orEmpty(),
+                dietaryPreferences = binding.dietaryPreferencesInput.text?.toString()?.trim().orEmpty(),
+                vaccinationHistory = binding.vaccinationHistoryInput.text?.toString()?.trim().orEmpty(),
+                allergies = binding.allergiesInput.text?.toString()?.trim().orEmpty(),
+                favoriteToys = binding.favoriteToysInput.text?.toString()?.trim().orEmpty(),
+                medicalRecords = binding.medicalRecordsInput.text?.toString()?.trim().orEmpty(),
+                groomingRoutine = binding.groomingRoutineInput.text?.toString()?.trim().orEmpty(),
+                healthNotes = binding.healthNotesInput.text?.toString()?.trim().orEmpty(),
+                photoUri = storedPhotos.firstOrNull(),
+                photoUris = storedPhotos.joinToString(PetEntity.PHOTO_SEPARATOR)
+            ))
             findNavController().navigateUp()
+        }
+    }
+
+    private fun updatePhotoCount() {
+        binding.photoCountText.text = if (photoUris.isEmpty()) {
+            getString(R.string.profile_photo_subtitle)
+        } else {
+            resources.getQuantityString(R.plurals.selected_photo_count, photoUris.size, photoUris.size)
         }
     }
 

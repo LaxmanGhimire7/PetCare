@@ -1,0 +1,290 @@
+package com.example.petcare.ui.providers
+
+import android.content.Intent
+import android.content.ActivityNotFoundException
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import android.provider.Settings
+import android.net.Uri
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.example.petcare.R
+import com.example.petcare.data.local.PetCareDatabase
+import com.example.petcare.data.local.provider.ProviderEntity
+import com.example.petcare.data.local.provider.ProviderRepository
+import com.example.petcare.databinding.FragmentFeatureListBinding
+import com.example.petcare.databinding.ItemFeatureBinding
+import com.example.petcare.ui.RowMotion
+import com.example.petcare.location.PlaceLocation
+import com.example.petcare.location.PlaceMarkerIcon
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
+
+/** Saved care places with direct map, dial and booking actions. */
+class ProviderListFragment : Fragment() {
+    private var _binding: FragmentFeatureListBinding? = null
+    private val binding get() = _binding!!
+    private val repository by lazy { ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao()) }
+    private var restoringId: Long? = null
+    private var places: List<ProviderEntity> = emptyList()
+    private var userLocation: Location? = null
+    private var map: GoogleMap? = null
+    private var clusterManager: ClusterManager<PlaceMarker>? = null
+    private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        if (grants.values.any { it }) loadLocation() else permissionFallback()
+    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentFeatureListBinding.inflate(inflater, container, false).also { _binding = it }.root
+    override fun onViewCreated(view: View, state: Bundle?) {
+        binding.titleText.setText(R.string.providers_title); binding.subtitleText.setText(R.string.providers_subtitle)
+        binding.addButton.setText(R.string.add_provider); binding.emptyText.setText(R.string.providers_empty)
+        binding.summaryText.setText(R.string.places); binding.secondarySummaryText.setText(R.string.providers_subtitle)
+        binding.backButton.visibility = View.GONE
+        binding.placeMapPanel.visibility = View.VISIBLE
+        binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_providers_to_add_provider) }
+        binding.placeSearchButton.setOnClickListener { searchAddress() }
+        binding.findVetsButton.setOnClickListener {
+            val lat = userLocation?.latitude ?: 0.0
+            val lon = userLocation?.longitude ?: 0.0
+            openIntent(Intent(Intent.ACTION_VIEW, Uri.parse("geo:$lat,$lon?q=veterinary+clinic")))
+        }
+        parentFragmentManager.setFragmentResultListener(PLACE_ACTION, viewLifecycleOwner) { _, result ->
+            val id = result.getLong(PLACE_ID)
+            when (result.getString(PLACE_ACTION)) {
+                EDIT -> findNavController().navigate(R.id.action_providers_to_add_provider,
+                    Bundle().apply { putLong(PLACE_ID, id) })
+                DELETE -> deletePlace(id)
+            }
+        }
+        setupMap()
+        requestLocation()
+        viewLifecycleOwner.lifecycleScope.launch { viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repository.observeAll().collect { places = it; render(it); updateMarkers() }
+        } }
+    }
+    private fun render(items: List<ProviderEntity>) {
+        binding.emptyText.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE; binding.itemContainer.removeAllViews()
+        val origin = userLocation
+        val sorted = if (origin == null) items.sortedBy { it.name.lowercase() }
+            else items.sortedWith(compareBy<ProviderEntity> {
+                if (it.latitude == null || it.longitude == null) Double.MAX_VALUE
+                else PlaceLocation.distanceKm(origin.latitude, origin.longitude, it.latitude, it.longitude)
+            }.thenBy { it.name.lowercase() })
+        sorted.forEach { provider ->
+            val row = ItemFeatureBinding.inflate(layoutInflater, binding.itemContainer, false)
+            row.itemColorRail.setBackgroundColor(
+                androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary)
+            )
+            row.itemTitleText.text = provider.name
+            row.itemDetailText.text = getString(R.string.provider_detail, provider.type, provider.address)
+            row.itemNoteText.text = if (origin != null && provider.latitude != null && provider.longitude != null)
+                getString(R.string.place_distance_km, PlaceLocation.distanceKm(origin.latitude, origin.longitude,
+                    provider.latitude, provider.longitude)) else getString(R.string.place_distance_unknown)
+            row.primaryButton.setText(R.string.directions); row.primaryButton.setOnClickListener { openMap(provider) }
+            row.secondaryButton.setText(R.string.call); row.secondaryButton.visibility = if (provider.phone.isBlank()) View.GONE else View.VISIBLE
+            row.secondaryButton.setOnClickListener { openIntent(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${provider.phone}"))) }
+            row.tertiaryButton.setText(R.string.book); row.tertiaryButton.visibility = if (provider.bookingUrl.isBlank()) View.GONE else View.VISIBLE
+            row.tertiaryButton.setOnClickListener { openUrl(provider.bookingUrl) }
+            row.root.setOnClickListener { PlaceDetailSheet.show(parentFragmentManager, provider, origin) }
+            row.deleteButton.setOnClickListener {
+                deletePlace(provider.id, row.root)
+            }
+            binding.itemContainer.addView(row.root)
+            if (restoringId == provider.id) {
+                restoringId = null
+                RowMotion.expand(row.root)
+            }
+        }
+    }
+    @SuppressLint("PotentialBehaviorOverride")
+    private fun setupMap() {
+        if (!PlaceLocation.mapsAvailable(requireContext())) {
+            binding.placeMapFrame.visibility = View.GONE
+            binding.placeMapUnavailable.visibility = View.VISIBLE
+            return
+        }
+        val fragment = SupportMapFragment.newInstance()
+        childFragmentManager.beginTransaction().replace(R.id.place_map_frame, fragment).commitNow()
+        fragment.getMapAsync { ready ->
+            if (_binding == null) return@getMapAsync
+            map = ready
+            ready.uiSettings.isMapToolbarEnabled = false
+            val manager = ClusterManager<PlaceMarker>(requireContext(), ready)
+            manager.renderer = object : DefaultClusterRenderer<PlaceMarker>(requireContext(), ready, manager) {
+                override fun onBeforeClusterItemRendered(item: PlaceMarker, options: MarkerOptions) {
+                    options.icon(PlaceMarkerIcon.create(requireContext(), item.place.type))
+                }
+            }
+            manager.setOnClusterItemClickListener { item ->
+                PlaceDetailSheet.show(parentFragmentManager, item.place, userLocation)
+                true
+            }
+            // ClusterManager owns both callbacks so marker taps and reclustering stay in sync.
+            ready.setOnCameraIdleListener(manager)
+            ready.setOnMarkerClickListener(manager)
+            clusterManager = manager
+            updateMarkers()
+        }
+    }
+
+    private fun updateMarkers() {
+        val manager = clusterManager ?: return
+        manager.clearItems()
+        manager.addItems(places.mapNotNull { place ->
+            if (place.latitude == null || place.longitude == null) null else PlaceMarker(place)
+        })
+        manager.cluster()
+        val first = places.firstOrNull { it.latitude != null && it.longitude != null }
+        if (first != null && userLocation == null) map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
+            LatLng(first.latitude!!, first.longitude!!), 11f))
+    }
+
+    private fun requestLocation() {
+        if (!PlaceLocation.playServicesAvailable(requireContext())) {
+            binding.placeLocationStatus.setText(R.string.map_unavailable)
+            return
+        }
+        if (hasPermission()) { loadLocation(); return }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.location_permission_title)
+            .setMessage(R.string.location_permission_message)
+            .setPositiveButton(R.string.allow) { _, _ ->
+                requireContext().getSharedPreferences(PERMISSION_PREFS, Activity.MODE_PRIVATE)
+                    .edit().putBoolean(REQUESTED, true).apply()
+                permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION))
+            }
+            .setNegativeButton(R.string.cancel) { _, _ ->
+                binding.placeLocationStatus.setText(R.string.location_permission_denied)
+            }.show()
+    }
+
+    private fun hasPermission(): Boolean =
+        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    private fun permissionFallback() {
+        val blocked = !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) &&
+            !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) &&
+            requireContext().getSharedPreferences(PERMISSION_PREFS, Activity.MODE_PRIVATE)
+                .getBoolean(REQUESTED, false)
+        binding.placeLocationStatus.setText(if (blocked) R.string.location_permission_settings
+            else R.string.location_permission_denied)
+        if (blocked) MaterialAlertDialogBuilder(requireContext())
+            .setMessage(R.string.location_permission_settings)
+            .setPositiveButton(R.string.open_settings) { _, _ ->
+                openIntent(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:${requireContext().packageName}")))
+            }.setNegativeButton(R.string.cancel, null).show()
+    }
+
+    private fun loadLocation() {
+        if (!hasPermission() || !PlaceLocation.playServicesAvailable(requireContext())) return
+        val service = requireContext().getSystemService(LocationManager::class.java)
+        if (service == null || (!service.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                    !service.isProviderEnabled(LocationManager.NETWORK_PROVIDER))) {
+            binding.placeLocationStatus.setText(R.string.location_services_off)
+            return
+        }
+        try {
+            val client = LocationServices.getFusedLocationProviderClient(requireActivity())
+            client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (_binding == null) return@addOnSuccessListener
+                    if (location != null) applyLocation(location)
+                    else client.lastLocation.addOnSuccessListener { last ->
+                        if (_binding != null && last != null) applyLocation(last)
+                    }
+                }.addOnFailureListener {
+                    if (_binding != null) binding.placeLocationStatus.setText(R.string.place_distance_unknown)
+                }
+        } catch (_: SecurityException) { permissionFallback() }
+    }
+
+    private fun applyLocation(location: Location) {
+        userLocation = location
+        binding.placeLocationStatus.setText(R.string.location_ready)
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 11f))
+        render(places)
+    }
+
+    private fun deletePlace(id: Long, row: View? = null) {
+        val action: () -> Unit = {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val deleted = repository.delete(id) ?: return@launch
+                Snackbar.make(binding.root, R.string.place_deleted, Snackbar.LENGTH_LONG)
+                    .setDuration(6000).setAction(R.string.undo) {
+                        restoringId = deleted.id
+                        viewLifecycleOwner.lifecycleScope.launch { repository.restore(deleted) }
+                    }.show()
+            }
+        }
+        if (row == null) action() else RowMotion.collapse(row, action)
+    }
+
+    private fun searchAddress() {
+        val query = binding.placeSearchInput.text?.toString()?.trim().orEmpty()
+        if (query.isBlank()) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = PlaceLocation.search(requireContext(), query)
+            if (result == null) Snackbar.make(binding.root, R.string.place_search_empty, Snackbar.LENGTH_LONG).show()
+            else if (map != null) map?.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                LatLng(result.first, result.second), 14f))
+            else openIntent(Intent(Intent.ACTION_VIEW, Uri.parse(
+                "geo:${result.first},${result.second}?q=${Uri.encode(query)}")))
+        }
+    }
+
+    private data class PlaceMarker(val place: ProviderEntity) : ClusterItem {
+        override fun getPosition() = LatLng(place.latitude!!, place.longitude!!)
+        override fun getTitle() = place.name
+        override fun getSnippet() = place.address
+        override fun getZIndex(): Float? = null
+    }
+
+    private fun openMap(provider: ProviderEntity) {
+        val query = Uri.encode(provider.address.ifBlank { provider.name })
+        val uri = if (provider.latitude != null && provider.longitude != null) Uri.parse("geo:${provider.latitude},${provider.longitude}?q=$query") else Uri.parse("geo:0,0?q=$query")
+        openIntent(Intent(Intent.ACTION_VIEW, uri))
+    }
+    private fun openUrl(value: String) { val url = if (value.startsWith("http://") || value.startsWith("https://")) value else "https://$value"; openIntent(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+    private fun openIntent(intent: Intent) {
+        try { startActivity(intent) } catch (_: ActivityNotFoundException) { Toast.makeText(requireContext(), R.string.no_compatible_app, Toast.LENGTH_SHORT).show() }
+    }
+    override fun onDestroyView() { map = null; clusterManager = null; _binding = null; super.onDestroyView() }
+
+    companion object {
+        const val PLACE_ACTION = "placeAction"
+        const val PLACE_ID = "placeId"
+        const val EDIT = "edit"
+        const val DELETE = "delete"
+        const val PERMISSION_PREFS = "petcare_location"
+        const val REQUESTED = "requested"
+    }
+}

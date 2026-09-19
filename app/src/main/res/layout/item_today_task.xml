@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Today task row: rail identifies the pet; time, title and state remain separate. -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_8"
+    app:cardBackgroundColor="?attr/colorSurfaceContainer"
+    app:cardCornerRadius="@dimen/radius_card"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingEnd="@dimen/space_8">
+
+        <View
+            android:id="@+id/task_color_rail"
+            android:layout_width="@dimen/task_rail_width"
+            android:layout_height="@dimen/task_rail_height"
+            android:background="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/task_time_text"
+            android:layout_width="@dimen/task_time_width"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.PetCare.Label"
+            android:fontFeatureSettings="tnum" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingVertical="@dimen/space_12">
+            <TextView
+                android:id="@+id/task_title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textAppearance="@style/TextAppearance.PetCare.Title" />
+            <TextView
+                android:id="@+id/task_pet_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:textAppearance="@style/TextAppearance.PetCare.Label"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/task_category_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:clickable="false"
+                android:checkable="false" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/task_location_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:text="@string/directions"
+                android:contentDescription="@string/location_chip"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/task_overdue_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/space_8"
+            android:text="@string/overdue"
+            android:textAppearance="@style/TextAppearance.PetCare.Label"
+            android:textColor="?attr/colorError"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/complete_task_button"
+            style="@style/Widget.PetCare.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="@dimen/pet_filter_avatar"
+            android:text=""
+            android:contentDescription="@string/task_done_content_description"
+            app:icon="@drawable/ic_check" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -9,10 +9,36 @@ class PetRepository(private val petDao: PetDao) {
     suspend fun addPet(
         name: String,
         species: String,
+        breed: String,
+        age: String,
+        weight: String,
+        dietaryPreferences: String,
+        vaccinationHistory: String,
+        allergies: String,
+        favoriteToys: String,
+        medicalRecords: String,
+        groomingRoutine: String,
         healthNotes: String,
-        photoUri: String?
+        photoUris: List<String>,
+        selectedColorIndex: Int? = null
     ): PetEntity {
-        val pet = PetEntity(name = name, species = species, healthNotes = healthNotes, photoUri = photoUri)
+        val pet = PetEntity(
+            name = name,
+            species = species,
+            colorIndex = selectedColorIndex ?: ColorAssignment.forNewPet(petDao.latestId()),
+            breed = breed,
+            age = age,
+            weight = weight,
+            dietaryPreferences = dietaryPreferences,
+            vaccinationHistory = vaccinationHistory,
+            allergies = allergies,
+            favoriteToys = favoriteToys,
+            medicalRecords = medicalRecords,
+            groomingRoutine = groomingRoutine,
+            healthNotes = healthNotes,
+            photoUri = photoUris.firstOrNull(),
+            photoUris = photoUris.joinToString(PetEntity.PHOTO_SEPARATOR)
+        )
         return pet.copy(id = petDao.insert(pet))
     }
 

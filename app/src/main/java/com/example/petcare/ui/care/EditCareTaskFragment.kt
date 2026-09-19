@@ -21,8 +21,12 @@ import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
 import com.example.petcare.data.local.care.DEFAULT_REMINDER_MINUTES_OF_DAY
+import com.example.petcare.data.local.care.CARE_CATEGORY_GENERAL
+import com.example.petcare.data.local.care.CARE_FREQUENCY_ONE_TIME
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
+import com.example.petcare.data.local.provider.ProviderEntity
+import com.example.petcare.data.local.provider.ProviderRepository
 import com.example.petcare.databinding.FragmentAddCareTaskBinding
 import com.example.petcare.reminders.CareReminderScheduler
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -54,6 +58,11 @@ class EditCareTaskFragment : Fragment() {
     private var selectedPet: PetEntity? = null
     private var selectedDueDateEpochDay: Long? = null
     private var selectedReminderMinutesOfDay = DEFAULT_REMINDER_MINUTES_OF_DAY
+    private var selectedCategory = CARE_CATEGORY_GENERAL
+    private var selectedFrequency = CARE_FREQUENCY_ONE_TIME
+    private var places: List<ProviderEntity> = emptyList()
+    private var selectedPlace: ProviderEntity? = null
+    private var placeChanged = false
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -72,8 +81,10 @@ class EditCareTaskFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         configureForm()
+        configureRoutineFields()
         loadCareTask()
         observePets()
+        observePlaces()
         binding.dueDateInput.setOnClickListener { showDatePicker() }
         binding.reminderTimeInput.setOnClickListener { showTimePicker() }
         binding.saveCareTaskButton.setOnClickListener {
@@ -83,6 +94,23 @@ class EditCareTaskFragment : Fragment() {
         }
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
+        }
+    }
+
+    private fun configureRoutineFields() {
+        val categories = resources.getStringArray(R.array.care_categories).toList()
+        val frequencies = resources.getStringArray(R.array.care_frequencies).toList()
+        binding.categoryInput.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categories)
+        )
+        binding.frequencyInput.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, frequencies)
+        )
+        binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
+            selectedCategory = categories[position]
+        }
+        binding.frequencyInput.setOnItemClickListener { _, _, position, _ ->
+            selectedFrequency = frequencies[position]
         }
     }
 
@@ -130,6 +158,31 @@ class EditCareTaskFragment : Fragment() {
         }
     }
 
+    private fun observePlaces() {
+        val repository = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao())
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repository.observeAll().collect { saved ->
+                    places = saved
+                    val labels = listOf(getString(R.string.no_task_place)) + saved.map { it.name }
+                    binding.taskPlaceInput.setAdapter(
+                        ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels)
+                    )
+                    bindPlace()
+                    binding.taskPlaceInput.setOnItemClickListener { _, _, position, _ ->
+                        selectedPlace = saved.getOrNull(position - 1)
+                        placeChanged = true
+                    }
+                }
+            }
+        }
+    }
+
+    private fun bindPlace() {
+        selectedPlace = places.firstOrNull { it.id == careTask?.placeId }
+        binding.taskPlaceInput.setText(selectedPlace?.name ?: getString(R.string.no_task_place), false)
+    }
+
     private fun bindCareTask() {
         val task = careTask ?: return
         binding.careTaskTitleInput.setText(task.title)
@@ -137,6 +190,13 @@ class EditCareTaskFragment : Fragment() {
         binding.dueDateInput.setText(formatDate(task.dueDateEpochDay))
         selectedReminderMinutesOfDay = task.reminderMinutesOfDay
         binding.reminderTimeInput.setText(formatTime(task.reminderMinutesOfDay))
+        selectedCategory = task.category
+        selectedFrequency = task.frequency
+        binding.categoryInput.setText(task.category, false)
+        binding.frequencyInput.setText(task.frequency, false)
+        binding.requiredSuppliesInput.setText(task.requiredSupplies)
+        binding.careNotesInput.setText(task.notes)
+        bindPlace()
 
         pets.firstOrNull { it.id == task.petId }?.let { pet ->
             selectedPet = pet
@@ -216,7 +276,14 @@ class EditCareTaskFragment : Fragment() {
                 petId = requireNotNull(selectedPet).id,
                 title = binding.careTaskTitleInput.text?.toString()?.trim().orEmpty(),
                 dueDateEpochDay = requireNotNull(selectedDueDateEpochDay),
-                reminderMinutesOfDay = selectedReminderMinutesOfDay
+                reminderMinutesOfDay = selectedReminderMinutesOfDay,
+                category = selectedCategory,
+                frequency = selectedFrequency,
+                requiredSupplies = binding.requiredSuppliesInput.text?.toString()?.trim().orEmpty(),
+                notes = binding.careNotesInput.text?.toString()?.trim().orEmpty(),
+                latitude = if (placeChanged) selectedPlace?.latitude else currentTask.latitude,
+                longitude = if (placeChanged) selectedPlace?.longitude else currentTask.longitude,
+                placeId = if (placeChanged) selectedPlace?.id else currentTask.placeId
             )
         ) { updatedCareTask ->
             CareReminderScheduler(requireContext()).schedule(updatedCareTask)

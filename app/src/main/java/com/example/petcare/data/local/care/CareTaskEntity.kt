@@ -24,7 +24,19 @@ data class CareTaskEntity(
     val title: String,
     val dueDateEpochDay: Long,
     val reminderMinutesOfDay: Int = DEFAULT_REMINDER_MINUTES_OF_DAY,
-    val isCompleted: Boolean = false
+    val category: String = CARE_CATEGORY_GENERAL,
+    val frequency: String = CARE_FREQUENCY_ONE_TIME,
+    val requiredSupplies: String = "",
+    val notes: String = "",
+    val isCompleted: Boolean = false,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val placeId: Long? = null
 )
 
 const val DEFAULT_REMINDER_MINUTES_OF_DAY = 9 * 60
+const val CARE_CATEGORY_GENERAL = "General"
+const val CARE_FREQUENCY_ONE_TIME = "One time"
+const val CARE_FREQUENCY_DAILY = "Daily"
+const val CARE_FREQUENCY_WEEKLY = "Weekly"
+const val CARE_FREQUENCY_MONTHLY = "Monthly"

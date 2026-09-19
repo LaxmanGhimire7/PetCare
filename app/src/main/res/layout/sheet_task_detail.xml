@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Drag-up task detail: title and time appear at peek height; supplies and notes appear expanded. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:padding="@dimen/space_24"
+    android:minHeight="@dimen/task_detail_sheet_min_height"
+    android:background="@drawable/bg_task_sheet">
+    <View android:layout_width="@dimen/space_32" android:layout_height="@dimen/space_4"
+        android:layout_gravity="center_horizontal" android:background="?attr/colorOutlineVariant" />
+    <TextView android:id="@+id/task_title" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_16"
+        android:textAppearance="@style/TextAppearance.PetCare.Headline" />
+    <TextView android:id="@+id/task_time" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4"
+        android:textAppearance="@style/TextAppearance.PetCare.Label"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+    <TextView android:id="@+id/task_pet" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_24"
+        android:textAppearance="@style/TextAppearance.PetCare.Title" />
+    <TextView android:id="@+id/task_category" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8"
+        android:textAppearance="@style/TextAppearance.PetCare.Body" />
+    <TextView android:id="@+id/task_supplies" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_16"
+        android:textAppearance="@style/TextAppearance.PetCare.Body" />
+    <TextView android:id="@+id/task_notes" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
+        android:textAppearance="@style/TextAppearance.PetCare.Body" />
+    <FrameLayout android:id="@+id/task_map_preview" android:layout_width="match_parent"
+        android:layout_height="@dimen/place_preview_height"
+        android:layout_marginTop="@dimen/space_16" android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/task_directions_button"
+        style="@style/Widget.PetCare.Button.Text" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="@string/directions"
+        android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/task_calendar_button"
+        style="@style/Widget.PetCare.Button.Text" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="@string/add_to_calendar" />
+</LinearLayout>

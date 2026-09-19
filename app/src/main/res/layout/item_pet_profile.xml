@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Pet summary card: its leading rail carries the pet's persistent identity colour. -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="12dp"
-    app:cardCornerRadius="16dp"
-    app:strokeColor="@color/surface_variant"
-    app:strokeWidth="1dp">
+    style="@style/Widget.PetCare.Card">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,14 +14,30 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/pet_photo_image"
+        <View
+            android:id="@+id/pet_color_rail"
+            android:layout_width="@dimen/space_4"
+            android:layout_height="@dimen/pet_avatar_size"
+            android:layout_marginEnd="@dimen/space_12"
+            android:background="?attr/colorPrimary" />
+
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="72dp"
             android:layout_height="72dp"
-            android:layout_marginEnd="12dp"
-            android:contentDescription="@null"
-            android:scaleType="centerCrop"
-            android:visibility="gone" />
+            android:layout_marginEnd="14dp"
+            app:cardBackgroundColor="@color/primary_container"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/pet_photo_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/pet_photo"
+                android:padding="18dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_pets" />
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -35,21 +50,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/on_surface"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/pet_species_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textAppearance="?attr/textAppearanceBodyMedium" />
+                android:layout_marginTop="3dp"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/primary" />
 
             <TextView
                 android:id="@+id/pet_health_notes_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
+                android:maxLines="2"
                 android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="@color/on_surface_variant"
                 android:visibility="gone" />
 
             <LinearLayout
@@ -60,17 +79,25 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/edit_pet_button"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.PetCare.Button.Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/edit" />
+                    android:text="@string/edit"
+                    app:icon="@drawable/ic_edit"
+                    app:iconPadding="6dp"
+                    app:iconSize="18dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/remove_pet_button"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.PetCare.Button.Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/remove" />
+                    android:text="@string/remove"
+                    android:textColor="@color/error"
+                    app:icon="@drawable/ic_delete"
+                    app:iconPadding="6dp"
+                    app:iconSize="18dp"
+                    app:iconTint="@color/error" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

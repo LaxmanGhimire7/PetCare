@@ -12,12 +12,28 @@ class AddPetViewModel(private val petRepository: PetRepository) : ViewModel() {
     fun addPet(
         name: String,
         species: String,
+        breed: String,
+        age: String,
+        weight: String,
+        dietaryPreferences: String,
+        vaccinationHistory: String,
+        allergies: String,
+        favoriteToys: String,
+        medicalRecords: String,
+        groomingRoutine: String,
         healthNotes: String,
-        photoUri: String?,
+        photoUris: List<String>,
+        selectedColorIndex: Int?,
         onSaved: (PetEntity) -> Unit
     ) {
         viewModelScope.launch {
-            onSaved(petRepository.addPet(name, species, healthNotes, photoUri))
+            onSaved(
+                petRepository.addPet(
+                    name, species, breed, age, weight, dietaryPreferences,
+                    vaccinationHistory, allergies, favoriteToys, medicalRecords,
+                    groomingRoutine, healthNotes, photoUris, selectedColorIndex
+                )
+            )
         }
     }
 }

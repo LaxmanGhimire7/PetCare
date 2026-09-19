@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Primary Settings destination for care preferences and account actions. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/colorSurface"
+    android:paddingHorizontal="@dimen/space_20"
+    android:paddingTop="@dimen/space_24">
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/nav_settings"
+        android:textAppearance="@style/TextAppearance.PetCare.Headline" />
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_8"
+        android:text="@string/settings_screen_subtitle"
+        android:textAppearance="@style/TextAppearance.PetCare.Body"
+        android:textColor="?attr/colorOnSurfaceVariant" />
+
+    <TextView android:id="@+id/account_text"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_32"
+        android:textAppearance="@style/TextAppearance.PetCare.Title" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reminder_settings_button"
+        style="@style/Widget.PetCare.Button.Tonal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_24"
+        android:text="@string/reminder_settings_title"
+        app:icon="@drawable/ic_alarm" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sign_out_button"
+        style="@style/Widget.PetCare.Button.Outlined"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_12"
+        android:text="@string/sign_out" />
+</LinearLayout>

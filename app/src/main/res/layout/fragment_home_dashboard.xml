@@ -1,143 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background" android:clipToPadding="false" android:fillViewport="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingStart="20dp" android:paddingTop="18dp"
+        android:paddingEnd="20dp" android:paddingBottom="48dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textAppearance="?attr/textAppearanceTitleLarge"
-            android:textColor="@color/primary"
-            android:textStyle="bold" />
+        <LinearLayout android:id="@+id/top_bar" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView android:layout_width="48dp" android:layout_height="48dp"
+                app:cardBackgroundColor="@color/primary" app:cardCornerRadius="17dp" app:cardElevation="3dp">
+                <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:contentDescription="@string/app_logo" android:padding="12dp" android:src="@drawable/ic_pets"
+                    app:tint="@color/on_primary" />
+            </com.google.android.material.card.MaterialCardView>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="13dp" android:layout_weight="1" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/app_name" android:textAppearance="?attr/textAppearanceTitleLarge"
+                    android:textColor="@color/on_surface" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/dashboard_overline"
+                    android:textAppearance="?attr/textAppearanceLabelSmall" android:textColor="@color/primary"
+                    android:textStyle="bold" android:letterSpacing="0.12" />
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton android:id="@+id/reminder_settings_button"
+                style="@style/Widget.PetCare.Button.Tonal" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/settings_short"
+                app:icon="@drawable/ic_settings" app:iconPadding="7dp" app:iconSize="19dp" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/greeting_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:textAppearance="?attr/textAppearanceHeadlineMedium" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/dashboard_subtitle"
-            android:textAppearance="?attr/textAppearanceBodyLarge" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            app:cardBackgroundColor="@color/primary_container"
-            app:cardCornerRadius="24dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/pets_section_title"
-                    android:textAppearance="?attr/textAppearanceTitleLarge"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/pet_summary_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_pet_button"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/add_pet" />
-
-                <LinearLayout
-                    android:id="@+id/pet_list_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
+        <com.google.android.material.card.MaterialCardView android:id="@+id/hero_card"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="22dp"
+            app:cardBackgroundColor="@android:color/transparent" app:cardCornerRadius="30dp" app:cardElevation="7dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:background="@drawable/bg_hero_gradient" android:orientation="vertical" android:padding="26dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/today_label" android:textColor="@color/hero_muted"
+                    android:textSize="12sp" android:textStyle="bold" android:letterSpacing="0.16" />
+                <TextView android:id="@+id/greeting_text" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginTop="9dp"
+                    android:ellipsize="end" android:maxLines="2" android:textColor="@color/on_hero"
+                    android:textSize="31sp" android:fontFamily="@font/fraunces_semibold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" android:text="@string/dashboard_subtitle"
+                    android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="@color/hero_muted" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp" android:baselineAligned="false" android:orientation="horizontal">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/add_pet_button"
+                        style="@style/Widget.PetCare.Button.HeroPrimary" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:layout_weight="1"
+                        android:text="@string/add_pet" app:icon="@drawable/ic_add" app:iconPadding="7dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/add_care_task_button"
+                        style="@style/Widget.PetCare.Button.HeroSecondary" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_marginStart="6dp" android:layout_weight="1"
+                        android:text="@string/add_task_short" app:icon="@drawable/ic_calendar" app:iconPadding="7dp" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/upcoming_care_section_title"
-            android:textAppearance="?attr/textAppearanceTitleLarge"
-            android:textStyle="bold" />
+        <LinearLayout android:id="@+id/care_tools_header" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="32dp" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/care_hub_title" android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="@color/on_surface" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/care_hub_subtitle"
+                android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="@color/on_surface_variant" />
+        </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/secondary_container"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="@color/secondary"
-            app:strokeWidth="1dp">
-
-            <TextView
-                android:id="@+id/upcoming_care_empty_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="24dp"
-                android:text="@string/upcoming_care_empty_state"
-                android:textAppearance="?attr/textAppearanceBodyLarge" />
+        <com.google.android.material.card.MaterialCardView android:id="@+id/care_tools_card"
+            style="@style/Widget.PetCare.Card" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" app:cardElevation="3dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="12dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:baselineAligned="false" android:orientation="horizontal">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/generate_routine_button"
+                        style="@style/Widget.PetCare.Button.Tool" android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp" android:layout_weight="1" android:text="@string/generate_routine"
+                        android:textColor="@color/on_primary_container" app:backgroundTint="@color/tool_lavender"
+                        app:icon="@drawable/ic_routine" app:iconTint="@color/primary" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/share_checklist_button"
+                        style="@style/Widget.PetCare.Button.Tool" android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp" android:layout_weight="1" android:text="@string/share_checklist"
+                        android:textColor="@color/on_secondary_container" app:backgroundTint="@color/tool_coral"
+                        app:icon="@drawable/ic_share" app:iconTint="@color/secondary" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp" android:baselineAligned="false" android:orientation="horizontal">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/expenses_button"
+                        style="@style/Widget.PetCare.Button.Tool" android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp" android:layout_weight="1" android:text="@string/expenses"
+                        android:textColor="@color/sun" app:backgroundTint="@color/tool_sun"
+                        app:icon="@drawable/ic_wallet" app:iconTint="@color/sun" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/providers_button"
+                        style="@style/Widget.PetCare.Button.Tool" android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp" android:layout_weight="1" android:text="@string/places"
+                        android:textColor="@color/mint" app:backgroundTint="@color/tool_mint"
+                        app:icon="@drawable/ic_location" app:iconTint="@color/mint" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/import_appointment_button"
+                    style="@style/Widget.PetCare.Button.Tool" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp" android:text="@string/import_appointment"
+                    android:textColor="@color/primary" app:backgroundTint="@color/tool_blue"
+                    app:icon="@drawable/ic_import" app:iconTint="@color/primary" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/care_task_list_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+        <LinearLayout android:id="@+id/pet_section_header" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="34dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="@string/pets_section_title" android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="@color/on_surface" android:textStyle="bold" />
+            <TextView android:id="@+id/pet_summary_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:background="@drawable/bg_count_pill" android:paddingStart="12dp" android:paddingTop="6dp"
+                android:paddingEnd="12dp" android:paddingBottom="6dp" android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:textColor="@color/primary" android:textStyle="bold" />
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/add_care_task_button"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/add_care_task" />
+        <com.google.android.material.card.MaterialCardView android:id="@+id/pet_empty_card"
+            style="@style/Widget.PetCare.Card" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" app:cardBackgroundColor="@color/tool_lavender">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:orientation="vertical" android:padding="30dp">
+                <ImageView android:layout_width="46dp" android:layout_height="46dp" android:contentDescription="@null"
+                    android:src="@drawable/ic_pets" app:tint="@color/primary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp" android:gravity="center" android:text="@string/pets_empty_state"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="@color/on_surface_variant" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:id="@+id/pet_list_container" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
 
-        <TextView
-            android:id="@+id/completed_care_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/completed_care_section_title"
-            android:textAppearance="?attr/textAppearanceTitleLarge"
-            android:textStyle="bold"
-            android:visibility="gone" />
+        <LinearLayout android:id="@+id/upcoming_section_header" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="34dp" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/upcoming_care_section_title" android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="@color/on_surface" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="5dp" android:text="@string/gesture_help"
+                android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="@color/on_surface_variant" />
+        </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/completed_care_list_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/sign_out_button"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/sign_out" />
+        <com.google.android.material.card.MaterialCardView android:id="@+id/upcoming_care_empty_card"
+            style="@style/Widget.PetCare.Card" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" app:cardBackgroundColor="@color/tool_blue">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal" android:padding="22dp">
+                <com.google.android.material.card.MaterialCardView android:layout_width="46dp" android:layout_height="46dp"
+                    app:cardBackgroundColor="@color/primary" app:cardCornerRadius="16dp" app:cardElevation="0dp">
+                    <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
+                        android:contentDescription="@null" android:padding="12dp" android:src="@drawable/ic_calendar"
+                        app:tint="@color/on_primary" />
+                </com.google.android.material.card.MaterialCardView>
+                <TextView android:id="@+id/upcoming_care_empty_text" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1"
+                    android:text="@string/upcoming_care_empty_state" android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="@color/on_surface_variant" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:id="@+id/care_task_list_container" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
+        <TextView android:id="@+id/completed_care_title" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="34dp" android:text="@string/completed_care_section_title"
+            android:textAppearance="?attr/textAppearanceTitleLarge" android:textColor="@color/on_surface"
+            android:textStyle="bold" android:visibility="gone" />
+        <LinearLayout android:id="@+id/completed_care_list_container" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="vertical" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/sign_out_button"
+            style="@style/Widget.PetCare.Button.Outlined" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="38dp" android:text="@string/sign_out" />
     </LinearLayout>
 </ScrollView>
