@@ -13,7 +13,7 @@
         android:layout_width="@dimen/pet_filter_avatar"
         android:layout_height="@dimen/pet_filter_avatar"
         app:cardCornerRadius="@dimen/radius_chip"
-        app:cardElevation="0dp"
+        app:cardElevation="@dimen/layout_zero"
         app:strokeWidth="@dimen/space_4">
         <ImageView
             android:id="@+id/filter_avatar_image"

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Exact legacy form and auth sizes shared across XML layouts. -->
+<resources>
+    <dimen name="layout_11_dp">11dp</dimen>
+    <dimen name="layout_13_dp">13dp</dimen>
+    <dimen name="layout_14_dp">14dp</dimen>
+    <dimen name="layout_17_dp">17dp</dimen>
+    <dimen name="layout_18_dp">18dp</dimen>
+    <dimen name="layout_22_dp">22dp</dimen>
+    <dimen name="layout_22_sp">22sp</dimen>
+    <dimen name="layout_23_sp">23sp</dimen>
+    <dimen name="layout_26_dp">26dp</dimen>
+    <dimen name="layout_28_dp">28dp</dimen>
+    <dimen name="layout_30_dp">30dp</dimen>
+    <dimen name="layout_33_sp">33sp</dimen>
+    <dimen name="layout_36_dp">36dp</dimen>
+    <dimen name="layout_36_sp">36sp</dimen>
+    <dimen name="layout_3_dp">3dp</dimen>
+    <dimen name="layout_40_dp">40dp</dimen>
+    <dimen name="layout_46_dp">46dp</dimen>
+    <dimen name="layout_5_dp">5dp</dimen>
+    <dimen name="layout_60_dp">60dp</dimen>
+    <dimen name="layout_64_dp">64dp</dimen>
+    <dimen name="layout_6_dp">6dp</dimen>
+    <dimen name="layout_72_dp">72dp</dimen>
+    <dimen name="layout_7_dp">7dp</dimen>
+    <dimen name="layout_88_dp">88dp</dimen>
+    <dimen name="layout_negative_30_dp">-30dp</dimen>
+    <dimen name="layout_negative_32_dp">-32dp</dimen>
+    <dimen name="layout_zero">0dp</dimen>
+</resources>

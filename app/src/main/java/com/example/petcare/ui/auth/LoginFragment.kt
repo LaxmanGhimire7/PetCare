@@ -8,9 +8,19 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
 import com.example.petcare.data.local.AuthPreferences
+import com.example.petcare.data.local.user.AuthRepository
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import com.example.petcare.data.local.BiometricPreferences
+import com.example.petcare.ui.onboarding.OnboardingPrefs
+import com.google.android.material.snackbar.Snackbar
 import com.example.petcare.databinding.FragmentLoginBinding
 import android.util.Patterns
 
+/** Signs a local account in with a password or an enabled biometric prompt. */
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
@@ -32,6 +42,15 @@ class LoginFragment : Fragment() {
             if (isValidInput()) {
                 signIn()
             }
+        }
+        binding.staySignedInCheck.isChecked = AuthPreferences(requireContext()).staySignedIn()
+        val biometricId = BiometricPreferences(requireContext()).enabledUserId()
+        if (biometricId > 0 && BiometricManager.from(requireContext()).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            ) == BiometricManager.BIOMETRIC_SUCCESS) {
+            binding.biometricButton.visibility = View.VISIBLE
+            binding.biometricButton.setOnClickListener { unlockWithBiometric(biometricId) }
         }
 
         binding.signUpButton.setOnClickListener {
@@ -77,11 +96,47 @@ class LoginFragment : Fragment() {
         val email = binding.emailInput.text?.toString().orEmpty()
         val password = binding.passwordInput.text?.toString().orEmpty()
 
-        if (AuthPreferences(requireContext()).signIn(email, password)) {
-            findNavController().navigate(R.id.action_login_to_home)
-        } else {
-            binding.passwordLayout.error = getString(R.string.error_invalid_credentials)
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (AuthRepository(requireContext()).signIn(email, password,
+                    binding.staySignedInCheck.isChecked)) {
+                findNavController().navigate(if (OnboardingPrefs(requireContext()).isComplete())
+                    R.id.action_login_to_home else R.id.action_login_to_onboarding)
+            } else {
+                binding.passwordLayout.error = getString(R.string.error_invalid_credentials)
+            }
         }
+    }
+
+    private fun unlockWithBiometric(userId: Long) {
+        val prompt = BiometricPrompt(this, ContextCompat.getMainExecutor(requireContext()),
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        if (AuthRepository(requireContext()).unlockWithBiometric(userId)) {
+                            findNavController().navigate(if (OnboardingPrefs(requireContext()).isComplete())
+                                R.id.action_login_to_home else R.id.action_login_to_onboarding)
+                        } else {
+                            Snackbar.make(binding.root, R.string.biometric_account_unavailable,
+                                Snackbar.LENGTH_LONG).show()
+                        }
+                    }
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
+                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
+                        Snackbar.make(binding.root, R.string.biometric_failed,
+                            Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            })
+        val info = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(getString(R.string.biometric_unlock))
+            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
+            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            .build()
+        prompt.authenticate(info)
     }
 
     override fun onDestroyView() {

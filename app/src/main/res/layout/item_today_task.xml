@@ -8,13 +8,14 @@
     android:layout_marginTop="@dimen/space_8"
     app:cardBackgroundColor="?attr/colorSurfaceContainer"
     app:cardCornerRadius="@dimen/radius_card"
-    app:cardElevation="0dp">
+    app:cardElevation="@dimen/layout_zero">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:paddingStart="@dimen/space_8"
         android:paddingEnd="@dimen/space_8">
 
         <View
@@ -32,7 +33,7 @@
             android:fontFeatureSettings="tnum" />
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="@dimen/layout_zero"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"

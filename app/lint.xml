@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Existing explicit preference edits and Uri.parse calls are readable and tested. -->
+    <issue id="UseKtx" severity="ignore" />
+
+    <!-- @dimen/layout_zero resolves to 0dp for weighted children; lint checks only literals. -->
+    <issue id="InefficientWeight" severity="ignore" />
+
+    <!-- Dependencies are pinned to the verified API 24-37 build until an upgrade is tested. -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+
+    <!-- The brief requires targetSdk 36 while compileSdk is 37. -->
+    <issue id="OldTargetApi" severity="ignore" />
+
+    <!-- Phone and tablet layouts deliberately use different navigation widgets. -->
+    <issue id="InconsistentLayout">
+        <ignore path="src/main/res/layout/activity_main.xml" />
+        <ignore path="src/main/res/layout-w600dp/activity_main.xml" />
+    </issue>
+
+    <!-- These surfaces need an opaque field even when their host theme also paints one. -->
+    <issue id="Overdraw">
+        <ignore path="src/main/res/layout/dialog_gesture_coach.xml" />
+        <ignore path="src/main/res/layout/item_pet_hero.xml" />
+        <ignore path="src/main/res/layout/widget_care.xml" />
+    </issue>
+
+    <!-- The reminder icon has a distinct 40dp visual size and decorative accessibility role. -->
+    <issue id="UseCompoundDrawables">
+        <ignore path="src/main/res/layout/fragment_reminder_settings.xml" />
+    </issue>
+
+    <!-- Predictive-back opt-in is ignored safely by API 24-32 and used on API 33+. -->
+    <issue id="UnusedAttribute">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+</lint>

@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.ui.SelectionDialog
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.ReminderPreferences
 import com.example.petcare.data.local.care.CareTaskRepository
@@ -38,10 +40,12 @@ import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
 
+/** Edits a new care task and reviews imported appointment fields before saving. */
 class AddCareTaskFragment : Fragment() {
 
     private var _binding: FragmentAddCareTaskBinding? = null
     private val binding get() = _binding!!
+    private val repositories by lazy { PetCareRepositories(requireContext()) }
 
     private var pets: List<PetEntity> = emptyList()
     private var selectedPet: PetEntity? = null
@@ -57,7 +61,7 @@ class AddCareTaskFragment : Fragment() {
 
     private val viewModel: AddCareTaskViewModel by viewModels {
         AddCareTaskViewModelFactory(
-            CareTaskRepository(PetCareDatabase.getInstance(requireContext()).careTaskDao())
+        repositories.tasks
         )
     }
 
@@ -106,8 +110,14 @@ class AddCareTaskFragment : Fragment() {
         binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
             selectedCategory = categories[position]
         }
+        SelectionDialog.attach(binding.categoryInput, R.string.task_category, categories) {
+            selectedCategory = categories[it]
+        }
         binding.frequencyInput.setOnItemClickListener { _, _, position, _ ->
             selectedFrequency = frequencies[position]
+        }
+        SelectionDialog.attach(binding.frequencyInput, R.string.task_frequency, frequencies) {
+            selectedFrequency = frequencies[it]
         }
     }
 
@@ -133,7 +143,7 @@ class AddCareTaskFragment : Fragment() {
     }
 
     private fun observePets() {
-        val petRepository = PetRepository(PetCareDatabase.getInstance(requireContext()).petDao())
+        val petRepository = repositories.pets
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 petRepository.observePets().collect { savedPets ->
@@ -148,13 +158,17 @@ class AddCareTaskFragment : Fragment() {
                         selectedPet = pets[position]
                         binding.petLayout.error = null
                     }
+                    SelectionDialog.attach(binding.petInput, R.string.select_pet, labels) {
+                        selectedPet = pets[it]
+                        binding.petLayout.error = null
+                    }
                 }
             }
         }
     }
 
     private fun observePlaces() {
-        val repository = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao())
+        val repository = repositories.places
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeAll().collect { places ->
@@ -171,6 +185,9 @@ class AddCareTaskFragment : Fragment() {
                     )
                     binding.taskPlaceInput.setOnItemClickListener { _, _, position, _ ->
                         selectedPlace = places.getOrNull(position - 1)
+                    }
+                    SelectionDialog.attach(binding.taskPlaceInput, R.string.task_place, labels) {
+                        selectedPlace = places.getOrNull(it - 1)
                     }
                 }
             }

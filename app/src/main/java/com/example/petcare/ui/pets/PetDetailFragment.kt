@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
 import com.example.petcare.R
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetColor
 import com.example.petcare.data.local.pet.PetEntity
@@ -63,7 +64,7 @@ class PetDetailFragment : Fragment() {
             })
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            pets = PetRepository(PetCareDatabase.getInstance(requireContext()).petDao())
+        pets = PetCareRepositories(requireContext()).pets
                 .observePets().first()
             val start = pets.indexOfFirst { it.id == requestedId }
             if (start < 0) {
@@ -154,6 +155,7 @@ class PetDetailFragment : Fragment() {
                 image.setOnClickListener { open(pet) }
             }
         }
+        /** Holds one pet's photo and profile hero card. */
         class Holder(val binding: ItemPetHeroBinding) : RecyclerView.ViewHolder(binding.root)
     }
 }

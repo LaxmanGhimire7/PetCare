@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Sets the default time used when a new care reminder is created. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -10,10 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="36dp">
+        android:paddingStart="@dimen/space_24"
+        android:paddingTop="@dimen/space_20"
+        android:paddingEnd="@dimen/space_24"
+        android:paddingBottom="@dimen/layout_36_dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
@@ -25,7 +26,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/space_12"
             android:text="@string/reminder_settings_title"
             android:textAppearance="?attr/textAppearanceHeadlineLarge"
             android:textColor="@color/on_surface"
@@ -34,7 +35,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/space_8"
             android:text="@string/reminder_settings_subtitle"
             android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textColor="@color/on_surface_variant" />
@@ -43,7 +44,7 @@
             style="@style/Widget.PetCare.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="@dimen/layout_28_dp"
             app:cardBackgroundColor="@color/secondary_container">
 
             <LinearLayout
@@ -51,19 +52,19 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="20dp">
+                android:padding="@dimen/space_20">
 
                 <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/layout_40_dp"
+                    android:layout_height="@dimen/layout_40_dp"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_alarm"
                     app:tint="@color/on_secondary_container" />
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/layout_zero"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="@dimen/space_16"
                     android:layout_weight="1"
                     android:text="@string/reminder_settings_explainer"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
@@ -76,7 +77,7 @@
             style="@style/Widget.PetCare.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="@dimen/layout_22_dp"
             android:hint="@string/default_reminder_time"
             app:endIconDrawable="@drawable/ic_alarm"
             app:endIconMode="custom">
@@ -95,10 +96,10 @@
             style="@style/Widget.PetCare.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="@dimen/space_24"
             android:text="@string/save_changes"
             app:icon="@drawable/ic_check"
-            app:iconPadding="8dp"
+            app:iconPadding="@dimen/space_8"
             app:iconTint="@color/on_primary" />
     </LinearLayout>
 </ScrollView>

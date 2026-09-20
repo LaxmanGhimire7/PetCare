@@ -163,22 +163,26 @@ class TodayTaskAdapter(
                 restoringTaskId = null
                 RowMotion.expand(row.root)
             }
+            row.root.animate().cancel()
+            row.root.scaleX = 1f
+            row.root.scaleY = 1f
             row.completeTaskButton.visibility = if (completed) View.GONE else View.VISIBLE
+            row.completeTaskButton.isEnabled = !completed
             row.completeTaskButton.setOnClickListener {
+                row.completeTaskButton.isEnabled = false
                 GestureHaptics.confirm(row.root)
-                if (!MotionPrefs.animationsEnabled(context)) {
-                    onComplete(task)
-                } else {
+                if (MotionPrefs.animationsEnabled(context)) {
                     row.completeTaskButton.icon = AppCompatResources.getDrawable(
                         context, R.drawable.avd_task_check
                     ).also { (it as? Animatable)?.start() }
-                    // A short press response precedes the database update that moves the row.
+                    // The database action must not depend on an animation end callback:
+                    // RecyclerView can cancel that callback when a large-text row reflows.
                     row.root.animate().scaleX(0.97f).scaleY(0.97f).setDuration(100L)
                         .withEndAction {
-                            row.root.animate().scaleX(1f).scaleY(1f).setDuration(100L)
-                                .withEndAction { onComplete(task) }.start()
+                            row.root.animate().scaleX(1f).scaleY(1f).setDuration(100L).start()
                         }.start()
                 }
+                onComplete(task)
             }
             row.taskDragHandle.visibility = if (completed) View.GONE else View.VISIBLE
             row.taskDragHandle.setOnLongClickListener {

@@ -31,11 +31,9 @@ import androidx.transition.TransitionManager
 import com.example.petcare.R
 import com.example.petcare.ImportActivity
 import com.example.petcare.data.local.AuthPreferences
-import com.example.petcare.data.local.PetCareDatabase
-import com.example.petcare.data.local.care.CareTaskRepository
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.pet.PetEntity
-import com.example.petcare.data.local.pet.PetRepository
+import com.example.petcare.ui.ScreenState
 import com.example.petcare.databinding.FragmentTodayBinding
 import com.example.petcare.integration.IcsAppointmentParser
 import com.example.petcare.integration.CarePlanEntry
@@ -46,6 +44,7 @@ import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.GestureCoachPrefs
 import com.example.petcare.ui.BrandFonts
 import com.example.petcare.ui.RowMotion
+import com.example.petcare.widget.CareWidgetProvider
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.snackbar.Snackbar
@@ -54,10 +53,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.first
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
@@ -68,9 +65,6 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     private var _binding: FragmentTodayBinding? = null
     private val binding get() = _binding!!
     private val viewModel: TodayViewModel by viewModels()
-    private val database by lazy { PetCareDatabase.getInstance(requireContext()) }
-    private val pets by lazy { PetRepository(database.petDao()) }
-    private val tasks by lazy { CareTaskRepository(database.careTaskDao()) }
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
     private val filterAdapter = PetFilterAdapter(::selectPet)
     private lateinit var taskTouchHelper: ItemTouchHelper
@@ -144,6 +138,9 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         binding.addTaskFab.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_add_care_task)
         }
+        binding.addTaskInline.setOnClickListener {
+            findNavController().navigate(R.id.action_home_to_add_care_task)
+        }
         binding.todayEmptyAction.setOnClickListener { openEmptyAction() }
         binding.completedHeader.setOnClickListener {
             completedExpanded = !completedExpanded
@@ -173,29 +170,45 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             GestureHaptics.confirm(binding.root)
             viewLifecycleOwner.lifecycleScope.launch {
                 // Re-read Room and the local calendar day so midnight and overdue state refresh.
-                latestPets = pets.observePets().first()
-                latestUpcoming = tasks.observeUpcoming().first()
-                latestCompleted = tasks.observeCompleted().first()
-                render()
+                viewModel.refresh()
                 binding.todayRefresh.isRefreshing = false
                 Snackbar.make(binding.root, R.string.today_refreshed, Snackbar.LENGTH_SHORT).show()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(pets.observePets(), tasks.observeUpcoming(), tasks.observeCompleted()) {
-                    petItems, upcomingItems, completedItems -> Triple(petItems, upcomingItems, completedItems)
-                }.collect { (petItems, upcomingItems, completedItems) ->
-                    latestPets = petItems
-                    latestUpcoming = upcomingItems
-                    latestCompleted = completedItems
-                    render()
-                    if (pendingDeepLinkTaskId > 0L) {
-                        val target = (latestUpcoming + latestCompleted)
-                            .firstOrNull { it.id == pendingDeepLinkTaskId }
-                        pendingDeepLinkTaskId = 0L
-                        if (target != null) openDetail(target)
-                        else Snackbar.make(binding.root, R.string.task_unavailable, Snackbar.LENGTH_LONG).show()
+                viewModel.state.collect { state ->
+                    when (state) {
+                        ScreenState.Loading -> {
+                            binding.loadingSkeleton.visibility = View.VISIBLE
+                            binding.loadingSkeleton.start()
+                        }
+                        ScreenState.Empty -> {
+                            latestPets = emptyList()
+                            latestUpcoming = emptyList()
+                            latestCompleted = emptyList()
+                            render()
+                        }
+                        is ScreenState.Content -> {
+                            latestPets = state.data.pets
+                            latestUpcoming = state.data.upcoming
+                            latestCompleted = state.data.completed
+                            render()
+                            CareWidgetProvider.refresh(requireContext().applicationContext)
+                            if (pendingDeepLinkTaskId > 0L) {
+                                val target = (latestUpcoming + latestCompleted)
+                                    .firstOrNull { it.id == pendingDeepLinkTaskId }
+                                pendingDeepLinkTaskId = 0L
+                                if (target != null) openDetail(target)
+                                else Snackbar.make(binding.root, R.string.task_unavailable,
+                                    Snackbar.LENGTH_LONG).show()
+                            }
+                        }
+                        is ScreenState.Error -> {
+                            binding.loadingSkeleton.visibility = View.GONE
+                            binding.loadingSkeleton.stop()
+                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                        }
                     }
                 }
             }
@@ -271,7 +284,13 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         binding.todayEmptyAction.setText(
             if (latestPets.isEmpty()) R.string.add_a_pet else R.string.add_task
         )
-        binding.addTaskFab.visibility = if (latestPets.isEmpty()) View.GONE else View.VISIBLE
+        // At large text sizes the floating button can cover a task's completion control.
+        // Move the same action into the scrollable content once there are tasks.
+        val inlineAdd = resources.configuration.fontScale >= 1.5f &&
+            latestPets.isNotEmpty() && (upcoming.isNotEmpty() || completedToday.isNotEmpty())
+        binding.addTaskInline.visibility = if (inlineAdd) View.VISIBLE else View.GONE
+        binding.addTaskFab.visibility = if (latestPets.isEmpty() || inlineAdd) View.GONE
+            else View.VISIBLE
         binding.generateRoutineButton.isEnabled = latestPets.isNotEmpty()
         if (firstEntrance && MotionPrefs.animationsEnabled(requireContext())) playTaskEntrance()
     }
@@ -296,7 +315,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun complete(task: CareTaskSummary) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val next = tasks.completeTask(task.id)
+            val next = viewModel.completeTask(task.id)
             scheduler.cancel(task.id)
             next?.let(scheduler::schedule)
         }
@@ -311,7 +330,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         if (ids == latestUpcoming.filter { it.dueDateEpochDay <= todayEpochDay() &&
                 (viewModel.selectedPetId == null || it.petId == viewModel.selectedPetId) }
                 .map(CareTaskSummary::id)) return
-        viewLifecycleOwner.lifecycleScope.launch { tasks.saveOrder(ids, slots) }
+        viewLifecycleOwner.lifecycleScope.launch { viewModel.saveOrder(ids, slots) }
     }
 
     override fun onResume() {
@@ -360,7 +379,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun resetChecklist() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val snapshots = tasks.resetCompletedForDay(todayEpochDay())
+            val snapshots = viewModel.resetCompleted(todayEpochDay())
             if (snapshots.isEmpty()) return@launch
             val minutesNow = Calendar.getInstance().let {
                 it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)
@@ -371,7 +390,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                 .setAction(R.string.undo) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         snapshots.forEach { scheduler.cancel(it.id) }
-                        tasks.restoreCompleted(snapshots)
+                    viewModel.restoreCompleted(snapshots)
                     }
                 }.show()
         }
@@ -379,14 +398,14 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun delete(task: CareTaskSummary) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val snapshot = tasks.deleteTask(task.id) ?: return@launch
+            val snapshot = viewModel.deleteTask(task.id) ?: return@launch
             scheduler.cancel(task.id)
             Snackbar.make(binding.root, R.string.task_deleted, Snackbar.LENGTH_LONG)
                 .setDuration(6000)
                 .setAction(R.string.undo) {
                     upcomingAdapter.restoringTaskId = snapshot.id
                     viewLifecycleOwner.lifecycleScope.launch {
-                        tasks.restoreTask(snapshot)
+                    viewModel.restoreTask(snapshot)
                         if (!snapshot.isCompleted) scheduler.schedule(snapshot)
                     }
                 }.show()
@@ -452,7 +471,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun writeCarePlan(uri: Uri, calendarFile: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
-            val items = tasks.observeUpcoming().first()
+            val items = viewModel.upcoming()
             val content = if (calendarFile) CarePlanIcsCodec.encode(items.map { task ->
                 val description = listOf(task.petName,
                     task.requiredSupplies.takeIf(String::isNotBlank)?.let {

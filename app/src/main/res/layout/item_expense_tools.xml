@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Export actions for the signed-in account's expense list. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <com.google.android.material.button.MaterialButton android:id="@+id/export_csv_button"
+        style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="@string/export_expenses_csv" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/export_pdf_button"
+        style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="@string/export_expenses_pdf" />
+</LinearLayout>

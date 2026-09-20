@@ -3,6 +3,7 @@ package com.example.petcare.data.local
 import android.content.Context
 import com.example.petcare.data.local.care.DEFAULT_REMINDER_MINUTES_OF_DAY
 
+/** Stores the user's default reminder time for newly created care tasks. */
 class ReminderPreferences(context: Context) {
 
     private val preferences = context.applicationContext.getSharedPreferences(

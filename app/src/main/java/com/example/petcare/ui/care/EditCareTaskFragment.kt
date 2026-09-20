@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.ui.SelectionDialog
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
@@ -38,17 +40,15 @@ import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
 
+/** Presents an existing care task for editing, including its saved place. */
 class EditCareTaskFragment : Fragment() {
 
     private var _binding: FragmentAddCareTaskBinding? = null
     private val binding get() = _binding!!
+    private val repositories by lazy { PetCareRepositories(requireContext()) }
 
-    private val careTaskRepository by lazy {
-        CareTaskRepository(PetCareDatabase.getInstance(requireContext()).careTaskDao())
-    }
-    private val petRepository by lazy {
-        PetRepository(PetCareDatabase.getInstance(requireContext()).petDao())
-    }
+    private val careTaskRepository by lazy { repositories.tasks }
+    private val petRepository by lazy { repositories.pets }
     private val viewModel: EditCareTaskViewModel by viewModels {
         EditCareTaskViewModelFactory(careTaskRepository)
     }
@@ -109,8 +109,14 @@ class EditCareTaskFragment : Fragment() {
         binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
             selectedCategory = categories[position]
         }
+        SelectionDialog.attach(binding.categoryInput, R.string.task_category, categories) {
+            selectedCategory = categories[it]
+        }
         binding.frequencyInput.setOnItemClickListener { _, _, position, _ ->
             selectedFrequency = frequencies[position]
+        }
+        SelectionDialog.attach(binding.frequencyInput, R.string.task_frequency, frequencies) {
+            selectedFrequency = frequencies[it]
         }
     }
 
@@ -152,6 +158,10 @@ class EditCareTaskFragment : Fragment() {
                         selectedPet = pets[position]
                         binding.petLayout.error = null
                     }
+                    SelectionDialog.attach(binding.petInput, R.string.select_pet, labels) {
+                        selectedPet = pets[it]
+                        binding.petLayout.error = null
+                    }
                     bindCareTask()
                 }
             }
@@ -159,7 +169,7 @@ class EditCareTaskFragment : Fragment() {
     }
 
     private fun observePlaces() {
-        val repository = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao())
+        val repository = repositories.places
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repository.observeAll().collect { saved ->
@@ -171,6 +181,10 @@ class EditCareTaskFragment : Fragment() {
                     bindPlace()
                     binding.taskPlaceInput.setOnItemClickListener { _, _, position, _ ->
                         selectedPlace = saved.getOrNull(position - 1)
+                        placeChanged = true
+                    }
+                    SelectionDialog.attach(binding.taskPlaceInput, R.string.task_place, labels) {
+                        selectedPlace = saved.getOrNull(it - 1)
                         placeChanged = true
                     }
                 }

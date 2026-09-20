@@ -1,61 +1,67 @@
 package com.example.petcare.data.local
 
 import android.content.Context
-import java.security.MessageDigest
 
+/** Persists only a session marker and retains old credentials until they are migrated. */
 class AuthPreferences(context: Context) {
-
+    private val biometric = BiometricPreferences(context)
     private val preferences = context.applicationContext.getSharedPreferences(
-        PREFERENCES_NAME,
-        Context.MODE_PRIVATE
+        PREFERENCES_NAME, Context.MODE_PRIVATE
     )
 
-    fun register(name: String, email: String, password: String): Boolean {
-        if (hasRegisteredAccount()) {
-            return false
-        }
+    fun ownerId(): Long = transientOwnerId.takeIf { it > 0 }
+        ?: preferences.getLong(KEY_OWNER_ID, 0)
 
+    fun isSignedIn(): Boolean {
+        val id = ownerId()
+        if (id > 0) return !biometric.isEnabledFor(id) || unlockedThisProcess
+        return preferences.getBoolean(KEY_LEGACY_SIGNED_IN, false) && legacyEmail() != null
+    }
+
+    fun userName(): String? = transientName ?: preferences.getString(KEY_NAME, null)
+
+    fun setSession(ownerId: Long, name: String, staySignedIn: Boolean) {
+        transientOwnerId = ownerId
+        transientName = name
+        unlockedThisProcess = true
         preferences.edit()
-            .putString(KEY_NAME, name)
-            .putString(KEY_EMAIL, email.normalizedEmail())
-            .putString(KEY_PASSWORD_HASH, password.sha256())
-            .putBoolean(KEY_SIGNED_IN, true)
+            .putLong(KEY_OWNER_ID, if (staySignedIn) ownerId else 0)
+            .putString(KEY_NAME, if (staySignedIn) name else null)
+            .putBoolean(KEY_STAY_SIGNED_IN, staySignedIn)
             .apply()
-        return true
     }
 
-    fun signIn(email: String, password: String): Boolean {
-        val isValidAccount = preferences.getString(KEY_EMAIL, null) == email.normalizedEmail() &&
-            preferences.getString(KEY_PASSWORD_HASH, null) == password.sha256()
-
-        if (isValidAccount) {
-            preferences.edit().putBoolean(KEY_SIGNED_IN, true).apply()
-        }
-
-        return isValidAccount
-    }
-
-    fun isSignedIn(): Boolean = preferences.getBoolean(KEY_SIGNED_IN, false)
-
-    fun userName(): String? = preferences.getString(KEY_NAME, null)
+    fun staySignedIn(): Boolean = preferences.getBoolean(KEY_STAY_SIGNED_IN, true)
 
     fun signOut() {
-        preferences.edit().putBoolean(KEY_SIGNED_IN, false).apply()
+        transientOwnerId = 0
+        transientName = null
+        unlockedThisProcess = false
+        preferences.edit().remove(KEY_OWNER_ID).remove(KEY_NAME)
+            .putBoolean(KEY_LEGACY_SIGNED_IN, false).apply()
     }
 
-    private fun hasRegisteredAccount(): Boolean = preferences.contains(KEY_EMAIL)
+    fun legacyEmail(): String? = preferences.getString(KEY_LEGACY_EMAIL, null)
+    fun legacyName(): String? = preferences.getString(KEY_LEGACY_NAME, null)
+    fun legacyHash(): String? = preferences.getString(KEY_LEGACY_HASH, null)
+    fun legacyWasSignedIn(): Boolean = preferences.getBoolean(KEY_LEGACY_SIGNED_IN, false)
 
-    private fun String.normalizedEmail(): String = trim().lowercase()
-
-    private fun String.sha256(): String = MessageDigest.getInstance("SHA-256")
-        .digest(toByteArray())
-        .joinToString(separator = "") { byte -> "%02x".format(byte) }
+    fun clearLegacyCredentials() {
+        preferences.edit().remove(KEY_LEGACY_EMAIL).remove(KEY_LEGACY_HASH)
+            .remove(KEY_LEGACY_SIGNED_IN).apply()
+    }
 
     private companion object {
         const val PREFERENCES_NAME = "petcare_auth"
+        const val KEY_OWNER_ID = "owner_id"
         const val KEY_NAME = "name"
-        const val KEY_EMAIL = "email"
-        const val KEY_PASSWORD_HASH = "password_hash"
-        const val KEY_SIGNED_IN = "signed_in"
+        const val KEY_STAY_SIGNED_IN = "stay_signed_in"
+        const val KEY_LEGACY_NAME = "name"
+        const val KEY_LEGACY_EMAIL = "email"
+        const val KEY_LEGACY_HASH = "password_hash"
+        const val KEY_LEGACY_SIGNED_IN = "signed_in"
+        @Volatile var transientOwnerId: Long = 0
+        @Volatile var transientName: String? = null
+        @Volatile var unlockedThisProcess: Boolean = false
     }
 }

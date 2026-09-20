@@ -12,14 +12,30 @@ android {
         applicationId = "com.example.petcare"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // A distributable APK is signed only when the owner's private key is supplied locally.
+    val releaseStorePath = providers.environmentVariable("PETCARE_RELEASE_STORE_FILE").orNull
+    val releaseStorePassword = providers.environmentVariable("PETCARE_RELEASE_STORE_PASSWORD").orNull
+    val releaseKeyAlias = providers.environmentVariable("PETCARE_RELEASE_KEY_ALIAS").orNull
+    val releaseKeyPassword = providers.environmentVariable("PETCARE_RELEASE_KEY_PASSWORD").orNull
+    val releaseSigning = if (listOf(releaseStorePath, releaseStorePassword, releaseKeyAlias,
+            releaseKeyPassword).all { !it.isNullOrBlank() }) {
+        signingConfigs.create("petcareRelease") {
+            storeFile = file(requireNotNull(releaseStorePath))
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+        }
+    } else null
+
     buildTypes {
         release {
+            signingConfig = releaseSigning
             optimization {
                 enable = false
             }
@@ -48,15 +64,16 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
-    implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.splashscreen)
     implementation(libs.material)
-    implementation("com.google.android.gms:play-services-maps:20.0.0")
-    implementation("com.google.android.gms:play-services-location:21.4.0")
-    implementation("com.google.maps.android:android-maps-utils:4.5.2")
+    implementation(libs.google.maps)
+    implementation(libs.google.location)
+    implementation(libs.maps.utils)
 
     // Database (Room)
     implementation(libs.androidx.room.runtime)
@@ -81,13 +98,13 @@ dependencies {
 
     // Image loading
     implementation(libs.coil)
-    implementation(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.8.1"))
+    implementation(platform(libs.kotlinx.serialization.bom))
 
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation("androidx.room:room-testing:2.8.5")
+    androidTestImplementation(libs.androidx.room.testing)
     // Room 2.8.5 migration schema readers require matching serialization modules.
-    androidTestImplementation(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.8.1"))
+    androidTestImplementation(platform(libs.kotlinx.serialization.bom))
 }

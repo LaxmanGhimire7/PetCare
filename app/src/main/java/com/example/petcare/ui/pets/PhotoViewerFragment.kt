@@ -66,6 +66,7 @@ class PhotoViewerFragment : Fragment() {
             holder.binding.zoomPhoto.load(photos[position])
             holder.binding.zoomPhoto.onDismiss = dismiss
         }
+        /** Holds a single zoomable photo page. */
         class Holder(val binding: ItemZoomPhotoBinding) : RecyclerView.ViewHolder(binding.root)
     }
 

@@ -45,7 +45,6 @@ class BrandFonts(private val context: Context) {
     private fun visit(view: View) {
         if (view is TextView) {
             val display = view.id == R.id.auth_display_title ||
-                view.id == R.id.greeting_text ||
                 view.id == R.id.pet_form_title ||
                 view.id == R.id.care_task_form_title
             val face = if (display) fraunces else manrope

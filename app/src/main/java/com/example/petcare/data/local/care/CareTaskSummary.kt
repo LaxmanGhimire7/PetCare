@@ -1,5 +1,6 @@
 package com.example.petcare.data.local.care
 
+/** Care task joined with the pet details needed by list screens. */
 data class CareTaskSummary(
     val id: Long,
     val petId: Long,

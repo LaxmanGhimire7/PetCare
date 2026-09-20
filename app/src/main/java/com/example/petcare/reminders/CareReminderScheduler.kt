@@ -10,6 +10,7 @@ import java.util.Calendar
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
+/** Schedules and cancels per-task WorkManager reminders. */
 class CareReminderScheduler(context: Context) {
 
     private val appContext = context.applicationContext
@@ -38,6 +39,16 @@ class CareReminderScheduler(context: Context) {
 
     fun cancel(careTaskId: Long) {
         workManager.cancelUniqueWork(workName(careTaskId))
+    }
+
+    /** Replaces the scheduled reminder without changing the care task due date. */
+    fun snooze(careTaskId: Long) {
+        val request = OneTimeWorkRequestBuilder<CareReminderWorker>()
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .setInputData(Data.Builder().putLong(CareReminderWorker.KEY_CARE_TASK_ID,
+                careTaskId).build())
+            .build()
+        workManager.enqueueUniqueWork(workName(careTaskId), ExistingWorkPolicy.REPLACE, request)
     }
 
     private fun reminderTimeMillis(careTask: CareTaskEntity): Long {

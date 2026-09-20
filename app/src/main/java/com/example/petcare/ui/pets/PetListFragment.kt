@@ -5,20 +5,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.petcare.R
-import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetColor
-import com.example.petcare.data.local.pet.PetDeletionRepository
 import com.example.petcare.data.local.pet.PetEntity
-import com.example.petcare.data.local.pet.PetRepository
+import com.example.petcare.ui.ScreenState
 import com.example.petcare.databinding.FragmentPetListBinding
 import com.example.petcare.databinding.ItemPetProfileBinding
 import com.example.petcare.reminders.CareReminderScheduler
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 class PetListFragment : Fragment() {
     private var _binding: FragmentPetListBinding? = null
     private val binding get() = _binding!!
-    private val database by lazy { PetCareDatabase.getInstance(requireContext()) }
+    private val viewModel: PetListViewModel by viewModels()
     private val adapter = PetAdapter()
     private var restoringId: Long? = null
 
@@ -47,9 +47,23 @@ class PetListFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                PetRepository(database.petDao()).observePets().collect { pets ->
-                    adapter.submit(pets)
-                    binding.emptyCard.visibility = if (pets.isEmpty()) View.VISIBLE else View.GONE
+                viewModel.state.collect { state ->
+                    when (state) {
+                        ScreenState.Loading -> binding.emptyCard.visibility = View.GONE
+                        ScreenState.Empty -> {
+                            adapter.submit(emptyList())
+                            binding.emptyCard.visibility = View.VISIBLE
+                        }
+                        is ScreenState.Content -> {
+                            adapter.submit(state.data)
+                            binding.emptyCard.visibility = View.GONE
+                        }
+                        is ScreenState.Error -> {
+                            adapter.submit(emptyList())
+                            binding.emptyCard.visibility = View.VISIBLE
+                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                        }
+                    }
                 }
             }
         }
@@ -69,7 +83,7 @@ class PetListFragment : Fragment() {
 
     private fun delete(pet: PetEntity, row: View) {
         RowMotion.collapse(row) { viewLifecycleOwner.lifecycleScope.launch {
-            val snapshot = PetDeletionRepository(database).delete(pet.id) ?: return@launch
+            val snapshot = viewModel.delete(pet.id) ?: return@launch
             val scheduler = CareReminderScheduler(requireContext())
             snapshot.tasks.forEach { scheduler.cancel(it.id) }
             Snackbar.make(binding.root, R.string.pet_deleted, Snackbar.LENGTH_LONG)
@@ -77,7 +91,7 @@ class PetListFragment : Fragment() {
                 .setAction(R.string.undo) {
                     restoringId = pet.id
                     viewLifecycleOwner.lifecycleScope.launch {
-                        PetDeletionRepository(database).restore(snapshot)
+                        viewModel.restore(snapshot)
                         snapshot.tasks.filterNot { it.isCompleted }.forEach(scheduler::schedule)
                     }
                 }.show()
@@ -93,8 +107,17 @@ class PetListFragment : Fragment() {
     private inner class PetAdapter : RecyclerView.Adapter<PetAdapter.Holder>() {
         private var pets = emptyList<PetEntity>()
         fun submit(items: List<PetEntity>) {
+            val before = pets
+            val changes = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+                override fun getOldListSize() = before.size
+                override fun getNewListSize() = items.size
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                    before[oldItemPosition].id == items[newItemPosition].id
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+                    before[oldItemPosition] == items[newItemPosition]
+            })
             pets = items
-            notifyDataSetChanged()
+            changes.dispatchUpdatesTo(this)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder =
             Holder(ItemPetProfileBinding.inflate(layoutInflater, parent, false))

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Three skippable first-run screens for care, the first pet and notifications. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/space_20">
+    <com.google.android.material.button.MaterialButton android:id="@+id/onboarding_skip"
+        style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="@string/onboarding_skip" />
+    <androidx.viewpager2.widget.ViewPager2 android:id="@+id/onboarding_pager"
+        android:layout_width="match_parent" android:layout_height="@dimen/layout_zero" android:layout_weight="1" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/onboarding_extra"
+        style="@style/Widget.PetCare.Button.Outlined" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/onboarding_next"
+        style="@style/Widget.PetCare.Button.Primary" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
+        android:text="@string/onboarding_next" />
+</LinearLayout>

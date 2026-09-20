@@ -27,12 +27,4 @@
     <color name="on_hero">#EDEEEA</color>
     <color name="hero_muted">#A3A9A4</color>
     <color name="hero_button">#7FC9B5</color>
-    <color name="tool_lavender">#242925</color>
-    <color name="tool_blue">#242925</color>
-    <color name="tool_coral">#242925</color>
-    <color name="tool_mint">#242925</color>
-    <color name="tool_sun">#242925</color>
-    <color name="mint">#7FC9B5</color>
-    <color name="sun">#DCC386</color>
-    <color name="shadow_tint">#66000000</color>
 </resources>

@@ -39,8 +39,10 @@ class MainActivity : AppCompatActivity() {
     private var pendingDeepLinkUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
-        super.onCreate(savedInstanceState)
-        pendingDeepLinkUri = savedInstanceState?.getString(STATE_DEEP_LINK)?.let(Uri::parse)
+        // A restored activity must not expose its old back stack after a non-persistent session ends.
+        val safeState = savedInstanceState.takeIf { AuthPreferences(this).isSignedIn() }
+        super.onCreate(safeState)
+        pendingDeepLinkUri = safeState?.getString(STATE_DEEP_LINK)?.let(Uri::parse)
         if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme == DEEP_LINK_SCHEME &&
             !AuthPreferences(this).isSignedIn()) {
             // Navigation would otherwise display private pet data before the login route runs.
@@ -91,10 +93,10 @@ class MainActivity : AppCompatActivity() {
             R.id.providerListFragment,
             R.id.settingsFragment
         )
-        if (savedInstanceState != null) {
-            pendingImport = savedInstanceState.getBundle(STATE_IMPORT)
+        if (safeState != null) {
+            pendingImport = safeState.getBundle(STATE_IMPORT)
             @Suppress("DEPRECATION")
-            pendingImportQueue.addAll(savedInstanceState.getParcelableArrayList<Bundle>(STATE_IMPORT_QUEUE).orEmpty())
+            pendingImportQueue.addAll(safeState.getParcelableArrayList<Bundle>(STATE_IMPORT_QUEUE).orEmpty())
         } else {
             val incoming = importArgsList(intent)
             pendingImport = incoming.firstOrNull()
@@ -142,12 +144,14 @@ class MainActivity : AppCompatActivity() {
             if (!MotionPrefs.animationsEnabled(this)) {
                 provider.remove()
             } else {
-                provider.iconView.animate()
-                    .scaleX(1.12f).scaleY(1.12f).alpha(0f)
-                    .setDuration(300L)
-                    .setInterpolator(OvershootInterpolator(0.7f))
-                    .withEndAction { provider.remove() }
-                    .start()
+                // Some platform splash implementations omit the icon view during handoff.
+                val icon = runCatching { provider.iconView }.getOrNull()
+                if (icon == null) provider.remove() else icon.animate()
+                        .scaleX(1.12f).scaleY(1.12f).alpha(0f)
+                        .setDuration(300L)
+                        .setInterpolator(OvershootInterpolator(0.7f))
+                        .withEndAction { provider.remove() }
+                        .start()
             }
         }
     }

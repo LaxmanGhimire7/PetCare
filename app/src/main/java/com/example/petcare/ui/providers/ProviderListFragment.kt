@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -23,12 +24,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
-import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.provider.ProviderEntity
-import com.example.petcare.data.local.provider.ProviderRepository
 import com.example.petcare.databinding.FragmentFeatureListBinding
 import com.example.petcare.databinding.ItemFeatureBinding
 import com.example.petcare.ui.RowMotion
+import com.example.petcare.ui.ScreenState
 import com.example.petcare.location.PlaceLocation
 import com.example.petcare.location.PlaceMarkerIcon
 import com.google.android.gms.location.LocationServices
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 class ProviderListFragment : Fragment() {
     private var _binding: FragmentFeatureListBinding? = null
     private val binding get() = _binding!!
-    private val repository by lazy { ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao()) }
+    private val viewModel: ProviderListViewModel by viewModels()
     private var restoringId: Long? = null
     private var places: List<ProviderEntity> = emptyList()
     private var userLocation: Location? = null
@@ -83,7 +83,17 @@ class ProviderListFragment : Fragment() {
         setupMap()
         requestLocation()
         viewLifecycleOwner.lifecycleScope.launch { viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            repository.observeAll().collect { places = it; render(it); updateMarkers() }
+            viewModel.state.collect { state ->
+                when (state) {
+                    ScreenState.Loading -> binding.emptyText.visibility = View.GONE
+                    ScreenState.Empty -> { places = emptyList(); render(places); updateMarkers() }
+                    is ScreenState.Content -> { places = state.data; render(places); updateMarkers() }
+                    is ScreenState.Error -> {
+                        places = emptyList(); render(places); updateMarkers()
+                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
         } }
     }
     private fun render(items: List<ProviderEntity>) {
@@ -237,11 +247,11 @@ class ProviderListFragment : Fragment() {
     private fun deletePlace(id: Long, row: View? = null) {
         val action: () -> Unit = {
             viewLifecycleOwner.lifecycleScope.launch {
-                val deleted = repository.delete(id) ?: return@launch
+                val deleted = viewModel.delete(id) ?: return@launch
                 Snackbar.make(binding.root, R.string.place_deleted, Snackbar.LENGTH_LONG)
                     .setDuration(6000).setAction(R.string.undo) {
                         restoringId = deleted.id
-                        viewLifecycleOwner.lifecycleScope.launch { repository.restore(deleted) }
+                        viewLifecycleOwner.lifecycleScope.launch { viewModel.restore(deleted) }
                     }.show()
             }
         }
@@ -261,6 +271,7 @@ class ProviderListFragment : Fragment() {
         }
     }
 
+    /** Maps one saved place to a clusterable Google Maps marker. */
     private data class PlaceMarker(val place: ProviderEntity) : ClusterItem {
         override fun getPosition() = LatLng(place.latitude!!, place.longitude!!)
         override fun getTitle() = place.name

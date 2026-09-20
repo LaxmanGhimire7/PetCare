@@ -12,7 +12,6 @@
     <dimen name="radius_card">20dp</dimen>
     <dimen name="radius_sheet">28dp</dimen>
     <dimen name="radius_button">14dp</dimen>
-    <dimen name="radius_image">16dp</dimen>
     <dimen name="radius_chip">100dp</dimen>
     <dimen name="pet_avatar_size">72dp</dimen>
     <dimen name="progress_ring_size">104dp</dimen>

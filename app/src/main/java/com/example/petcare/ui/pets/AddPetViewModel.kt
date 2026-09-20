@@ -7,6 +7,7 @@ import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
 import kotlinx.coroutines.launch
 
+/** Saves a new profile through the current account's pet repository. */
 class AddPetViewModel(private val petRepository: PetRepository) : ViewModel() {
 
     fun addPet(
@@ -38,6 +39,7 @@ class AddPetViewModel(private val petRepository: PetRepository) : ViewModel() {
     }
 }
 
+/** Supplies the account-scoped pet repository to the add form ViewModel. */
 class AddPetViewModelFactory(
     private val petRepository: PetRepository
 ) : ViewModelProvider.Factory {

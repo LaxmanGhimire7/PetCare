@@ -39,6 +39,12 @@ class ShimmerSkeletonView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        start()
+    }
+
+    /** Resume shimmer when a screen re-enters Loading after a previous result. */
+    fun start() {
+        if (animator != null) return
         if (MotionPrefs.animationsEnabled(context)) {
             animator = ValueAnimator.ofFloat(-1f, 1f).apply {
                 duration = 900L

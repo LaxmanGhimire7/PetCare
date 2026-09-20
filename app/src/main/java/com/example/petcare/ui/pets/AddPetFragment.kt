@@ -11,20 +11,23 @@ import androidx.fragment.app.viewModels
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import coil.load
 
+/** Creates a pet profile with optional photos and a stable identity colour. */
 class AddPetFragment : Fragment() {
 
     private var _binding: FragmentAddPetBinding? = null
     private val binding get() = _binding!!
+    private val repositories by lazy { PetCareRepositories(requireContext()) }
 
     private val viewModel: AddPetViewModel by viewModels {
         AddPetViewModelFactory(
-            PetRepository(PetCareDatabase.getInstance(requireContext()).petDao())
+        repositories.pets
         )
     }
     private val selectedPhotoUris = mutableListOf<Uri>()

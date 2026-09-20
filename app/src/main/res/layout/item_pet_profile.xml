@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
+    android:layout_marginTop="@dimen/space_12"
     style="@style/Widget.PetCare.Card">
 
     <LinearLayout
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="top"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="@dimen/space_16">
 
         <View
             android:id="@+id/pet_color_rail"
@@ -22,25 +22,25 @@
             android:background="?attr/colorPrimary" />
 
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginEnd="14dp"
+            android:layout_width="@dimen/layout_72_dp"
+            android:layout_height="@dimen/layout_72_dp"
+            android:layout_marginEnd="@dimen/layout_14_dp"
             app:cardBackgroundColor="@color/primary_container"
-            app:cardCornerRadius="22dp"
-            app:cardElevation="0dp">
+            app:cardCornerRadius="@dimen/layout_22_dp"
+            app:cardElevation="@dimen/layout_zero">
 
             <ImageView
                 android:id="@+id/pet_photo_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/pet_photo"
-                android:padding="18dp"
+                android:padding="@dimen/layout_18_dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_pets" />
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="@dimen/layout_zero"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -57,7 +57,7 @@
                 android:id="@+id/pet_species_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="@dimen/layout_3_dp"
                 android:textAppearance="?attr/textAppearanceLabelLarge"
                 android:textColor="@color/primary" />
 
@@ -65,7 +65,7 @@
                 android:id="@+id/pet_health_notes_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/space_8"
                 android:maxLines="2"
                 android:textAppearance="?attr/textAppearanceBodySmall"
                 android:textColor="@color/on_surface_variant"
@@ -74,7 +74,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/space_8"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
@@ -84,8 +84,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/edit"
                     app:icon="@drawable/ic_edit"
-                    app:iconPadding="6dp"
-                    app:iconSize="18dp" />
+                    app:iconPadding="@dimen/layout_6_dp"
+                    app:iconSize="@dimen/layout_18_dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/remove_pet_button"
@@ -95,8 +95,8 @@
                     android:text="@string/remove"
                     android:textColor="@color/error"
                     app:icon="@drawable/ic_delete"
-                    app:iconPadding="6dp"
-                    app:iconSize="18dp"
+                    app:iconPadding="@dimen/layout_6_dp"
+                    app:iconSize="@dimen/layout_18_dp"
                     app:iconTint="@color/error" />
             </LinearLayout>
         </LinearLayout>

@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import coil.load
 import com.example.petcare.R
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
@@ -19,10 +20,11 @@ import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import kotlinx.coroutines.launch
 
+/** Updates an existing pet profile and its photos without changing its owner. */
 class EditPetFragment : Fragment() {
     private var _binding: FragmentAddPetBinding? = null
     private val binding get() = _binding!!
-    private val repository by lazy { PetRepository(PetCareDatabase.getInstance(requireContext()).petDao()) }
+    private val repository by lazy { PetCareRepositories(requireContext()).pets }
     private var pet: PetEntity? = null
     private var selectedColorIndex = 0
     private val photoUris = mutableListOf<Uri>()

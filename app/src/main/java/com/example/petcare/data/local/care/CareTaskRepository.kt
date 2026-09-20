@@ -2,11 +2,12 @@ package com.example.petcare.data.local.care
 
 import kotlinx.coroutines.flow.Flow
 
-class CareTaskRepository(private val careTaskDao: CareTaskDao) {
+/** Single account-scoped entry point for care task reads and mutations. */
+class CareTaskRepository(private val careTaskDao: CareTaskDao, private val ownerId: Long) {
 
-    fun observeUpcoming(): Flow<List<CareTaskSummary>> = careTaskDao.observeUpcoming()
+    fun observeUpcoming(): Flow<List<CareTaskSummary>> = careTaskDao.observeUpcoming(ownerId)
 
-    fun observeCompleted(): Flow<List<CareTaskSummary>> = careTaskDao.observeCompleted()
+    fun observeCompleted(): Flow<List<CareTaskSummary>> = careTaskDao.observeCompleted(ownerId)
 
     suspend fun addTask(
         petId: Long,
@@ -21,7 +22,9 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
         longitude: Double? = null,
         placeId: Long? = null
     ): CareTaskEntity {
+        require(careTaskDao.petBelongsToOwner(petId, ownerId))
         val careTask = CareTaskEntity(
+            ownerId = ownerId,
             petId = petId,
             title = title,
             dueDateEpochDay = dueDateEpochDay,
@@ -33,59 +36,58 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
             latitude = latitude,
             longitude = longitude,
             placeId = placeId,
-            sortOrder = careTaskDao.nextSortOrder()
+            sortOrder = careTaskDao.nextSortOrder(ownerId)
         )
         return careTask.copy(id = careTaskDao.insert(careTask))
     }
 
     suspend fun completeTask(careTaskId: Long): CareTaskEntity? {
-        val task = careTaskDao.getById(careTaskId) ?: return null
-        careTaskDao.markCompleted(careTaskId)
+        val task = careTaskDao.getById(careTaskId, ownerId) ?: return null
+        careTaskDao.markCompleted(careTaskId, ownerId)
         // Resetting and completing again must reuse the existing recurring successor.
-        careTaskDao.getGeneratedSuccessor(careTaskId)?.let { return it }
-        val daysToAdd = when (task.frequency) {
-            CARE_FREQUENCY_DAILY -> 1L
-            CARE_FREQUENCY_WEEKLY -> 7L
-            CARE_FREQUENCY_MONTHLY -> 30L
-            else -> return null
-        }
+        careTaskDao.getGeneratedSuccessor(careTaskId, ownerId)?.let { return it }
+        val nextDate = CareRecurrence.nextDate(task.dueDateEpochDay, task.frequency)
+            ?: return null
         val nextTask = task.copy(
             id = 0,
-            dueDateEpochDay = task.dueDateEpochDay + daysToAdd,
+            dueDateEpochDay = nextDate,
             isCompleted = false,
-            sortOrder = careTaskDao.nextSortOrder(),
+            sortOrder = careTaskDao.nextSortOrder(ownerId),
             generatedFromId = task.id
         )
         return nextTask.copy(id = careTaskDao.insert(nextTask))
     }
 
     suspend fun deleteTask(careTaskId: Long): CareTaskEntity? {
-        val snapshot = careTaskDao.getById(careTaskId) ?: return null
-        careTaskDao.deleteById(careTaskId)
+        val snapshot = careTaskDao.getById(careTaskId, ownerId) ?: return null
+        careTaskDao.deleteById(careTaskId, ownerId)
         return snapshot
     }
 
-    suspend fun restoreTask(snapshot: CareTaskEntity) = careTaskDao.insert(snapshot)
+    suspend fun restoreTask(snapshot: CareTaskEntity) {
+        if (snapshot.ownerId == ownerId) careTaskDao.insert(snapshot)
+    }
 
-    suspend fun getTask(careTaskId: Long): CareTaskEntity? = careTaskDao.getById(careTaskId)
+    suspend fun getTask(careTaskId: Long): CareTaskEntity? = careTaskDao.getById(careTaskId, ownerId)
 
-    suspend fun getTaskIdsForPet(petId: Long): List<Long> = careTaskDao.getIdsForPet(petId)
+    suspend fun getTaskIdsForPet(petId: Long): List<Long> = careTaskDao.getIdsForPet(petId, ownerId)
 
     suspend fun updateTask(careTask: CareTaskEntity) {
-        careTaskDao.update(careTask)
+        if (careTask.ownerId == ownerId && getTask(careTask.id) != null &&
+            careTaskDao.petBelongsToOwner(careTask.petId, ownerId)) careTaskDao.update(careTask)
     }
 
     /** Reopens only tasks completed on the chosen local day; snapshots support Undo. */
     suspend fun resetCompletedForDay(day: Long): List<CareTaskEntity> {
-        return careTaskDao.reopenCompletedForDay(day)
+        return careTaskDao.reopenCompletedForDay(day, ownerId)
     }
 
     suspend fun restoreCompleted(snapshots: List<CareTaskEntity>) {
-        careTaskDao.restoreCompletedTasks(snapshots)
+        careTaskDao.restoreCompletedTasks(snapshots, ownerId)
     }
 
     /** Assign the original visible slots to the dragged row order. */
     suspend fun saveOrder(idsInOrder: List<Long>, slotsInOrder: List<Long>) {
-        careTaskDao.setSortOrders(idsInOrder, slotsInOrder)
+        careTaskDao.setSortOrders(idsInOrder, slotsInOrder, ownerId)
     }
 }

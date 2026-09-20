@@ -7,6 +7,7 @@ import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
 import kotlinx.coroutines.launch
 
+/** Loads and updates an existing account-scoped care task. */
 class EditCareTaskViewModel(private val careTaskRepository: CareTaskRepository) : ViewModel() {
 
     fun updateTask(careTask: CareTaskEntity, onSaved: (CareTaskEntity) -> Unit) {
@@ -17,6 +18,7 @@ class EditCareTaskViewModel(private val careTaskRepository: CareTaskRepository) 
     }
 }
 
+/** Supplies the task repository to the edit form ViewModel. */
 class EditCareTaskViewModelFactory(
     private val careTaskRepository: CareTaskRepository
 ) : ViewModelProvider.Factory {

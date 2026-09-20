@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     app:cardBackgroundColor="?attr/colorSurface"
     app:cardCornerRadius="@dimen/radius_card"
-    app:cardElevation="0dp">
+    app:cardElevation="@dimen/layout_zero">
     <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="vertical" android:padding="@dimen/space_20">

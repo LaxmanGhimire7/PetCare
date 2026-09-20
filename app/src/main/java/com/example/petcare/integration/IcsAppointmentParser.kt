@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
+/** Appointment fields extracted from an external calendar invite. */
 data class ImportedAppointment(
     val title: String,
     val dateEpochDay: Long,
@@ -12,6 +13,7 @@ data class ImportedAppointment(
     val location: String? = null
 )
 
+/** Reads calendar text while tolerating missing optional ICS fields. */
 object IcsAppointmentParser {
     /** Each exported VEVENT can be read independently, preserving full care plans. */
     fun parseAll(content: String): List<ImportedAppointment> {

@@ -7,6 +7,7 @@ import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
 import kotlinx.coroutines.launch
 
+/** Persists a validated new care task through its account-scoped repository. */
 class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) : ViewModel() {
 
     fun addTask(
@@ -43,6 +44,7 @@ class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) :
     }
 }
 
+/** Supplies the signed-in account's task repository to the add form ViewModel. */
 class AddCareTaskViewModelFactory(
     private val careTaskRepository: CareTaskRepository
 ) : ViewModelProvider.Factory {

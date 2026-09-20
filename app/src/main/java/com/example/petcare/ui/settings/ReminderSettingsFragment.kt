@@ -14,6 +14,7 @@ import com.google.android.material.timepicker.TimeFormat
 import java.text.DateFormat
 import java.util.Calendar
 
+/** Changes the reminder time prefilled on new care tasks. */
 class ReminderSettingsFragment : Fragment() {
 
     private var _binding: FragmentReminderSettingsBinding? = null

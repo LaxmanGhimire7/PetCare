@@ -9,15 +9,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.data.local.PetCareRepositories
+import com.example.petcare.ui.SelectionDialog
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.provider.ProviderEntity
 import com.example.petcare.data.local.provider.ProviderRepository
 import com.example.petcare.databinding.FragmentAddProviderBinding
 import kotlinx.coroutines.launch
 
+/** Creates or edits a saved place, with coordinates from the map picker. */
 class AddProviderFragment : Fragment() {
     private var _binding: FragmentAddProviderBinding? = null
     private val binding get() = _binding!!
+    private val repositories by lazy { PetCareRepositories(requireContext()) }
     private var selectedType = "Veterinary clinic"
     private var editing: ProviderEntity? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentAddProviderBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -25,9 +29,12 @@ class AddProviderFragment : Fragment() {
         val types = resources.getStringArray(R.array.provider_types).toList()
         binding.typeInput.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types)); binding.typeInput.setText(selectedType, false)
         binding.typeInput.setOnItemClickListener { _, _, position, _ -> selectedType = types[position] }
+        SelectionDialog.attach(binding.typeInput, R.string.provider_type, types) {
+            selectedType = types[it]
+        }
         parentFragmentManager.setFragmentResultListener(PlacePickerFragment.PIN_RESULT, viewLifecycleOwner) { _, result ->
-            binding.latitudeInput.setText(result.getDouble(PlacePickerFragment.LATITUDE).toString())
-            binding.longitudeInput.setText(result.getDouble(PlacePickerFragment.LONGITUDE).toString())
+            binding.latitudeInput.setText(coordinate(result.getDouble(PlacePickerFragment.LATITUDE)))
+            binding.longitudeInput.setText(coordinate(result.getDouble(PlacePickerFragment.LONGITUDE)))
             result.getString(PlacePickerFragment.ADDRESS)?.takeIf(String::isNotBlank)?.let {
                 binding.addressInput.setText(it)
             }
@@ -37,14 +44,14 @@ class AddProviderFragment : Fragment() {
         }
         val editId = arguments?.getLong(ProviderListFragment.PLACE_ID) ?: 0L
         if (editId > 0L) viewLifecycleOwner.lifecycleScope.launch {
-            editing = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao()).get(editId)
+            editing = repositories.places.get(editId)
             editing?.let { place ->
                 binding.nameInput.setText(place.name)
                 selectedType = place.type
                 binding.typeInput.setText(place.type, false)
                 binding.addressInput.setText(place.address)
-                place.latitude?.let { binding.latitudeInput.setText(it.toString()) }
-                place.longitude?.let { binding.longitudeInput.setText(it.toString()) }
+                place.latitude?.let { binding.latitudeInput.setText(coordinate(it)) }
+                place.longitude?.let { binding.longitudeInput.setText(coordinate(it)) }
                 binding.hoursInput.setText(place.openingHours)
                 binding.phoneInput.setText(place.phone)
                 binding.urlInput.setText(place.bookingUrl)
@@ -68,14 +75,19 @@ class AddProviderFragment : Fragment() {
                 R.string.place_coordinate_invalid, com.google.android.material.snackbar.Snackbar.LENGTH_LONG).show()
             return
         }
-        val item = ProviderEntity(id = editing?.id ?: 0L, name = name, type = selectedType, address = address,
+        val item = ProviderEntity(id = editing?.id ?: 0L,
+            ownerId = editing?.ownerId ?: repositories.ownerId,
+            name = name, type = selectedType, address = address,
             latitude = latitude, longitude = longitude,
             openingHours = binding.hoursInput.text?.toString()?.trim().orEmpty(), phone = binding.phoneInput.text?.toString()?.trim().orEmpty(), bookingUrl = binding.urlInput.text?.toString()?.trim().orEmpty())
         viewLifecycleOwner.lifecycleScope.launch {
-            val repository = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao())
+            val repository = repositories.places
             if (editing == null) repository.add(item) else repository.update(item)
             findNavController().navigateUp()
         }
     }
     override fun onDestroyView() { _binding = null; super.onDestroyView() }
+    /** Coordinate forms use a stable decimal dot so their parser works in every locale. */
+    private fun coordinate(value: Double): String = java.math.BigDecimal.valueOf(value)
+        .stripTrailingZeros().toPlainString()
 }

@@ -9,8 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
 import com.example.petcare.data.local.AuthPreferences
+import com.example.petcare.data.local.user.AuthRepository
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.petcare.databinding.FragmentRegisterBinding
 
+/** Creates a local account before the optional first-run onboarding flow. */
 class RegisterFragment : Fragment() {
 
     private var _binding: FragmentRegisterBinding? = null
@@ -33,6 +37,7 @@ class RegisterFragment : Fragment() {
                 register()
             }
         }
+        binding.staySignedInCheck.isChecked = AuthPreferences(requireContext()).staySignedIn()
 
         binding.signInInsteadButton.setOnClickListener {
             findNavController().navigate(R.id.action_register_to_login)
@@ -91,10 +96,13 @@ class RegisterFragment : Fragment() {
         val email = binding.emailInput.text?.toString()?.trim().orEmpty()
         val password = binding.passwordInput.text?.toString().orEmpty()
 
-        if (AuthPreferences(requireContext()).register(name, email, password)) {
-            findNavController().navigate(R.id.action_register_to_home)
-        } else {
-            binding.emailLayout.error = getString(R.string.error_account_already_exists)
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (AuthRepository(requireContext()).register(name, email, password,
+                    binding.staySignedInCheck.isChecked)) {
+                findNavController().navigate(R.id.action_register_to_onboarding)
+            } else {
+                binding.emailLayout.error = getString(R.string.error_account_already_exists)
+            }
         }
     }
 

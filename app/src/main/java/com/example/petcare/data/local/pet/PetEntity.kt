@@ -1,11 +1,14 @@
 package com.example.petcare.data.local.pet
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "pets")
+/** Persisted pet profile with a stable identity colour and local photo references. */
 data class PetEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(defaultValue = "1") val ownerId: Long = 1,
     val name: String,
     val species: String,
     val colorIndex: Int = 0,

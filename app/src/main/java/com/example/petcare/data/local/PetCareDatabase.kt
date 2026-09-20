@@ -14,10 +14,12 @@ import com.example.petcare.data.local.pet.PetDao
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.provider.ProviderDao
 import com.example.petcare.data.local.provider.ProviderEntity
+import com.example.petcare.data.local.user.UserDao
+import com.example.petcare.data.local.user.UserEntity
 
 @Database(
-    entities = [PetEntity::class, CareTaskEntity::class, ExpenseEntity::class, ProviderEntity::class],
-    version = 11,
+    entities = [PetEntity::class, CareTaskEntity::class, ExpenseEntity::class, ProviderEntity::class, UserEntity::class],
+    version = 12,
     exportSchema = true
 )
 abstract class PetCareDatabase : RoomDatabase() {
@@ -26,6 +28,7 @@ abstract class PetCareDatabase : RoomDatabase() {
     abstract fun careTaskDao(): CareTaskDao
     abstract fun expenseDao(): ExpenseDao
     abstract fun providerDao(): ProviderDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -46,7 +49,8 @@ abstract class PetCareDatabase : RoomDatabase() {
                 MIGRATION_7_8,
                 MIGRATION_8_9,
                 MIGRATION_9_10,
-                MIGRATION_10_11
+                MIGRATION_10_11,
+                MIGRATION_11_12
             ).build().also { instance = it }
         }
 
@@ -178,6 +182,27 @@ abstract class PetCareDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE care_tasks ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
                 db.execSQL("ALTER TABLE care_tasks ADD COLUMN generatedFromId INTEGER")
                 db.execSQL("UPDATE care_tasks SET sortOrder = id")
+            }
+        }
+
+        /** Legacy records belong to the first account; login migrates its old digest in place. */
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pets ADD COLUMN ownerId INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE care_tasks ADD COLUMN ownerId INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE expenses ADD COLUMN ownerId INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE providers ADD COLUMN ownerId INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        email TEXT NOT NULL,
+                        passwordHash TEXT NOT NULL,
+                        passwordSalt TEXT NOT NULL,
+                        hashAlgorithm TEXT NOT NULL
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_users_email ON users(email)")
             }
         }
     }

@@ -13,13 +13,13 @@
             android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="@color/on_surface" android:textStyle="bold" />
         <TextView android:id="@+id/item_detail_text" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="5dp"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_5_dp"
             android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="@color/on_surface_variant" />
         <TextView android:id="@+id/item_note_text" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="6dp"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_6_dp"
             android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="@color/on_surface_variant" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:gravity="end" android:orientation="horizontal">
+            android:layout_marginTop="@dimen/space_8" android:gravity="end" android:orientation="horizontal">
             <com.google.android.material.button.MaterialButton android:id="@+id/primary_button"
                 style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

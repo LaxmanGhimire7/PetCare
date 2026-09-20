@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?attr/colorSurface"
     android:paddingHorizontal="@dimen/space_20"
     android:paddingTop="@dimen/space_24">
 
@@ -37,7 +36,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pet_recycler"
-        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_width="match_parent" android:layout_height="@dimen/layout_zero"
         android:layout_weight="1" android:layout_marginTop="@dimen/space_12"
         android:clipToPadding="false" android:paddingBottom="@dimen/space_24" />
 </LinearLayout>

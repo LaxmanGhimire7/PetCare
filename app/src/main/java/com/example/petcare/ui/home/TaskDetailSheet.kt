@@ -8,6 +8,7 @@ import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.petcare.data.local.PetCareDatabase
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.provider.ProviderRepository
 import android.view.LayoutInflater
 import android.view.View
@@ -93,7 +94,7 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
         var eventLocation = if (lat.isFinite() && lon.isFinite()) "$lat,$lon" else ""
         val placeId = data.getLong("placeId", 0L)
         if (placeId > 0L) lifecycleScope.launch {
-            val place = ProviderRepository(PetCareDatabase.getInstance(requireContext()).providerDao()).get(placeId)
+            val place = PetCareRepositories(requireContext()).places.get(placeId)
             if (place != null) eventLocation = place.address
         }
         binding.taskCalendarButton.setOnClickListener {

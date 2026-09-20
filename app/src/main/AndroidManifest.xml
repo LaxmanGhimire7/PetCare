@@ -20,6 +20,13 @@
         android:theme="@style/Theme.PetCare">
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+        <receiver android:name=".reminders.CareReminderActionReceiver"
+            android:exported="false" />
+        <receiver android:name=".widget.CareWidgetProvider" android:exported="true">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/care_widget_info" />
+        </receiver>
         <activity android:name=".ImportActivity" android:exported="true"
             android:theme="@style/Theme.PetCare" android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -49,8 +56,15 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="petcare" android:host="pet" />
-                <data android:scheme="petcare" android:host="task" />
+                <data android:scheme="petcare" />
+                <data android:host="pet" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="petcare" />
+                <data android:host="task" />
             </intent-filter>
         </activity>
     </application>
