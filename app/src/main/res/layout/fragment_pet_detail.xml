@@ -16,13 +16,15 @@
                 android:id="@+id/back_button" style="@style/Widget.PetCare.Button.Text"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="@string/back" />
-            <ImageView android:id="@+id/pet_photo" android:layout_width="match_parent"
+            <androidx.viewpager2.widget.ViewPager2 android:id="@+id/pet_pager" android:layout_width="match_parent"
                 android:layout_height="@dimen/pet_detail_photo_height"
                 android:layout_marginTop="@dimen/space_16"
-                android:background="?attr/colorSurfaceContainer"
-                android:contentDescription="@string/pet_photo"
-                android:padding="@dimen/space_32"
-                android:scaleType="fitCenter" android:src="@drawable/ic_pets" />
+                android:background="?attr/colorSurfaceContainer" />
+            <TextView android:id="@+id/pet_page_count"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8"
+                android:textAppearance="@style/TextAppearance.PetCare.Label"
+                android:textColor="?attr/colorOnSurfaceVariant" />
             <View android:id="@+id/pet_color_rail" android:layout_width="@dimen/space_32"
                 android:layout_height="@dimen/space_4" android:layout_marginTop="@dimen/space_24" />
             <TextView android:id="@+id/pet_name" android:layout_width="match_parent"

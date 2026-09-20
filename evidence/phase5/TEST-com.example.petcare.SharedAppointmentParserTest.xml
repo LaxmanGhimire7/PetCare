@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.petcare.SharedAppointmentParserTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-09-20T06:03:51.673Z" hostname="LAXMAN" time="0.013">
+  <properties/>
+  <testcase name="parsesWrittenMonthAnd24HourTime" classname="com.example.petcare.SharedAppointmentParserTest" time="0.01"/>
+  <testcase name="leavesMissingFieldsBlank" classname="com.example.petcare.SharedAppointmentParserTest" time="0.001"/>
+  <testcase name="parsesDayFirstDateTimeAndClinicFromEmail" classname="com.example.petcare.SharedAppointmentParserTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

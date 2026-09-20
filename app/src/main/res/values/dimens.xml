@@ -8,6 +8,7 @@
     <dimen name="space_20">20dp</dimen>
     <dimen name="space_24">24dp</dimen>
     <dimen name="space_32">32dp</dimen>
+    <dimen name="space_48">48dp</dimen>
     <dimen name="radius_card">20dp</dimen>
     <dimen name="radius_sheet">28dp</dimen>
     <dimen name="radius_button">14dp</dimen>

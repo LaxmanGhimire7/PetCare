@@ -103,7 +103,13 @@
         <argument android:name="petId" app:argType="long" />
         <deepLink app:uri="petcare://pet/{petId}" />
         <action android:id="@+id/action_pet_detail_to_edit" app:destination="@id/editPetFragment" />
+        <action android:id="@+id/action_pet_detail_to_photos" app:destination="@id/photoViewerFragment" />
     </fragment>
+
+    <fragment android:id="@+id/photoViewerFragment"
+        android:name="com.example.petcare.ui.pets.PhotoViewerFragment"
+        android:label="@string/photo_viewer_title"
+        tools:layout="@layout/fragment_photo_viewer" />
 
     <fragment
         android:id="@+id/settingsFragment"

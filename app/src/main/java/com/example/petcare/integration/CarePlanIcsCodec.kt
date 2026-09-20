@@ -18,9 +18,9 @@ data class CarePlanEntry(
 /** Writes standards-shaped VEVENT records that the app's own parser can read back. */
 object CarePlanIcsCodec {
     fun encode(entries: List<CarePlanEntry>): String = buildString {
-        appendLine("BEGIN:VCALENDAR")
-        appendLine("VERSION:2.0")
-        appendLine("PRODID:-//PetCare//Care Plan//EN")
+        appendIcsLine("BEGIN:VCALENDAR")
+        appendIcsLine("VERSION:2.0")
+        appendIcsLine("PRODID:-//PetCare//Care Plan//EN")
         val dateTime = SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.ROOT).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
@@ -30,17 +30,36 @@ object CarePlanIcsCodec {
         entries.forEach { entry ->
             // Floating local times match the date and reminder time shown in PetCare.
             val start = entry.dateEpochDay * DAY + entry.minutesOfDay * MINUTE
-            appendLine("BEGIN:VEVENT")
-            appendLine("UID:${entry.id}@petcare.local")
-            appendLine("DTSTAMP:$stamp")
-            appendLine("DTSTART:${dateTime.format(Date(start))}")
-            appendLine("DTEND:${dateTime.format(Date(start + HOUR))}")
-            appendLine("SUMMARY:${escape(entry.title)}")
-            appendLine("DESCRIPTION:${escape(entry.description)}")
-            if (entry.location.isNotBlank()) appendLine("LOCATION:${escape(entry.location)}")
-            appendLine("END:VEVENT")
+            appendIcsLine("BEGIN:VEVENT")
+            appendIcsLine("UID:${entry.id}@petcare.local")
+            appendIcsLine("DTSTAMP:$stamp")
+            appendIcsLine("DTSTART:${dateTime.format(Date(start))}")
+            appendIcsLine("DTEND:${dateTime.format(Date(start + HOUR))}")
+            appendIcsLine("SUMMARY:${escape(entry.title)}")
+            appendIcsLine("DESCRIPTION:${escape(entry.description)}")
+            if (entry.location.isNotBlank()) appendIcsLine("LOCATION:${escape(entry.location)}")
+            appendIcsLine("END:VEVENT")
         }
-        appendLine("END:VCALENDAR")
+        appendIcsLine("END:VCALENDAR")
+    }
+
+    /** iCalendar uses CRLF and folds each content line after at most 75 UTF-8 octets. */
+    private fun StringBuilder.appendIcsLine(line: String) {
+        var bytesOnLine = 0
+        var offset = 0
+        while (offset < line.length) {
+            val codePoint = line.codePointAt(offset)
+            val character = String(Character.toChars(codePoint))
+            val bytes = character.toByteArray(Charsets.UTF_8).size
+            if (bytesOnLine + bytes > 75) {
+                append("\r\n ")
+                bytesOnLine = 1
+            }
+            append(character)
+            bytesOnLine += bytes
+            offset += Character.charCount(codePoint)
+        }
+        append("\r\n")
     }
 
     private fun escape(value: String): String = value.replace("\\", "\\\\")

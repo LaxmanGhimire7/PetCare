@@ -17,7 +17,7 @@ import com.example.petcare.data.local.provider.ProviderEntity
 
 @Database(
     entities = [PetEntity::class, CareTaskEntity::class, ExpenseEntity::class, ProviderEntity::class],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 abstract class PetCareDatabase : RoomDatabase() {
@@ -45,7 +45,8 @@ abstract class PetCareDatabase : RoomDatabase() {
                 MIGRATION_6_7,
                 MIGRATION_7_8,
                 MIGRATION_8_9,
-                MIGRATION_9_10
+                MIGRATION_9_10,
+                MIGRATION_10_11
             ).build().also { instance = it }
         }
 
@@ -168,6 +169,15 @@ abstract class PetCareDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE care_tasks ADD COLUMN latitude REAL")
                 db.execSQL("ALTER TABLE care_tasks ADD COLUMN longitude REAL")
                 db.execSQL("ALTER TABLE care_tasks ADD COLUMN placeId INTEGER")
+            }
+        }
+
+        /** Old row ids provide a stable order; null origin marks pre-existing tasks. */
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE care_tasks ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE care_tasks ADD COLUMN generatedFromId INTEGER")
+                db.execSQL("UPDATE care_tasks SET sortOrder = id")
             }
         }
     }

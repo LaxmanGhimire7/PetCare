@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A single gallery image owns pinch and double-tap gestures. -->
+<com.example.petcare.ui.pets.ZoomablePhotoView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/zoom_photo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:contentDescription="@string/pet_photo"
+    android:scaleType="fitCenter" />

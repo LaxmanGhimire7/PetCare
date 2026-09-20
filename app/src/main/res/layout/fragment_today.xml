@@ -8,6 +8,7 @@
     android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/today_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:elevation="0dp">
@@ -37,14 +38,18 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/today_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
     <androidx.core.widget.NestedScrollView
         android:id="@+id/today_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="@dimen/space_32"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:paddingBottom="@dimen/space_32">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -169,6 +174,14 @@
                 android:text="@string/generate_routine"
                 app:icon="@drawable/ic_routine" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/reset_checklist_button"
+                style="@style/Widget.PetCare.Button.Tonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8"
+                android:text="@string/reset_today_checklist" />
+
               <com.google.android.material.button.MaterialButton
                   android:id="@+id/share_checklist_button"
                 style="@style/Widget.PetCare.Button.Tonal"
@@ -196,6 +209,7 @@
                 app:icon="@drawable/ic_import" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/add_task_fab"

@@ -31,7 +31,9 @@ data class CareTaskEntity(
     val isCompleted: Boolean = false,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val placeId: Long? = null
+    val placeId: Long? = null,
+    val sortOrder: Long = 0,
+    val generatedFromId: Long? = null
 )
 
 const val DEFAULT_REMINDER_MINUTES_OF_DAY = 9 * 60

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pet paging hero: tap a pet photo to open its zoomable gallery. -->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pet_hero_photo"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurfaceContainer"
+    android:contentDescription="@string/pet_photo"
+    android:padding="@dimen/space_32"
+    android:scaleType="fitCenter"
+    android:src="@drawable/ic_pets" />

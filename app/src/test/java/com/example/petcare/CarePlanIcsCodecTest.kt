@@ -20,4 +20,13 @@ class CarePlanIcsCodecTest {
         assertEquals(entries.map { it.minutesOfDay }, restored.map { it.minutesOfDay })
         assertEquals("Happy Paws Clinic", restored.first().location)
     }
+
+    @Test fun longUnicodeDescriptionsStayFoldedAndReadable() {
+        val description = "Bring vaccination records for Luna 🐾. ".repeat(5)
+        val encoded = CarePlanIcsCodec.encode(listOf(
+            CarePlanEntry(3, "Annual visit", 21_000, 10 * 60, description)
+        ))
+        assert(encoded.split("\r\n").all { it.toByteArray(Charsets.UTF_8).size <= 75 })
+        assertEquals(description, IcsAppointmentParser.parseAll(encoded).single().notes)
+    }
 }

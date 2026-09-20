@@ -32,7 +32,8 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
             notes = notes,
             latitude = latitude,
             longitude = longitude,
-            placeId = placeId
+            placeId = placeId,
+            sortOrder = careTaskDao.nextSortOrder()
         )
         return careTask.copy(id = careTaskDao.insert(careTask))
     }
@@ -40,6 +41,8 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
     suspend fun completeTask(careTaskId: Long): CareTaskEntity? {
         val task = careTaskDao.getById(careTaskId) ?: return null
         careTaskDao.markCompleted(careTaskId)
+        // Resetting and completing again must reuse the existing recurring successor.
+        careTaskDao.getGeneratedSuccessor(careTaskId)?.let { return it }
         val daysToAdd = when (task.frequency) {
             CARE_FREQUENCY_DAILY -> 1L
             CARE_FREQUENCY_WEEKLY -> 7L
@@ -49,7 +52,9 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
         val nextTask = task.copy(
             id = 0,
             dueDateEpochDay = task.dueDateEpochDay + daysToAdd,
-            isCompleted = false
+            isCompleted = false,
+            sortOrder = careTaskDao.nextSortOrder(),
+            generatedFromId = task.id
         )
         return nextTask.copy(id = careTaskDao.insert(nextTask))
     }
@@ -68,5 +73,19 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao) {
 
     suspend fun updateTask(careTask: CareTaskEntity) {
         careTaskDao.update(careTask)
+    }
+
+    /** Reopens only tasks completed on the chosen local day; snapshots support Undo. */
+    suspend fun resetCompletedForDay(day: Long): List<CareTaskEntity> {
+        return careTaskDao.reopenCompletedForDay(day)
+    }
+
+    suspend fun restoreCompleted(snapshots: List<CareTaskEntity>) {
+        careTaskDao.restoreCompletedTasks(snapshots)
+    }
+
+    /** Assign the original visible slots to the dragged row order. */
+    suspend fun saveOrder(idsInOrder: List<Long>, slotsInOrder: List<Long>) {
+        careTaskDao.setSortOrders(idsInOrder, slotsInOrder)
     }
 }

@@ -78,6 +78,14 @@
             android:textColor="?attr/colorError"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/task_drag_handle"
+            android:layout_width="@dimen/space_48"
+            android:layout_height="@dimen/space_48"
+            android:padding="@dimen/space_12"
+            android:src="@drawable/ic_drag_handle"
+            android:contentDescription="@string/task_drag_description" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/complete_task_button"
             style="@style/Widget.PetCare.Button.Text"

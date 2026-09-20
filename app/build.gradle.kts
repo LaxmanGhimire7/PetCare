@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation(libs.androidx.core.ktx)
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.material)

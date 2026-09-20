@@ -15,16 +15,50 @@ import kotlin.math.min
 
 /** Draws a proportional complete/delete action behind a dragged task row. */
 class TaskSwipeCallback(
-    private val onAction: (RecyclerView.ViewHolder, Int) -> Unit
-) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+    private val onAction: (RecyclerView.ViewHolder, Int) -> Unit,
+    private val onDragStart: () -> Unit,
+    private val onDragMove: (Int, Int) -> Boolean,
+    private val onDragFinish: () -> Unit
+) : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var thresholdHolder: RecyclerView.ViewHolder? = null
+    private var dragging = false
+
+    override fun isLongPressDragEnabled() = false
 
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
-    ) = false
+    ): Boolean = onDragMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+            dragging = true
+            onDragStart()
+            val row = viewHolder.itemView
+            row.translationZ = row.resources.getDimension(R.dimen.space_12)
+            if (MotionPrefs.animationsEnabled(row.context)) row.animate()
+                .scaleX(1.02f).scaleY(1.02f).setDuration(200L).start()
+            else { row.scaleX = 1.02f; row.scaleY = 1.02f }
+        }
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        if (dragging) {
+            dragging = false
+            val row = viewHolder.itemView
+            row.translationZ = 0f
+            if (MotionPrefs.animationsEnabled(row.context)) row.animate()
+                .scaleX(1f).scaleY(1f).setDuration(200L).start()
+            else { row.scaleX = 1f; row.scaleY = 1f }
+            GestureHaptics.confirm(row)
+            onDragFinish()
+        }
+    }
 
     override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder) = 0.3f
 

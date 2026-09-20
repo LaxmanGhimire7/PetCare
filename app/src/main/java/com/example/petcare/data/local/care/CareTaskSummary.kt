@@ -14,5 +14,6 @@ data class CareTaskSummary(
     val notes: String,
     val latitude: Double?,
     val longitude: Double?,
-    val placeId: Long?
+    val placeId: Long?,
+    val sortOrder: Long
 )

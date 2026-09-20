@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-screen pet gallery: pinch, double tap, page swipe and downward dismissal. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/photo_pager"
+        android:layout_width="match_parent" android:layout_height="match_parent" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_gravity="top" android:orientation="vertical"
+        android:padding="@dimen/space_16"
+        android:background="?attr/colorSurfaceContainer">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/photo_close_button" style="@style/Widget.PetCare.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/back" />
+        <TextView android:id="@+id/photo_page_count"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.PetCare.Title" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:text="@string/photo_viewer_hint"
+            android:textAppearance="@style/TextAppearance.PetCare.Label"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+</FrameLayout>

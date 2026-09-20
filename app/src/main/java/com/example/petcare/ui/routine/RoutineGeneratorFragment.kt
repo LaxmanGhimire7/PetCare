@@ -20,6 +20,7 @@ import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.databinding.FragmentRoutineGeneratorBinding
 import com.example.petcare.reminders.CareReminderScheduler
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,14 @@ class RoutineGeneratorFragment : Fragment() {
             pets = PetRepository(PetCareDatabase.getInstance(requireContext()).petDao()).observePets().first()
             val labels = pets.map { getString(R.string.pet_selection_label, it.name, it.species) }
             binding.petInput.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels))
+            binding.petInput.setOnClickListener {
+                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.select_pet)
+                    .setItems(labels.toTypedArray()) { _, position ->
+                        selectedPet = pets[position]
+                        binding.petInput.setText(labels[position], false)
+                        binding.petLayout.error = null
+                    }.show()
+            }
             binding.petInput.setOnItemClickListener { _, _, position, _ -> selectedPet = pets[position]; binding.petLayout.error = null }
         }
     }

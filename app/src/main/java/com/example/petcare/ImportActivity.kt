@@ -30,6 +30,7 @@ class ImportActivity : AppCompatActivity() {
     private var drafts: List<AppointmentDraft> = emptyList()
     private var draftIndex = 0
     private val reviewed = arrayListOf<Bundle>()
+    private var sharedContent: String? = null
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
@@ -46,10 +47,12 @@ class ImportActivity : AppCompatActivity() {
         binding.continueButton.isEnabled = false
         binding.continueButton.setOnClickListener { continueToTask() }
         lifecycleScope.launch {
-            val content = withContext(Dispatchers.IO) { readSharedContent(intent) }
+            val content = state?.getString(STATE_CONTENT)
+                ?: withContext(Dispatchers.IO) { readSharedContent(intent) }
             if (content.isNullOrBlank()) {
                 Snackbar.make(binding.root, R.string.import_error_read, Snackbar.LENGTH_INDEFINITE).show()
             } else {
+                sharedContent = content
                 drafts = if (intent.type == "text/calendar" || content.contains("BEGIN:VEVENT"))
                     IcsAppointmentParser.parseAll(content).map { appointment ->
                         AppointmentDraft(appointment.title, appointment.dateEpochDay,
@@ -58,9 +61,35 @@ class ImportActivity : AppCompatActivity() {
                 else listOf(SharedAppointmentParser.parse(content, intent.type))
                 if (drafts.isEmpty()) Snackbar.make(binding.root, R.string.import_error_read,
                     Snackbar.LENGTH_INDEFINITE).show()
-                else bind(drafts.first())
+                else {
+                    // Keep every reviewed event and the current edits across rotation.
+                    draftIndex = state?.getInt(STATE_INDEX, 0)?.coerceIn(drafts.indices) ?: 0
+                    @Suppress("DEPRECATION")
+                    val saved = state?.getParcelableArrayList<Bundle>(STATE_REVIEWED)
+                    reviewed.addAll(saved.orEmpty())
+                    bind(drafts[draftIndex])
+                    state?.let {
+                        binding.titleInput.setText(it.getString(STATE_TITLE))
+                        binding.dateInput.setText(it.getString(STATE_DATE))
+                        binding.timeInput.setText(it.getString(STATE_TIME))
+                        binding.clinicInput.setText(it.getString(STATE_CLINIC))
+                        binding.notesInput.setText(it.getString(STATE_NOTES))
+                    }
+                }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        sharedContent?.let { outState.putString(STATE_CONTENT, it) }
+        outState.putInt(STATE_INDEX, draftIndex)
+        outState.putParcelableArrayList(STATE_REVIEWED, reviewed)
+        outState.putString(STATE_TITLE, binding.titleInput.text?.toString())
+        outState.putString(STATE_DATE, binding.dateInput.text?.toString())
+        outState.putString(STATE_TIME, binding.timeInput.text?.toString())
+        outState.putString(STATE_CLINIC, binding.clinicInput.text?.toString())
+        outState.putString(STATE_NOTES, binding.notesInput.text?.toString())
     }
 
     private fun bind(draft: AppointmentDraft) {
@@ -166,5 +195,13 @@ class ImportActivity : AppCompatActivity() {
     private companion object {
         const val MAX_CHARS = 128 * 1024
         const val DAY = 86_400_000L
+        const val STATE_CONTENT = "sharedContent"
+        const val STATE_INDEX = "draftIndex"
+        const val STATE_REVIEWED = "reviewedEvents"
+        const val STATE_TITLE = "reviewTitle"
+        const val STATE_DATE = "reviewDate"
+        const val STATE_TIME = "reviewTime"
+        const val STATE_CLINIC = "reviewClinic"
+        const val STATE_NOTES = "reviewNotes"
     }
 }

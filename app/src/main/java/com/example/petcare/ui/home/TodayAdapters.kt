@@ -22,6 +22,7 @@ import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.pet.PetColor
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.ui.MotionPrefs
+import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.RowMotion
 import com.example.petcare.databinding.ItemPetFilterBinding
 import com.example.petcare.databinding.ItemTodayTaskBinding
@@ -88,10 +89,34 @@ class TodayTaskAdapter(
     private val onComplete: (CareTaskSummary) -> Unit,
     private val onEdit: (CareTaskSummary) -> Unit,
     private val onShare: (CareTaskSummary) -> Unit,
-    private val onOpen: (CareTaskSummary) -> Unit
+    private val onOpen: (CareTaskSummary) -> Unit,
+    private val onDrag: (RecyclerView.ViewHolder) -> Unit = {}
 ) : ListAdapter<CareTaskSummary, TodayTaskAdapter.Holder>(DIFF) {
     var todayEpochDay: Long = 0
     var restoringTaskId: Long? = null
+    private var draggedItems: MutableList<CareTaskSummary>? = null
+    private var originalSlots: List<Long> = emptyList()
+
+    fun beginDrag() {
+        draggedItems = currentList.toMutableList()
+        originalSlots = currentList.map(CareTaskSummary::sortOrder)
+    }
+
+    /** Keep the dragged row in the displayed order until Room confirms the move. */
+    fun moveItem(from: Int, to: Int): Boolean {
+        val items = draggedItems ?: return false
+        if (from !in items.indices || to !in items.indices) return false
+        items.add(to, items.removeAt(from))
+        submitList(items.toList())
+        return true
+    }
+
+    fun finishDrag(): Pair<List<Long>, List<Long>>? {
+        val result = draggedItems?.map(CareTaskSummary::id)?.let { it to originalSlots }
+        draggedItems = null
+        originalSlots = emptyList()
+        return result
+    }
 
     fun taskAt(position: Int): CareTaskSummary = getItem(position)
 
@@ -100,8 +125,11 @@ class TodayTaskAdapter(
     override fun onBindViewHolder(holder: Holder, position: Int) = holder.bind(getItem(position))
 
     inner class Holder(private val row: ItemTodayTaskBinding) : RecyclerView.ViewHolder(row.root) {
+        private var pendingDrag: Runnable? = null
         @SuppressLint("ClickableViewAccessibility")
         fun bind(task: CareTaskSummary) {
+            pendingDrag?.let(row.taskDragHandle::removeCallbacks)
+            pendingDrag = null
             val context = row.root.context
             row.root.visibility = View.VISIBLE
             row.root.layoutParams = row.root.layoutParams.apply {
@@ -137,6 +165,7 @@ class TodayTaskAdapter(
             }
             row.completeTaskButton.visibility = if (completed) View.GONE else View.VISIBLE
             row.completeTaskButton.setOnClickListener {
+                GestureHaptics.confirm(row.root)
                 if (!MotionPrefs.animationsEnabled(context)) {
                     onComplete(task)
                 } else {
@@ -151,6 +180,30 @@ class TodayTaskAdapter(
                         }.start()
                 }
             }
+            row.taskDragHandle.visibility = if (completed) View.GONE else View.VISIBLE
+            row.taskDragHandle.setOnLongClickListener {
+                GestureHaptics.confirm(row.taskDragHandle)
+                onDrag(this@Holder)
+                true
+            }
+            row.taskDragHandle.setOnTouchListener { view, event ->
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        // 350 ms feels deliberate and lifts before a scrolling parent takes over.
+                        pendingDrag = Runnable {
+                            if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                                GestureHaptics.confirm(view)
+                                onDrag(this@Holder)
+                            }
+                        }.also { view.postDelayed(it, 350L) }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        pendingDrag?.let(view::removeCallbacks)
+                        pendingDrag = null
+                    }
+                }
+                true
+            }
             val detector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
                 override fun onDown(e: MotionEvent): Boolean = true
                 override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
@@ -158,10 +211,14 @@ class TodayTaskAdapter(
                     return true
                 }
                 override fun onDoubleTap(e: MotionEvent): Boolean {
+                    GestureHaptics.confirm(row.root)
                     onEdit(task)
                     return true
                 }
-                override fun onLongPress(e: MotionEvent) = onShare(task)
+                override fun onLongPress(e: MotionEvent) {
+                    GestureHaptics.confirm(row.root)
+                    onShare(task)
+                }
             })
             row.root.isClickable = true
             row.root.setOnTouchListener { _, event ->

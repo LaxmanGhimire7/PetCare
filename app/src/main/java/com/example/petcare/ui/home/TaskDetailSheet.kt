@@ -16,6 +16,7 @@ import com.example.petcare.R
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.databinding.SheetTaskDetailBinding
 import com.example.petcare.ui.MotionPrefs
+import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.location.PlaceLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMapOptions
@@ -36,6 +37,7 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
     private var _binding: SheetTaskDetailBinding? = null
     private val binding get() = _binding!!
     private var preview: MapView? = null
+    private var sheetCallback: BottomSheetBehavior.BottomSheetCallback? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View {
         _binding = SheetTaskDetailBinding.inflate(inflater, container, false)
@@ -121,6 +123,15 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
         (dialog as? BottomSheetDialog)?.behavior?.apply {
             peekHeight = resources.getDimensionPixelSize(R.dimen.task_detail_peek_height)
             state = BottomSheetBehavior.STATE_COLLAPSED
+            sheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    if (newState == BottomSheetBehavior.STATE_EXPANDED ||
+                        newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                        GestureHaptics.confirm(bottomSheet)
+                    }
+                }
+                override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+            }.also(::addBottomSheetCallback)
         }
         if (!MotionPrefs.animationsEnabled(requireContext())) {
             dialog?.window?.setWindowAnimations(0)
@@ -128,6 +139,8 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
     }
 
     override fun onDestroyView() {
+        sheetCallback?.let { (dialog as? BottomSheetDialog)?.behavior?.removeBottomSheetCallback(it) }
+        sheetCallback = null
         preview?.onDestroy()
         preview = null
         _binding = null

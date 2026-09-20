@@ -2,8 +2,14 @@ package com.example.petcare.ui.home
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,11 +42,16 @@ import com.example.petcare.integration.CarePlanEntry
 import com.example.petcare.integration.CarePlanIcsCodec
 import com.example.petcare.reminders.CareReminderScheduler
 import com.example.petcare.ui.MotionPrefs
+import com.example.petcare.ui.GestureHaptics
+import com.example.petcare.ui.GestureCoachPrefs
+import com.example.petcare.ui.BrandFonts
 import com.example.petcare.ui.RowMotion
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
@@ -53,7 +64,7 @@ import java.util.Date
 import java.util.TimeZone
 
 /** Today's care, progress, pet filtering and the main care actions. */
-class HomeDashboardFragment : Fragment() {
+class HomeDashboardFragment : Fragment(), SensorEventListener {
     private var _binding: FragmentTodayBinding? = null
     private val binding get() = _binding!!
     private val viewModel: TodayViewModel by viewModels()
@@ -62,7 +73,9 @@ class HomeDashboardFragment : Fragment() {
     private val tasks by lazy { CareTaskRepository(database.careTaskDao()) }
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
     private val filterAdapter = PetFilterAdapter(::selectPet)
-    private val upcomingAdapter = TodayTaskAdapter(false, ::complete, ::edit, ::shareOne, ::openDetail)
+    private lateinit var taskTouchHelper: ItemTouchHelper
+    private val upcomingAdapter = TodayTaskAdapter(false, ::complete, ::edit, ::shareOne,
+        ::openDetail, ::startTaskDrag)
     private val completedAdapter = TodayTaskAdapter(true, {}, ::edit, ::shareOne, ::openDetail)
     private var latestPets = emptyList<PetEntity>()
     private var latestUpcoming = emptyList<CareTaskSummary>()
@@ -70,6 +83,12 @@ class HomeDashboardFragment : Fragment() {
     private var completedExpanded = false
     private var previousProgress: Pair<Int, Int>? = null
     private var pendingDeepLinkTaskId: Long = 0L
+    private val shakeDetector = ShakeDetector()
+    private val sensorManager by lazy {
+        requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    }
+    private var lastScrollAt = 0L
+    private var resetDialogShowing = false
 
     private val icsDocument = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/calendar")
@@ -83,8 +102,9 @@ class HomeDashboardFragment : Fragment() {
             uri ?: return@registerForActivityResult
             startActivity(Intent(requireContext(), ImportActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
-                data = uri
-                type = requireContext().contentResolver.getType(uri) ?: "text/calendar"
+                // setData() and setType() clear each other; pass both together for SAF URIs.
+                setDataAndType(uri,
+                    requireContext().contentResolver.getType(uri) ?: "text/calendar")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             })
         }
@@ -115,11 +135,12 @@ class HomeDashboardFragment : Fragment() {
         binding.taskRecycler.adapter = upcomingAdapter
         binding.completedRecycler.layoutManager = LinearLayoutManager(requireContext())
         binding.completedRecycler.adapter = completedAdapter
-        ItemTouchHelper(TaskSwipeCallback { viewHolder, direction ->
+        taskTouchHelper = ItemTouchHelper(TaskSwipeCallback({ viewHolder, direction ->
                 val task = upcomingAdapter.taskAt(viewHolder.bindingAdapterPosition)
                 if (direction == ItemTouchHelper.RIGHT) complete(task)
                 else RowMotion.collapse(viewHolder.itemView) { delete(task) }
-        }).attachToRecyclerView(binding.taskRecycler)
+        }, upcomingAdapter::beginDrag, upcomingAdapter::moveItem, ::finishTaskDrag))
+        taskTouchHelper.attachToRecyclerView(binding.taskRecycler)
         binding.addTaskFab.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_add_care_task)
         }
@@ -131,6 +152,7 @@ class HomeDashboardFragment : Fragment() {
         binding.generateRoutineButton.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_routine_generator)
         }
+        binding.resetChecklistButton.setOnClickListener { confirmChecklistReset() }
         binding.shareChecklistButton.setOnClickListener { shareChecklist(latestUpcoming) }
         binding.exportPlanButton.setOnClickListener { chooseCarePlanExport() }
         binding.importAppointmentButton.setOnClickListener {
@@ -138,7 +160,26 @@ class HomeDashboardFragment : Fragment() {
         }
         binding.todayScroll.setOnScrollChangeListener { _, _, scrollY, _, _ ->
             // This switches FAB state immediately; it does not animate while scrolling.
+            lastScrollAt = SystemClock.elapsedRealtime()
+            shakeDetector.clearWindow()
             binding.addTaskFab.isExtended = scrollY < resources.getDimensionPixelSize(R.dimen.space_24)
+        }
+        binding.todayRefresh.setColorSchemeColors(MaterialColors.getColor(binding.root,
+            androidx.appcompat.R.attr.colorPrimary))
+        binding.todayRefresh.setOnChildScrollUpCallback { _, _ ->
+            binding.todayScroll.canScrollVertically(-1)
+        }
+        binding.todayRefresh.setOnRefreshListener {
+            GestureHaptics.confirm(binding.root)
+            viewLifecycleOwner.lifecycleScope.launch {
+                // Re-read Room and the local calendar day so midnight and overdue state refresh.
+                latestPets = pets.observePets().first()
+                latestUpcoming = tasks.observeUpcoming().first()
+                latestCompleted = tasks.observeCompleted().first()
+                render()
+                binding.todayRefresh.isRefreshing = false
+                Snackbar.make(binding.root, R.string.today_refreshed, Snackbar.LENGTH_SHORT).show()
+            }
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -159,6 +200,18 @@ class HomeDashboardFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun showGestureCoachIfNeeded() {
+        val preferences = GestureCoachPrefs(requireContext())
+        if (!preferences.shouldShow()) return
+        val content = layoutInflater.inflate(R.layout.dialog_gesture_coach, null)
+        BrandFonts(requireContext()).applyTo(content)
+        val dialog = MaterialAlertDialogBuilder(requireContext()).setView(content).create()
+        content.findViewById<MaterialButton>(R.id.gesture_coach_done)
+            .setOnClickListener { GestureHaptics.confirm(it); dialog.dismiss() }
+        dialog.setOnDismissListener { preferences.markSeen() }
+        dialog.show()
     }
 
     private fun selectPet(petId: Long?) {
@@ -246,6 +299,81 @@ class HomeDashboardFragment : Fragment() {
             val next = tasks.completeTask(task.id)
             scheduler.cancel(task.id)
             next?.let(scheduler::schedule)
+        }
+    }
+
+    private fun startTaskDrag(holder: RecyclerView.ViewHolder) {
+        taskTouchHelper.startDrag(holder)
+    }
+
+    private fun finishTaskDrag() {
+        val (ids, slots) = upcomingAdapter.finishDrag() ?: return
+        if (ids == latestUpcoming.filter { it.dueDateEpochDay <= todayEpochDay() &&
+                (viewModel.selectedPetId == null || it.petId == viewModel.selectedPetId) }
+                .map(CareTaskSummary::id)) return
+        viewLifecycleOwner.lifecycleScope.launch { tasks.saveOrder(ids, slots) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.root.post { if (isResumed && _binding != null) showGestureCoachIfNeeded() }
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        }
+    }
+
+    override fun onPause() {
+        sensorManager.unregisterListener(this)
+        super.onPause()
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type != Sensor.TYPE_ACCELEROMETER || _binding == null) return
+        // Scrolling can produce short acceleration peaks; discard that whole gesture window.
+        if (SystemClock.elapsedRealtime() - lastScrollAt < 850L) {
+            shakeDetector.clearWindow()
+            return
+        }
+        if (shakeDetector.addSample(event.values[0], event.values[1], event.values[2],
+                event.timestamp / 1_000_000L)) {
+            GestureHaptics.confirm(binding.root)
+            confirmChecklistReset()
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    private fun confirmChecklistReset() {
+        if (resetDialogShowing) return
+        if (latestCompleted.none { it.dueDateEpochDay == todayEpochDay() }) {
+            Snackbar.make(binding.root, R.string.reset_today_empty, Snackbar.LENGTH_SHORT).show()
+            return
+        }
+        resetDialogShowing = true
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.reset_today_title)
+            .setMessage(R.string.reset_today_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.reset_today_confirm) { _, _ -> resetChecklist() }
+            .show().setOnDismissListener { resetDialogShowing = false }
+    }
+
+    private fun resetChecklist() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val snapshots = tasks.resetCompletedForDay(todayEpochDay())
+            if (snapshots.isEmpty()) return@launch
+            val minutesNow = Calendar.getInstance().let {
+                it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)
+            }
+            snapshots.filter { it.reminderMinutesOfDay > minutesNow }.forEach(scheduler::schedule)
+            Snackbar.make(binding.root, R.string.reset_today_done, Snackbar.LENGTH_LONG)
+                .setDuration(6000)
+                .setAction(R.string.undo) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        snapshots.forEach { scheduler.cancel(it.id) }
+                        tasks.restoreCompleted(snapshots)
+                    }
+                }.show()
         }
     }
 

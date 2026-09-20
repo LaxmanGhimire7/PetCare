@@ -1,4 +1,24 @@
 <resources>
+    <string name="task_drag_description">Touch and hold to reorder task</string>
+    <string name="reset_today_checklist">Reset today’s checklist</string>
+    <string name="reset_today_title">Reset completed tasks?</string>
+    <string name="reset_today_message">Today’s completed tasks will move back to Upcoming.</string>
+    <string name="reset_today_confirm">Reset checklist</string>
+    <string name="reset_today_done">Today’s checklist reset</string>
+    <string name="reset_today_empty">No completed tasks to reset today.</string>
+    <string name="pet_page_count">%1$d of %2$d pets</string>
+    <string name="pet_meta_separator"> · </string>
+    <string name="photo_viewer_title">Pet photos</string>
+    <string name="photo_viewer_hint">Pinch to zoom, double tap, or swipe down to close.</string>
+    <string name="photo_page_count">Photo %1$d of %2$d</string>
+    <string name="gesture_coach_title">Care at your fingertips</string>
+    <string name="gesture_coach_swipe_visual">← Delete     Complete →</string>
+    <string name="gesture_coach_swipe">Swipe a task right to complete it or left to delete it. Delete can be undone.</string>
+    <string name="gesture_coach_drag">Touch and hold a task’s handle to change its order.</string>
+    <string name="gesture_coach_shake">Shake your phone three times to reset today’s completed tasks. You can also use Reset today’s checklist below.</string>
+    <string name="gesture_coach_done">Got it</string>
+    <string name="gesture_coach_replay">Show gesture guide</string>
+    <string name="today_refreshed">Today’s schedule is up to date.</string>
     <string name="nav_today">Today</string>
     <string name="nav_pets">Pets</string>
     <string name="nav_money">Money</string>

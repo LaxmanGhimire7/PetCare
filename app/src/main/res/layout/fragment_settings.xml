@@ -33,6 +33,13 @@
         app:icon="@drawable/ic_alarm" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/replay_gestures_button"
+        style="@style/Widget.PetCare.Button.Tonal"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_12"
+        android:text="@string/gesture_coach_replay" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/sign_out_button"
         style="@style/Widget.PetCare.Button.Outlined"
         android:layout_width="match_parent" android:layout_height="wrap_content"

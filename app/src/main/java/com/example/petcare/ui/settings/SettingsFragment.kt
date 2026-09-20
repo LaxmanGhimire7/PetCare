@@ -9,6 +9,8 @@ import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
 import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.databinding.FragmentSettingsBinding
+import com.example.petcare.ui.GestureCoachPrefs
+import com.example.petcare.ui.GestureHaptics
 
 /** Primary Settings destination, reached from both phone and tablet navigation. */
 class SettingsFragment : Fragment() {
@@ -28,6 +30,11 @@ class SettingsFragment : Fragment() {
         )
         binding.reminderSettingsButton.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_reminder_settings)
+        }
+        binding.replayGesturesButton.setOnClickListener {
+            GestureHaptics.confirm(it)
+            GestureCoachPrefs(requireContext()).requestReplay()
+            findNavController().navigate(R.id.homeDashboardFragment)
         }
         binding.signOutButton.setOnClickListener {
             auth.signOut()
