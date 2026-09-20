@@ -1,79 +1,26 @@
-# PetCare Project Status
+# PetCare project status
 
-Last updated: September 18, 2026
+Updated: 21 September 2026. The primary submission feature is **location and geotagging**; app integration and gestures/sensors are additional features.
 
-## Completed application
+## Implementation
 
-- Native Android app built with Kotlin, XML layouts, Material 3, Navigation, View Binding, Room, Coroutines, WorkManager, and Coil.
-- Professional responsive light and dark themes, consistent cards, typography, icons, validation, empty states, and edge-to-edge system-bar handling.
-- Splash, local registration, login, persisted signed-in state, logout, and input validation.
-- Dashboard with personalized greeting, pet summaries, upcoming care, completed-care history, care tools, reminder settings, and clear first-use states.
+Phases 1–9 of [PETCARE_UPGRADE_SPEC.md](PETCARE_UPGRADE_SPEC.md) have been implemented in this workspace. The app has the new light/dark design system, responsive five-tab navigation, Today dashboard, motion and reduced-motion support, geotagged tasks and places, share/import/export integration, gestures and sensor reset, multiple local accounts, insights, widget, search, settings, onboarding, accessibility work, Room migrations through version 12, and repository/ViewModel screen state for the main lists. See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) for the detailed inventory.
 
-## Pet profiles
+Release hygiene includes working backup rules, an adaptive and monochrome launcher icon, ignored local secrets/databases, version 2.0.0, and environment-based release signing. The stray root `petcare.db` has been removed from version control. All layouts use string, colour, and dimension resources rather than inline literals. Lint suppressions and their reasons are documented in `app/lint.xml`.
 
-- Create, edit, and delete pet profiles.
-- Store name, animal type, breed, age, weight, dietary preferences, vaccination history, allergies, favourite toys, medical records, grooming routine, and health notes.
-- Select and persist multiple on-device pet photos. The first image is used as the dashboard profile image.
-- Existing profile data is preserved by Room migrations.
+## Verification
 
-## Care plans and checklists
+- `:app:assembleDebug`, `:app:testDebugUnitTest`, and `:app:lintDebug` pass. The current lint report says **No issues found**.
+- The final connected run passed 14 Android tests, including the Espresso account-to-task journey and migration tests. The same suite also passed at 200% font scale; the emulator was restored to 100% afterward.
+- The unit suite contains 20 tests; with 14 connected tests, the automated total is 34.
+- `:app:assembleRelease` produced an unsigned APK without signing credentials. Setting all four `PETCARE_RELEASE_*` environment variables signs the release build.
 
-- Create and edit care tasks with a pet, title, category, due date, reminder time, repeat frequency, required supplies, and instructions.
-- Categories include feeding, exercise, grooming, medication, healthcare, cleaning, and general care.
-- Frequencies include one time, daily, weekly, and monthly.
-- Mark tasks complete, retain completed history, edit tasks, and delete tasks with confirmation.
-- Completing a daily, weekly, or monthly task automatically generates and schedules its next occurrence.
-- Routine generator creates selected feeding, exercise, grooming, medication, and healthcare tasks for a pet.
-- Local WorkManager notifications are scheduled per task. Default reminder time is configurable.
+## Limits that still require a configured device or service
 
-## Delegation and gestures
+- No Maps API key is stored in this checkout. The empty-key fallback has been exercised, but live tiles, clustering, and pin placement need a valid key for a visual end-to-end check.
+- A real contact selection, biometric prompt, widget placement, and physical shake need a suitably configured device. Their entry points and data paths are implemented; the emulator has limited data/hardware for those checks.
+- API 24 and API 36 runtime behaviour has not been checked on those exact system images. The installed test emulator is API 37. The project compiles with `minSdk 24` and guards newer APIs, but that does not replace device testing.
+- A distributable release APK requires a private signing key supplied by the app owner. The checked-in project intentionally contains no private key.
+- Map imagery, geocoding, SMS, calendars, contacts, and booking depend on device services or external apps; core care records remain available offline.
 
-- Share the full upcoming checklist through the device SMS app with pet names, dates, frequencies, and instructions.
-- Long-press an individual task to share it by SMS.
-- Swipe right on an upcoming task to complete it.
-- Swipe left to open task deletion confirmation.
-- Double-tap a task to edit it.
-- The dashboard displays the gesture guide directly above the checklist.
-
-## Expenses
-
-- Add expenses for a selected pet with category, amount, date, and note.
-- Categories cover food, grooming, veterinary care, medication, toys, and other costs.
-- Expense history shows localized currency and dates.
-- Summary shows total spending and individual totals for each pet.
-- Delete unwanted expense records.
-
-## Geotagged places and provider integration
-
-- Save veterinary clinics, grooming salons, dog parks, pet supply stores, and animal shelters.
-- Store address, optional latitude/longitude, opening hours, phone number, and booking website.
-- Open a saved place in a compatible map app using a `geo:` intent.
-- Open the dialer for a provider and its booking website in a browser.
-
-## Appointment import
-
-- Import `.ics` or calendar text files with Android's document picker.
-- Parse appointment title, date, description, and location.
-- Pre-fill a healthcare task so the user can choose the pet and confirm the imported appointment.
-- The picker does not require broad storage permission.
-
-## Persistence and migrations
-
-- Room database version 8 stores pets, care tasks, expenses, and service providers.
-- Explicit migrations preserve databases created by versions 1 through 7.
-- Deleting a pet cascades to its care tasks and expenses, and scheduled task reminders are cancelled.
-
-## Verification completed
-
-- `:app:assembleDebug` passes.
-- `:app:testDebugUnitTest` passes, including ICS appointment parsing.
-- `:app:lintDebug` passes with zero errors.
-- `:app:connectedDebugAndroidTest` passes all three emulator tests.
-- Device tests cover task completion/history, recurring-task generation, expense persistence, provider persistence, and Room relationships.
-- The APK was installed and launched on the Android emulator. Login, dashboard, and expense screens were visually checked with no runtime crash.
-- Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
-
-## Prototype scope
-
-- User accounts and application records are stored only on the device; there is no cloud synchronization or production authentication server.
-- Provider availability is represented by saved opening hours and booking links. Live appointment availability depends on the provider's external website.
+Screenshots by phase are no longer being collected, per the user's request.
