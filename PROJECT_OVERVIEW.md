@@ -77,9 +77,9 @@ Updated: 21 September 2026. This records what is implemented and verified in the
 - Fixed selector interaction on expense, task, and place forms; added accessibility labels to those fields; and made the expense chart grow with larger text.
 - Verified expense creation and edit prefill on the emulator. The debug build, 20 unit tests, 13 connected tests, and lint passed at the phase gate. No phase screenshots were captured at the user's request.
 
-### Phase 8 — Architecture, comments, and tests: implemented
+### Phase 8 — Architecture, comments, and tests: partially complete
 
-- Added repository-provided data access, `StateFlow` ViewModels and explicit Loading/Empty/Content/Error states to Today, Pets, Money, Places, and Search. Forms use repositories directly from their existing ViewModels or Fragments; the main list screens no longer access DAOs from UI code.
+- Added repository-provided data access, `StateFlow` ViewModels and explicit Loading/Empty/Content/Error states to Today, Pets, Money, Places, and Search. Some forms and detail screens still use repositories from Fragments and do not have all four screen states, so the spec's "MVVM throughout" requirement remains open.
 - Added KDoc to classes, reasoning comments for non-obvious logic, and a purpose comment to each layout. Kept explicit migration tests 8→9 through 11→12, account-scoping tests, backup tests, and an Espresso registration-to-completion journey.
 - Verified debug build, 20 unit tests, 14 connected tests, and lint at the phase gate.
 

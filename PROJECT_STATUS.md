@@ -4,7 +4,7 @@ Updated: 21 September 2026. The primary submission feature is **location and geo
 
 ## Implementation
 
-Phases 1–9 of [PETCARE_UPGRADE_SPEC.md](PETCARE_UPGRADE_SPEC.md) have been implemented in this workspace. The app has the new light/dark design system, responsive five-tab navigation, Today dashboard, motion and reduced-motion support, geotagged tasks and places, share/import/export integration, gestures and sensor reset, multiple local accounts, insights, widget, search, settings, onboarding, accessibility work, Room migrations through version 12, and repository/ViewModel screen state for the main lists. See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) for the detailed inventory.
+The main feature work across phases 1–9 of [PETCARE_UPGRADE_SPEC.md](PETCARE_UPGRADE_SPEC.md) is implemented in this workspace. The app has the new light/dark design system, responsive five-tab navigation, Today dashboard, motion and reduced-motion support, geotagged tasks and places, share/import/export integration, gestures and sensor reset, multiple local accounts, insights, widget, search, settings, onboarding, accessibility work, Room migrations through version 12, and repository/ViewModel screen state for the main lists. See [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) for the detailed inventory.
 
 Release hygiene includes working backup rules, an adaptive and monochrome launcher icon, ignored local secrets/databases, version 2.0.0, and environment-based release signing. The stray root `petcare.db` has been removed from version control. All layouts use string, colour, and dimension resources rather than inline literals. Lint suppressions and their reasons are documented in `app/lint.xml`.
 
@@ -22,5 +22,11 @@ Release hygiene includes working backup rules, an adaptive and monochrome launch
 - API 24 and API 36 runtime behaviour has not been checked on those exact system images. The installed test emulator is API 37. The project compiles with `minSdk 24` and guards newer APIs, but that does not replace device testing.
 - A distributable release APK requires a private signing key supplied by the app owner. The checked-in project intentionally contains no private key.
 - Map imagery, geocoding, SMS, calendars, contacts, and booking depend on device services or external apps; core care records remain available offline.
+
+## Strict specification items still open
+
+- Phase 8 calls for MVVM with `StateFlow` and explicit Loading/Empty/Content/Error handling **on every screen**. The main list screens have this structure, but some forms and detail screens still obtain repository data directly from Fragments and do not expose all four screen states.
+- The 4.5:1 contrast target, full TalkBack walkthrough, and rotation coverage across every screen have not been independently measured or exercised. The 200% font-scale automated journey passes, but it does not prove the whole accessibility checklist.
+- The brief's API 24 and API 36 runtime acceptance checks and the live/device-specific flows listed above remain open. A signed distributable APK remains pending the owner's keystore.
 
 Screenshots by phase are no longer being collected, per the user's request.
