@@ -72,6 +72,23 @@
         <item name="android:textColor">@color/text_primary</item>
     </style>
 
+    <!-- Equal-width figure block on pet detail. -->
+    <style name="PetDetailStat">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+    <style name="PetDetailStatValue" parent="TextAppearance.PetCare.Amount">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="PetDetailStatLabel" parent="TextAppearance.PetCare.Label">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
     <!-- 56dp icon well used by the Today quick action row. -->
     <style name="Widget.PetCare.QuickActionButton" parent="Widget.Material3.Button.TonalButton">
         <item name="backgroundTint">@color/surface_muted</item><item name="iconTint">@color/text_primary</item>

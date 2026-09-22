@@ -7,6 +7,17 @@
     <string name="reset_today_done">Today’s checklist reset</string>
     <string name="reset_today_empty">No completed tasks to reset today.</string>
     <string name="pet_page_count">Pet %1$d of %2$d</string>
+    <string name="pet_age_stat">Age</string>
+    <string name="pet_weight_stat">Weight</string>
+    <string name="pet_done_today_stat">Done today</string>
+    <string name="pet_tab_care">Care</string>
+    <string name="pet_tab_health">Health</string>
+    <string name="pet_tab_profile">Profile</string>
+    <string name="pet_tab_spending">Spending</string>
+    <string name="value_not_set">—</string>
+    <string name="pet_detail_field">%1$s\n%2$s</string>
+    <string name="pet_profile_empty">Add details when you edit this pet.</string>
+    <string name="pet_spending_open_money">Open Money to see this pet’s expenses and monthly trend.</string>
     <string name="pet_meta_separator"> · </string>
     <string name="photo_viewer_title">Pet photos</string>
     <string name="photo_viewer_hint">Pinch to zoom, double tap, or swipe down to close.</string>
@@ -78,6 +89,9 @@
     </string-array>
     <string name="app_name">PetCare</string>
     <string name="login_title">Welcome back</string>
+    <string name="welcome_headline">Their day, handled.</string>
+    <string name="welcome_supporting">Routines, health, places and spending for every pet.</string>
+    <string name="welcome_photo_description">Max and Luna resting together at home</string>
     <string name="login_subtitle">Sign in to manage your pets and their care.</string>
     <string name="register_title">Create your account</string>
     <string name="register_subtitle">Start keeping your pet’s care in one place.</string>

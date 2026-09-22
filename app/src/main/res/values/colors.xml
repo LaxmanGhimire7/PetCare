@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="hero_scrim_mid">#33000000</color>
     <!-- Pit Lane light palette. Orange is reserved for action and time. -->
     <color name="canvas">#F4F4F5</color>
     <color name="surface">#FFFFFF</color>

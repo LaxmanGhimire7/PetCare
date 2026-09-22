@@ -26,12 +26,14 @@ class DemoDataSeeder(private val context: Context) {
         val max = repositories.pets.addPet(
             context.getString(R.string.demo_max), context.getString(R.string.demo_dog),
             context.getString(R.string.demo_golden_retriever), context.getString(R.string.demo_max_age),
-            context.getString(R.string.demo_max_weight), "", "", "", "", "", "", "", emptyList(), 0
+            context.getString(R.string.demo_max_weight), "", "", "", "", "", "", "",
+            listOf(resourceUri(R.drawable.demo_max)), 0
         )
         val luna = repositories.pets.addPet(
             context.getString(R.string.demo_luna), context.getString(R.string.demo_cat),
             context.getString(R.string.demo_shorthair), context.getString(R.string.demo_luna_age),
-            context.getString(R.string.demo_luna_weight), "", "", "", "", "", "", "", emptyList(), 1
+            context.getString(R.string.demo_luna_weight), "", "", "", "", "", "", "",
+            listOf(resourceUri(R.drawable.demo_luna)), 1
         )
         val vetId = repositories.places.add(ProviderEntity(
             ownerId = repositories.ownerId,
@@ -89,4 +91,8 @@ class DemoDataSeeder(private val context: Context) {
                 context.getString(R.string.demo_expense_note))
         }
     }
+
+    /** Gives Coil a stable local URI for the packaged debug demonstration photos. */
+    private fun resourceUri(drawable: Int): String =
+        "android.resource://${context.packageName}/$drawable"
 }

@@ -35,6 +35,7 @@ class PetDetailFragment : Fragment() {
     private val binding get() = _binding!!
     private var pets = emptyList<PetEntity>()
     private var currentPetId = 0L
+    private var currentPet: PetEntity? = null
     private var pageCallback: ViewPager2.OnPageChangeCallback? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +64,10 @@ class PetDetailFragment : Fragment() {
             findNavController().navigate(R.id.action_pet_detail_to_edit, Bundle().apply {
                 putLong("petId", currentPetId)
             })
+        }
+        listOf(binding.petTabCare, binding.petTabHealth, binding.petTabProfile,
+            binding.petTabSpending).forEach { tab ->
+            tab.setOnClickListener { currentPet?.let(::renderSelectedTab) }
         }
         viewLifecycleOwner.lifecycleScope.launch {
         pets = PetCareRepositories(requireContext()).pets
@@ -95,17 +100,48 @@ class PetDetailFragment : Fragment() {
 
     private fun showPet(pet: PetEntity, position: Int) {
         currentPetId = pet.id
+        currentPet = pet
         binding.petDetailCard.transitionName = "pet_${pet.id}"
         binding.petPageCount.text = getString(R.string.pet_page_count, position + 1, pets.size)
         binding.petPageCount.visibility = if (pets.size > 1) View.VISIBLE else View.GONE
         binding.petName.text = pet.name
         binding.petSpecies.text = listOf(pet.species, pet.breed, pet.age)
             .filter(String::isNotBlank).joinToString(getString(R.string.pet_meta_separator))
-        binding.petColorRail.setBackgroundColor(PetColor.fromIndex(pet.colorIndex).primary)
-        binding.petHealth.text = pet.healthNotes
-        binding.petHealth.visibility = if (pet.healthNotes.isBlank()) View.GONE else View.VISIBLE
-        binding.petAllergies.text = getString(R.string.pet_allergies_summary, pet.allergies)
-        binding.petAllergies.visibility = if (pet.allergies.isBlank()) View.GONE else View.VISIBLE
+        binding.petColorRail.setBackgroundColor(PetColor.fromIndex(pet.colorIndex).color(requireContext()))
+        binding.petAgeStat.text = pet.age.ifBlank { getString(R.string.value_not_set) }
+        binding.petWeightStat.text = pet.weight.ifBlank { getString(R.string.value_not_set) }
+        binding.petDoneStat.text = getString(R.string.value_not_set)
+        renderSelectedTab(pet)
+    }
+
+    /** Presents each profile tab from the existing pet fields without duplicating data ownership. */
+    private fun renderSelectedTab(pet: PetEntity) {
+        val lines = when {
+            binding.petTabHealth.isChecked -> listOf(
+                R.string.vaccination_history to pet.vaccinationHistory,
+                R.string.allergies to pet.allergies,
+                R.string.medical_records to pet.medicalRecords
+            )
+            binding.petTabProfile.isChecked -> listOf(
+                R.string.dietary_preferences to pet.dietaryPreferences,
+                R.string.favorite_toys to pet.favoriteToys,
+                R.string.health_notes to pet.healthNotes
+            )
+            binding.petTabSpending.isChecked -> emptyList()
+            else -> listOf(
+                R.string.grooming_routine to pet.groomingRoutine,
+                R.string.dietary_preferences to pet.dietaryPreferences
+            )
+        }.filter { it.second.isNotBlank() }
+        binding.petHealth.text = if (binding.petTabSpending.isChecked)
+            getString(R.string.pet_spending_open_money) else lines.firstOrNull()?.let {
+            getString(R.string.pet_detail_field, getString(it.first), it.second)
+        } ?: getString(R.string.pet_profile_empty)
+        binding.petHealth.visibility = View.VISIBLE
+        binding.petAllergies.text = lines.drop(1).joinToString("\n\n") {
+            getString(R.string.pet_detail_field, getString(it.first), it.second)
+        }
+        binding.petAllergies.visibility = if (lines.size > 1) View.VISIBLE else View.GONE
     }
 
     private fun openPhotos(pet: PetEntity) {
@@ -141,7 +177,8 @@ class PetDetailFragment : Fragment() {
             val photo = pet.photos().firstOrNull()
             if (photo == null) {
                 image.setImageResource(R.drawable.ic_pets)
-                image.imageTintList = ColorStateList.valueOf(PetColor.fromIndex(pet.colorIndex).primary)
+                image.imageTintList = ColorStateList.valueOf(
+                    PetColor.fromIndex(pet.colorIndex).color(image.context))
                 image.setPadding(image.resources.getDimensionPixelSize(R.dimen.space_32),
                     image.resources.getDimensionPixelSize(R.dimen.space_32),
                     image.resources.getDimensionPixelSize(R.dimen.space_32),
