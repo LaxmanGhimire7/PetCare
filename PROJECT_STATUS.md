@@ -16,8 +16,8 @@ Release hygiene includes working backup rules, adaptive and monochrome launcher 
 - The unit suite contains 23 passing tests.
 - The emulator suite previously passed 16 Android tests, including the Espresso account-to-task journey, future-task visibility, clinic-share import, and migrations. The automated total is 39.
 - `:app:assembleRelease` produced an unsigned APK without signing credentials. Setting all four `PETCARE_RELEASE_*` environment variables signs the release build.
-- The v4 build was installed and launched on the Xiaomi Redmi Note 9 Pro Max (API 31) without clearing app data, and AndroidRuntime reported no crash. Physical review found and fixed the 12-hour time-column wrap.
-- MIUI blocks ADB input injection. The phone disconnected before the final post-Places reinstall and component-gallery capture.
+- The final v4 APK, including the live Pets/Pet Detail data, expense sheet, and draggable Places sheet, was installed and launched on the Xiaomi Redmi Note 9 Pro Max (API 31) without clearing app data. AndroidRuntime reported no crash. Physical review found and fixed the 12-hour time-column wrap.
+- MIUI blocks ADB input injection, so automated tap-through verification and the final component-gallery capture could not be performed from ADB.
 
 ## Limits that require a configured device or service
 
