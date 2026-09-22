@@ -71,6 +71,7 @@
     <dimen name="money_chart_label_text">12sp</dimen>
     <dimen name="money_chart_title_text">17sp</dimen>
     <dimen name="places_map_height">300dp</dimen>
+    <dimen name="places_sheet_peek_height">340dp</dimen>
     <dimen name="place_row_height">68dp</dimen>
     <dimen name="pet_detail_hero_height">340dp</dimen>
     <dimen name="auth_photo_height">360dp</dimen>

@@ -1,85 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pit Lane Places destination: styled map, floating filters, and a distance-sorted list sheet. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Pit Lane Places: full map, floating filters, and a draggable distance-sorted sheet. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/canvas">
 
-    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
-        android:orientation="vertical">
-        <FrameLayout android:id="@+id/place_map_panel" android:layout_width="match_parent"
-            android:layout_height="@dimen/places_map_height">
-            <FrameLayout android:id="@+id/place_map_frame" android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <TextView android:id="@+id/place_map_unavailable" android:layout_width="match_parent"
-                android:layout_height="match_parent" android:gravity="center" android:padding="@dimen/space_32"
-                android:text="@string/map_unavailable_list" android:textAppearance="@style/TextAppearance.PetCare.Supporting"
-                android:textColor="?attr/colorOnSurfaceVariant" android:visibility="gone" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:paddingHorizontal="@dimen/space_20"
-                android:paddingTop="@dimen/space_20">
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="@string/nav_places" android:textAppearance="@style/TextAppearance.PetCare.Display"
-                    android:shadowColor="@color/canvas" android:shadowDx="0" android:shadowDy="1" android:shadowRadius="4" />
-                <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_12" android:scrollbars="none">
-                    <com.google.android.material.chip.ChipGroup android:id="@+id/category_filters"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        app:selectionRequired="true" app:singleSelection="true">
-                        <com.google.android.material.chip.Chip android:id="@+id/filter_all" style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:checked="true" android:text="@string/money_all_pets" />
-                        <com.google.android.material.chip.Chip android:id="@+id/filter_vet" style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/place_filter_vets" />
-                        <com.google.android.material.chip.Chip android:id="@+id/filter_grooming" style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/place_filter_grooming" />
-                        <com.google.android.material.chip.Chip android:id="@+id/filter_parks" style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/place_filter_parks" />
-                    </com.google.android.material.chip.ChipGroup>
-                </HorizontalScrollView>
-            </LinearLayout>
-        </FrameLayout>
+    <FrameLayout
+        android:id="@+id/place_map_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <androidx.core.widget.NestedScrollView android:layout_width="match_parent"
-            android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false">
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="vertical" android:paddingHorizontal="@dimen/space_20"
-                android:paddingTop="@dimen/space_16" android:paddingBottom="@dimen/fab_clearance">
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:hint="@string/search_place_hint"
-                    app:endIconDrawable="@drawable/ic_location" app:endIconMode="custom">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/place_search_input" android:layout_width="match_parent"
-                        android:layout_height="wrap_content" android:inputType="textPostalAddress"
-                        android:imeOptions="actionSearch" />
-                </com.google.android.material.textfield.TextInputLayout>
-                <com.google.android.material.button.MaterialButton android:id="@+id/place_search_button"
-                    style="@style/Widget.PetCare.Button.Text" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="@string/search_place" />
-                <TextView android:id="@+id/place_location_status" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Supporting"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/find_vets_button"
-                    style="@style/Widget.PetCare.Button.Tonal" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
-                    android:text="@string/find_vets_near_me" app:icon="@drawable/ic_location" />
-                <TextView android:id="@+id/empty_text" android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:gravity="center" android:padding="@dimen/space_32"
-                    android:text="@string/providers_empty" android:textAppearance="@style/TextAppearance.PetCare.Supporting"
-                    android:textColor="?attr/colorOnSurfaceVariant" android:visibility="gone" />
-                <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_16">
-                    <LinearLayout android:id="@+id/item_container" android:layout_width="match_parent"
-                        android:layout_height="wrap_content" android:orientation="vertical" />
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
+        <FrameLayout
+            android:id="@+id/place_map_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/place_map_unavailable"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|top"
+            android:paddingHorizontal="@dimen/space_32"
+            android:paddingTop="@dimen/place_map_height"
+            android:text="@string/map_unavailable_list"
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/space_20"
+        android:paddingTop="@dimen/space_20">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:shadowColor="@color/canvas"
+            android:shadowDx="@dimen/layout_zero"
+            android:shadowDy="@dimen/layout_1_dp"
+            android:shadowRadius="@dimen/space_4"
+            android:text="@string/nav_places"
+            android:textAppearance="@style/TextAppearance.PetCare.Display" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/category_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filter_all"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/money_all_pets" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filter_vet"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/place_filter_vets" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filter_grooming"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/place_filter_grooming" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/filter_parks"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/place_filter_parks" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
     </LinearLayout>
 
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/place_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_task_sheet"
+        android:clipToPadding="false"
+        android:elevation="@dimen/space_8"
+        app:behavior_fitToContents="true"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="@dimen/places_sheet_peek_height"
+        app:layout_behavior="@string/bottom_sheet_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/space_20"
+            android:paddingBottom="@dimen/fab_clearance">
+
+            <ImageView
+                android:layout_width="@dimen/space_40"
+                android:layout_height="@dimen/space_24"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@null"
+                android:padding="@dimen/space_8"
+                android:src="@drawable/ic_drag_handle"
+                app:tint="@color/hairline" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.PetCare.TextInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/search_place_hint"
+                app:endIconDrawable="@drawable/ic_location"
+                app:endIconMode="custom">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/place_search_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionSearch"
+                    android:inputType="textPostalAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/place_search_button"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_place" />
+
+            <TextView
+                android:id="@+id/place_location_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/find_vets_button"
+                style="@style/Widget.PetCare.Button.Tonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_12"
+                android:text="@string/find_vets_near_me"
+                app:icon="@drawable/ic_location" />
+
+            <TextView
+                android:id="@+id/empty_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="@dimen/space_32"
+                android:text="@string/providers_empty"
+                android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.PetCare.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_16">
+
+                <LinearLayout
+                    android:id="@+id/item_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/add_button" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end" android:layout_margin="@dimen/space_20"
-        android:text="@string/add_provider" android:textColor="@color/on_primary"
-        app:backgroundTint="@color/primary" app:icon="@drawable/ic_add" app:iconTint="@color/on_primary" />
-</FrameLayout>
+        android:id="@+id/add_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/space_20"
+        android:text="@string/add_provider"
+        android:textColor="@color/on_primary"
+        app:backgroundTint="@color/primary"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/on_primary" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

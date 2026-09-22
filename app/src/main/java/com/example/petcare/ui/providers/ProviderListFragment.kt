@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
@@ -62,6 +63,7 @@ class ProviderListFragment : Fragment() {
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentProviderListBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
+        BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_COLLAPSED
         binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_providers_to_add_provider) }
         binding.placeSearchButton.setOnClickListener { searchAddress() }
         binding.categoryFilters.setOnCheckedStateChangeListener { _, checkedIds ->
@@ -119,6 +121,7 @@ class ProviderListFragment : Fragment() {
                 getString(R.string.place_distance_km, PlaceLocation.distanceKm(origin.latitude, origin.longitude,
                     provider.latitude, provider.longitude)) else getString(R.string.place_distance_unknown)
             row.placeDetail.text = getString(R.string.place_row_detail, provider.type, distance)
+            row.root.tag = provider.id
             row.root.setOnClickListener { PlaceDetailSheet.show(parentFragmentManager, provider, origin) }
             row.root.setOnLongClickListener {
                 deletePlace(provider.id)
@@ -132,6 +135,7 @@ class ProviderListFragment : Fragment() {
         if (!PlaceLocation.mapsAvailable(requireContext())) {
             binding.placeMapFrame.visibility = View.GONE
             binding.placeMapUnavailable.visibility = View.VISIBLE
+            BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_EXPANDED
             return
         }
         val fragment = SupportMapFragment.newInstance()
@@ -151,7 +155,7 @@ class ProviderListFragment : Fragment() {
                 }
             }
             manager.setOnClusterItemClickListener { item ->
-                PlaceDetailSheet.show(parentFragmentManager, item.place, userLocation)
+                revealPlace(item.place.id)
                 true
             }
             // ClusterManager owns both callbacks so marker taps and reclustering stay in sync.
@@ -253,6 +257,18 @@ class ProviderListFragment : Fragment() {
                 .setDuration(6000).setAction(R.string.undo) {
                     viewLifecycleOwner.lifecycleScope.launch { viewModel.restore(deleted) }
                 }.show()
+        }
+    }
+
+    /** Expands the sheet and scrolls the distance-sorted list to a tapped marker. */
+    private fun revealPlace(placeId: Long) {
+        BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_EXPANDED
+        binding.placeSheet.post {
+            val row = (0 until binding.itemContainer.childCount)
+                .map(binding.itemContainer::getChildAt)
+                .firstOrNull { it.tag == placeId }
+            if (row != null) binding.placeSheet.smoothScrollTo(0,
+                binding.itemContainer.top + row.top)
         }
     }
 
