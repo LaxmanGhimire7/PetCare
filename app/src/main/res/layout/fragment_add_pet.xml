@@ -29,9 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_12"
             android:text="@string/add_pet_title"
-            android:textAppearance="?attr/textAppearanceHeadlineLarge"
-            android:textColor="@color/on_surface"
-            android:textStyle="bold" />
+            android:textAppearance="@style/TextAppearance.PetCare.Display"
+            android:textColor="@color/on_surface" />
 
         <TextView
             android:id="@+id/pet_form_subtitle"
@@ -39,15 +38,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_8"
             android:text="@string/add_pet_subtitle"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="@color/on_surface_variant" />
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+            android:textColor="@color/on_surface_variant"
+            android:visibility="gone" />
 
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.PetCare.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/layout_28_dp"
-            app:cardBackgroundColor="@color/primary_container">
+            app:cardBackgroundColor="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -57,10 +57,10 @@
                 android:padding="@dimen/layout_18_dp">
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="@dimen/layout_88_dp"
-                    android:layout_height="@dimen/layout_88_dp"
+                    android:layout_width="@dimen/pet_photo_picker_size"
+                    android:layout_height="@dimen/pet_photo_picker_size"
                     app:cardBackgroundColor="@color/surface_container_low"
-                    app:cardCornerRadius="@dimen/layout_26_dp"
+                    app:cardCornerRadius="@dimen/radius_pill"
                     app:cardElevation="@dimen/layout_zero">
 
                     <ImageView
@@ -85,17 +85,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/profile_photo_title"
-                        android:textAppearance="?attr/textAppearanceTitleMedium"
-                        android:textColor="@color/on_primary_container"
-                        android:textStyle="bold" />
+                        android:textAppearance="@style/TextAppearance.PetCare.Section"
+                        android:textColor="@color/on_surface" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_4"
                         android:text="@string/profile_photo_subtitle"
-                        android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textColor="@color/on_primary_container" />
+                        android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+                        android:textColor="@color/on_surface_variant" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/select_photo_button"
