@@ -28,7 +28,7 @@
                     android:layout_height="@dimen/space_48" android:background="@drawable/bg_profile_avatar"
                     android:gravity="center" android:textAppearance="@style/TextAppearance.PetCare.Section"
                     android:textColor="@color/on_primary_container" />
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_16" android:layout_weight="1" android:orientation="vertical">
                     <TextView android:id="@+id/account_text" android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Section" />
