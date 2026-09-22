@@ -404,6 +404,11 @@
         <item quantity="other">%d minutes</item>
     </plurals>
     <string name="pet_no_tasks_today">No tasks today</string>
+    <string name="pets_coming_up">Coming up</string>
+    <string name="pets_this_month">This month</string>
+    <string name="pets_no_notable_tasks">No vet, grooming, vaccination or medication visits in the next seven days.</string>
+    <string name="pets_coming_up_row">%1$s · %2$s · %3$s</string>
+    <string name="pet_tasks_progress">%1$d of %2$d today</string>
     <string name="load_demo_data">Load demo data</string>
     <string name="demo_data_loaded">Max and Luna are ready.</string>
     <string name="demo_data_failed">Demo data could not be loaded. Try again.</string>
