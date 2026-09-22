@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dashed full-width add tile below the pet grid. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="@dimen/radius_icon_well" />
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="@dimen/layout_1_dp" android:color="@color/hairline" android:dashWidth="@dimen/space_8" android:dashGap="@dimen/space_4" />
+</shape>

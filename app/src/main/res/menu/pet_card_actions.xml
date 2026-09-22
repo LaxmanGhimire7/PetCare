@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press actions keep editing controls off the pet card face. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_edit_pet" android:title="@string/edit" />
+    <item android:id="@+id/action_remove_pet" android:title="@string/remove" />
+</menu>

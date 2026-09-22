@@ -13,6 +13,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
@@ -25,6 +26,7 @@ import com.example.petcare.databinding.ItemPetProfileBinding
 import com.example.petcare.reminders.CareReminderScheduler
 import com.example.petcare.ui.RowMotion
 import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.widget.PopupMenu
 import kotlinx.coroutines.launch
 
 /** Primary list of pets; identity rails match the same pet's tasks and expenses. */
@@ -41,11 +43,14 @@ class PetListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        binding.petRecycler.layoutManager = LinearLayoutManager(requireContext())
+        binding.petRecycler.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.petRecycler.adapter = adapter
-        binding.addPetButton.setOnClickListener {
+        val addPet = View.OnClickListener {
             findNavController().navigate(R.id.action_pets_to_add_pet)
         }
+        binding.addPetButton.setOnClickListener(addPet)
+        binding.addPetTile.setOnClickListener(addPet)
+        binding.emptyAddPetButton.setOnClickListener(addPet)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
@@ -54,10 +59,14 @@ class PetListFragment : Fragment() {
                         ScreenState.Empty -> {
                             adapter.submit(emptyList())
                             binding.emptyCard.visibility = View.VISIBLE
+                            binding.petRecycler.visibility = View.GONE
+                            binding.addPetTile.visibility = View.GONE
                         }
                         is ScreenState.Content -> {
                             adapter.submit(state.data)
                             binding.emptyCard.visibility = View.GONE
+                            binding.petRecycler.visibility = View.VISIBLE
+                            binding.addPetTile.visibility = View.VISIBLE
                         }
                         is ScreenState.Error -> {
                             adapter.submit(emptyList())
@@ -133,18 +142,12 @@ class PetListFragment : Fragment() {
                     height = ViewGroup.LayoutParams.WRAP_CONTENT
                 }
                 val color = PetColor.fromIndex(pet.colorIndex)
-                row.petColorRail.setBackgroundColor(color.primary)
                 row.petInitialText.setTextColor(color.onContainer(requireContext()))
                 row.petNameText.text = pet.name
-                row.petSpeciesText.text = pet.species
-                row.petSpeciesText.setTextColor(color.onContainer(requireContext()))
-                row.petHealthNotesText.text = pet.healthNotes.ifBlank {
-                    pet.allergies.takeIf(String::isNotBlank)?.let {
-                        getString(R.string.pet_allergies_summary, it)
-                    }.orEmpty()
-                }
-                row.petHealthNotesText.visibility =
-                    if (row.petHealthNotesText.text.isBlank()) View.GONE else View.VISIBLE
+                row.petSpeciesText.text = listOf(pet.species, pet.breed)
+                    .filter(String::isNotBlank).joinToString(" · ")
+                row.petHealthNotesText.setText(R.string.pet_no_tasks_today)
+                row.petProgressBadge.setPet(pet.name, pet.colorIndex, 0, 0)
                 pet.photos().firstOrNull()?.let {
                     row.petInitialText.visibility = View.GONE
                     row.petPhotoImage.visibility = View.VISIBLE
@@ -162,8 +165,20 @@ class PetListFragment : Fragment() {
                     RowMotion.expand(row.root)
                 }
                 row.root.setOnClickListener { openDetail(pet, row.root) }
-                row.editPetButton.setOnClickListener { edit(pet) }
-                row.removePetButton.setOnClickListener { delete(pet, row.root) }
+                row.root.setOnLongClickListener {
+                    PopupMenu(requireContext(), row.root).apply {
+                        inflate(R.menu.pet_card_actions)
+                        setOnMenuItemClickListener { item ->
+                            when (item.itemId) {
+                                R.id.action_edit_pet -> { edit(pet); true }
+                                R.id.action_remove_pet -> { delete(pet, row.root); true }
+                                else -> false
+                            }
+                        }
+                        show()
+                    }
+                    true
+                }
             }
         }
     }
