@@ -28,9 +28,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_12"
             android:text="@string/reminder_settings_title"
-            android:textAppearance="?attr/textAppearanceHeadlineLarge"
+            android:textAppearance="@style/TextAppearance.PetCare.Display"
             android:textColor="@color/on_surface"
-            android:textStyle="bold" />
+            />
 
         <TextView
             android:layout_width="wrap_content"
