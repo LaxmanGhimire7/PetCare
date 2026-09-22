@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Grouped saved-place row; detail actions open in the place sheet. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true"
+    android:gravity="center_vertical" android:minHeight="@dimen/place_row_height"
+    android:orientation="horizontal" android:padding="@dimen/space_16">
+    <ImageView android:id="@+id/place_icon" android:layout_width="@dimen/space_40"
+        android:layout_height="@dimen/space_40" android:background="@drawable/bg_profile_avatar"
+        android:contentDescription="@null" android:padding="@dimen/space_8"
+        android:src="@drawable/ic_location" app:tint="?attr/colorOnSurfaceVariant" />
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_12" android:layout_weight="1" android:orientation="vertical">
+        <TextView android:id="@+id/place_name" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.RowTitle" />
+        <TextView android:id="@+id/place_detail" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_2"
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+    <ImageView android:layout_width="@dimen/touch_target" android:layout_height="@dimen/touch_target"
+        android:contentDescription="@null" android:padding="@dimen/space_12"
+        android:src="@drawable/ic_chevron_right" app:tint="?attr/colorOnSurfaceVariant" />
+</LinearLayout>

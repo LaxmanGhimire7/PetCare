@@ -70,4 +70,6 @@
     <dimen name="money_chart_bar_height">92dp</dimen>
     <dimen name="money_chart_label_text">12sp</dimen>
     <dimen name="money_chart_title_text">17sp</dimen>
+    <dimen name="places_map_height">300dp</dimen>
+    <dimen name="place_row_height">68dp</dimen>
 </resources>

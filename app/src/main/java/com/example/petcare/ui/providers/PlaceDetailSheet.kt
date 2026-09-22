@@ -5,6 +5,7 @@ import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.content.res.Configuration
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /** Saved-place detail with a lite map and actions that return edit/delete to the list. */
@@ -50,6 +52,10 @@ class PlaceDetailSheet : BottomSheetDialogFragment() {
             binding.placePreviewFrame.addView(mapView)
             mapView.onCreate(state)
             mapView.getMapAsync { map ->
+                val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+                    Configuration.UI_MODE_NIGHT_YES
+                map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(),
+                    if (night) R.raw.map_style_dark else R.raw.map_style_light))
                 val point = LatLng(lat, lon)
                 map.addMarker(MarkerOptions().position(point).title(name))
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(point, 14f))

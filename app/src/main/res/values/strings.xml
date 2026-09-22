@@ -331,6 +331,11 @@
     <string name="navigation_add_provider">Add place</string>
     <string name="no_compatible_app">No compatible app is installed on this device.</string>
     <string name="map_unavailable">Map unavailable. You can still save places and enter coordinates manually.</string>
+    <string name="map_unavailable_list">Map unavailable on this build. Saved places still open in your device’s map app.</string>
+    <string name="place_filter_vets">Vets</string>
+    <string name="place_filter_grooming">Grooming</string>
+    <string name="place_filter_parks">Parks</string>
+    <string name="place_row_detail">%1$s · %2$s</string>
     <string name="search_place_hint">Search a place or address</string>
     <string name="search_place">Search</string>
     <string name="find_vets_near_me">Find vets near me</string>
