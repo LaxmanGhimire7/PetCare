@@ -5,4 +5,11 @@
     <string name="gallery_inputs">Inputs and filters</string><string name="gallery_pet_name">Pet name</string><string name="gallery_chip_all">All</string><string name="gallery_chip_max">Max</string>
     <string name="gallery_avatar">Pet progress ring</string><string name="gallery_empty_title">Add your first pet</string>
     <string name="gallery_empty_body">Their feeding, walks, grooming and vet visits will show up here.</string>
+    <string name="gallery_next_up">Next up · Luna</string>
+    <string name="gallery_task">Brushing</string>
+    <string name="gallery_countdown">00:42:18</string>
+    <string name="gallery_time">14:00</string>
+    <string name="gallery_check">✓</string>
+    <string name="gallery_task_detail">Luna · Grooming</string>
+    <string name="gallery_luna">Luna</string>
 </resources>
