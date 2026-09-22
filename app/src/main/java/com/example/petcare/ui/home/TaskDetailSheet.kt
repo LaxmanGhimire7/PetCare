@@ -7,6 +7,8 @@ import android.net.Uri
 import android.provider.CalendarContract
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.appcompat.widget.PopupMenu
+import androidx.navigation.fragment.findNavController
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.provider.ProviderRepository
@@ -18,6 +20,11 @@ import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.databinding.SheetTaskDetailBinding
 import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.GestureHaptics
+import com.example.petcare.ui.UiSnackbar
+import com.example.petcare.data.local.pet.PetColor
+import com.example.petcare.reminders.CareReminderScheduler
+import com.google.android.material.snackbar.Snackbar
+import android.graphics.drawable.GradientDrawable
 import com.example.petcare.location.PlaceLocation
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMapOptions
@@ -59,8 +66,14 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
             timeZone = TimeZone.getTimeZone("UTC")
         }.format(Date(data.getLong("day") * 86_400_000L))
         binding.taskTime.text = getString(R.string.task_detail_when, day, time)
-        binding.taskPet.text = getString(R.string.task_detail_pet, data.getString("pet"))
-        binding.taskCategory.text = getString(R.string.task_detail_category, data.getString("category"))
+        binding.taskPet.text = data.getString("pet")
+        val petColor = PetColor.fromIndex(data.getInt("petColorIndex"))
+        binding.taskPet.setTextColor(petColor.onContainer(requireContext()))
+        binding.taskPet.background = GradientDrawable().apply {
+            cornerRadius = resources.getDimension(R.dimen.radius_pill)
+            setColor(petColor.container(requireContext()))
+        }
+        binding.taskCategory.text = data.getString("category")
         val supplies = data.getString("supplies").orEmpty()
         binding.taskSupplies.text = getString(R.string.today_checklist_supplies, supplies)
         binding.taskSupplies.visibility = if (supplies.isBlank()) View.GONE else View.VISIBLE
@@ -111,6 +124,66 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
                     .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, start + 60 * 60 * 1000L))
             } catch (_: ActivityNotFoundException) {
                 Toast.makeText(requireContext(), R.string.no_compatible_app, Toast.LENGTH_SHORT).show()
+            }
+        }
+        val taskId = data.getLong("id")
+        val completed = data.getBoolean("completed")
+        binding.taskMarkDoneButton.visibility = if (completed) View.GONE else View.VISIBLE
+        binding.taskMarkDoneButton.setOnClickListener {
+            lifecycleScope.launch {
+                val repository = PetCareRepositories(requireContext()).tasks
+                val successor = repository.completeTask(taskId)
+                CareReminderScheduler(requireContext()).cancel(taskId)
+                successor?.let(CareReminderScheduler(requireContext())::schedule)
+                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
+                    getString(R.string.task_done_message, data.getString("title")),
+                    Snackbar.LENGTH_LONG).setAction(R.string.undo) {
+                    lifecycleScope.launch {
+                        repository.reopenTask(taskId)?.let(CareReminderScheduler(requireContext())::schedule)
+                    }
+                }.show()
+                dismiss()
+            }
+        }
+        binding.taskShareButton.setOnClickListener {
+            val body = getString(R.string.task_share_body, data.getString("pet"),
+                data.getString("title"), day, time, notes)
+            startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, body)
+            }, getString(R.string.share_list)))
+        }
+        binding.taskMoreButton.setOnClickListener { anchor ->
+            PopupMenu(requireContext(), anchor).apply {
+                inflate(R.menu.task_detail_actions)
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.action_edit_task -> {
+                            dismiss()
+                            requireParentFragment().findNavController().navigate(R.id.action_home_to_edit_care_task,
+                                Bundle().apply { putLong("careTaskId", taskId) })
+                            true
+                        }
+                        R.id.action_delete_task -> {
+                            lifecycleScope.launch {
+                                val repository = PetCareRepositories(requireContext()).tasks
+                                val snapshot = repository.deleteTask(taskId) ?: return@launch
+                                CareReminderScheduler(requireContext()).cancel(taskId)
+                                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
+                                    R.string.task_deleted, Snackbar.LENGTH_LONG).setAction(R.string.undo) {
+                                    lifecycleScope.launch {
+                                        repository.restoreTask(snapshot)
+                                        if (!snapshot.isCompleted) CareReminderScheduler(requireContext()).schedule(snapshot)
+                                    }
+                                }.show()
+                                dismiss()
+                            }
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                show()
             }
         }
     }
@@ -169,6 +242,7 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
         fun newInstance(task: CareTaskSummary): TaskDetailSheet = TaskDetailSheet().apply {
             arguments = Bundle().apply {
                 putString("title", task.title)
+                putLong("id", task.id)
                 putString("pet", task.petName)
                 putString("category", task.category)
                 putString("supplies", task.requiredSupplies)
@@ -178,6 +252,8 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
                 putDouble("latitude", task.latitude ?: Double.NaN)
                 putDouble("longitude", task.longitude ?: Double.NaN)
                 putLong("placeId", task.placeId ?: 0L)
+                putInt("petColorIndex", task.petColorIndex)
+                putBoolean("completed", task.isCompleted)
             }
         }
     }

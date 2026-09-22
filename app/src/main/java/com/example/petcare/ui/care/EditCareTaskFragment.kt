@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -34,6 +36,8 @@ import com.example.petcare.reminders.CareReminderScheduler
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import com.google.android.material.chip.Chip
+import com.example.petcare.ui.PetAvatarView
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
@@ -100,29 +104,26 @@ class EditCareTaskFragment : Fragment() {
     private fun configureRoutineFields() {
         val categories = resources.getStringArray(R.array.care_categories).toList()
         val frequencies = resources.getStringArray(R.array.care_frequencies).toList()
-        binding.categoryInput.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categories)
-        )
-        binding.frequencyInput.setAdapter(
-            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, frequencies)
-        )
-        binding.categoryInput.setOnItemClickListener { _, _, position, _ ->
-            selectedCategory = categories[position]
+        categories.forEach { category ->
+            binding.categoryChipGroup.addView(Chip(requireContext()).apply {
+                text = category
+                isCheckable = true
+                setOnClickListener { selectedCategory = category }
+            })
         }
-        SelectionDialog.attach(binding.categoryInput, R.string.task_category, categories) {
-            selectedCategory = categories[it]
-        }
-        binding.frequencyInput.setOnItemClickListener { _, _, position, _ ->
-            selectedFrequency = frequencies[position]
-        }
-        SelectionDialog.attach(binding.frequencyInput, R.string.task_frequency, frequencies) {
-            selectedFrequency = frequencies[it]
+        binding.frequencyToggle.addOnButtonCheckedListener { _, checkedId, checked ->
+            if (!checked) return@addOnButtonCheckedListener
+            selectedFrequency = when (checkedId) {
+                R.id.repeat_daily -> frequencies[1]
+                R.id.repeat_weekly -> frequencies[2]
+                R.id.repeat_monthly -> frequencies[3]
+                else -> frequencies[0]
+            }
         }
     }
 
     private fun configureForm() {
         binding.careTaskFormTitle.setText(R.string.edit_care_task_title)
-        binding.careTaskFormSubtitle.setText(R.string.edit_care_task_subtitle)
         binding.saveCareTaskButton.setText(R.string.save_changes)
     }
 
@@ -148,20 +149,7 @@ class EditCareTaskFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 petRepository.observePets().collect { savedPets ->
                     pets = savedPets
-                    val labels = savedPets.map { pet ->
-                        getString(R.string.pet_selection_label, pet.name, pet.species)
-                    }
-                    binding.petInput.setAdapter(
-                        ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels)
-                    )
-                    binding.petInput.setOnItemClickListener { _, _, position, _ ->
-                        selectedPet = pets[position]
-                        binding.petLayout.error = null
-                    }
-                    SelectionDialog.attach(binding.petInput, R.string.select_pet, labels) {
-                        selectedPet = pets[it]
-                        binding.petLayout.error = null
-                    }
+                    renderPetChoices()
                     bindCareTask()
                 }
             }
@@ -206,18 +194,59 @@ class EditCareTaskFragment : Fragment() {
         binding.reminderTimeInput.setText(formatTime(task.reminderMinutesOfDay))
         selectedCategory = task.category
         selectedFrequency = task.frequency
-        binding.categoryInput.setText(task.category, false)
-        binding.frequencyInput.setText(task.frequency, false)
+        for (index in 0 until binding.categoryChipGroup.childCount) {
+            (binding.categoryChipGroup.getChildAt(index) as? Chip)?.let { chip ->
+                chip.isChecked = chip.text.toString() == task.category
+            }
+        }
+        binding.frequencyToggle.check(when (task.frequency) {
+            resources.getStringArray(R.array.care_frequencies)[1] -> R.id.repeat_daily
+            resources.getStringArray(R.array.care_frequencies)[2] -> R.id.repeat_weekly
+            resources.getStringArray(R.array.care_frequencies)[3] -> R.id.repeat_monthly
+            else -> R.id.repeat_once
+        })
         binding.requiredSuppliesInput.setText(task.requiredSupplies)
         binding.careNotesInput.setText(task.notes)
         bindPlace()
 
         pets.firstOrNull { it.id == task.petId }?.let { pet ->
             selectedPet = pet
-            binding.petInput.setText(
-                getString(R.string.pet_selection_label, pet.name, pet.species),
-                false
-            )
+            renderPetChoices()
+        }
+    }
+
+    private fun renderPetChoices() {
+        binding.petAvatarContainer.removeAllViews()
+        pets.forEach { pet ->
+            val column = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = android.view.Gravity.CENTER_HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    resources.getDimensionPixelSize(R.dimen.pet_filter_width),
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                isClickable = true
+                isFocusable = true
+                contentDescription = getString(R.string.select_pet_named, pet.name)
+            }
+            column.addView(PetAvatarView(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar),
+                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar)
+                )
+                setPet(pet.name, pet.colorIndex, 0, 0, selectedPet?.id == pet.id)
+            })
+            column.addView(TextView(requireContext()).apply {
+                text = pet.name
+                setTextAppearance(R.style.TextAppearance_PetCare_Label)
+                gravity = android.view.Gravity.CENTER
+            })
+            column.setOnClickListener {
+                selectedPet = pet
+                binding.petErrorText.visibility = View.GONE
+                renderPetChoices()
+            }
+            binding.petAvatarContainer.addView(column)
         }
     }
 
@@ -266,11 +295,8 @@ class EditCareTaskFragment : Fragment() {
         } else {
             null
         }
-        binding.petLayout.error = if (selectedPet == null) {
-            getString(R.string.error_pet_selection_required)
-        } else {
-            null
-        }
+        binding.petErrorText.visibility = if (selectedPet == null) View.VISIBLE else View.GONE
+        binding.petErrorText.setText(R.string.error_pet_selection_required)
         binding.dueDateLayout.error = if (selectedDueDateEpochDay == null) {
             getString(R.string.error_due_date_required)
         } else {
@@ -278,7 +304,7 @@ class EditCareTaskFragment : Fragment() {
         }
 
         return binding.careTaskTitleLayout.error == null &&
-            binding.petLayout.error == null &&
+            selectedPet != null &&
             binding.dueDateLayout.error == null
     }
 
