@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pit Lane splash mark: an original paw nested inside a stopwatch outline. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp" android:height="72dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="@android:color/transparent" android:pathData="M12,4.5A8.5,8.5 0,1 0,12 21.5A8.5,8.5 0,1 0,12 4.5"
+        android:strokeColor="@color/primary" android:strokeLineCap="round" android:strokeWidth="1.8" />
+    <path android:fillColor="@android:color/transparent" android:pathData="M9,2 L15,2 M12,2 L12,4.5 M18.2,5.5 L20,3.8"
+        android:strokeColor="@color/primary" android:strokeLineCap="round" android:strokeWidth="1.8" />
+    <group android:translateX="6.6" android:translateY="7.3" android:scaleX="0.45" android:scaleY="0.45">
+        <path android:fillColor="@color/primary"
+            android:pathData="M4.5,9.5C5.88,9.5 7,8.38 7,7S5.88,4.5 4.5,4.5 2,5.62 2,7s1.12,2.5 2.5,2.5zM9,6.5c1.38,0 2.5,-1.12 2.5,-2.5S10.38,1.5 9,1.5 6.5,2.62 6.5,4 7.62,6.5 9,6.5zM15,6.5c1.38,0 2.5,-1.12 2.5,-2.5S16.38,1.5 15,1.5 12.5,2.62 12.5,4 13.62,6.5 15,6.5zM19.5,9.5C20.88,9.5 22,8.38 22,7s-1.12,-2.5 -2.5,-2.5S17,5.62 17,7s1.12,2.5 2.5,2.5zM17.34,14.86c-.87,-1.02 -1.6,-1.89 -2.49,-2.91 -.46,-.54 -1.05,-1.08 -1.75,-1.32 -.36,-.12 -.74,-.13 -1.1,-.13s-.74,.01 -1.1,.13c-.7,.24 -1.29,.78 -1.75,1.32 -.88,1.02 -1.61,1.89 -2.49,2.91 -1.31,1.31 -2.92,2.76 -2.62,4.79 .29,1.02 1.02,2.03 2.33,2.32 .73,.15 3.06,-.44 5.54,-.44h.18c2.48,0 4.81,.58 5.54,.44 1.31,-.29 2.04,-1.31 2.33,-2.32 .3,-2.03 -1.31,-3.48 -2.62,-4.79z" />
+    </group>
+</vector>

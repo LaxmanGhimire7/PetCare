@@ -6,7 +6,7 @@ PetCare is a native Android app for managing pets, care schedules, expenses, and
 
 ## What the app does
 
-- **Today:** shows upcoming tasks including future appointments with their due dates, completed tasks, a completion ring, pet filters, reminders, routine generation, and undo for destructive actions. Save a pet profile before adding its first task.
+- **Today:** shows the selected day as a strict time-ordered timeline. A live countdown and Now marker keep the next task clear; completed tasks stay in place, pet rings and progress segments update immediately, and destructive actions remain undoable.
 - **Pets:** stores profiles, health details, caregiver contacts, and photos. Pet colours consistently identify their tasks and cards.
 - **Money:** records and edits expenses, shows per-pet totals and Canvas charts, and exports CSV or PDF.
 - **Places:** saves care locations, sorts by distance when location is available, and opens directions, calls, or booking links. With a Maps key, it also shows clustered markers, a pin picker, and map previews.

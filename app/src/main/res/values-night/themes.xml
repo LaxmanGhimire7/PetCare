@@ -52,7 +52,7 @@
 
     <style name="Theme.PetCare.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/canvas</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_pets</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_stopwatch_paw</item>
         <item name="postSplashScreenTheme">@style/Theme.PetCare</item>
     </style>
 </resources>

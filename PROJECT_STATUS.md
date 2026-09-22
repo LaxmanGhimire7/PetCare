@@ -1,6 +1,6 @@
 # PetCare project status
 
-Updated: 21 September 2026. The primary submission feature is **location and geotagging**; app integration and gestures/sensors are additional features.
+Updated: 22 September 2026. The primary submission feature is **location and geotagging**; app integration and gestures/sensors are additional features.
 
 ## Implementation
 
@@ -10,11 +10,11 @@ Release hygiene includes working backup rules, an adaptive and monochrome launch
 
 ## Verification
 
-- `:app:assembleDebug`, `:app:testDebugUnitTest`, and `:app:lintDebug` pass. The current lint report says **No issues found**.
+- `:app:assembleDebug`, `:app:testDebugUnitTest`, and `:app:lintDebug` pass. Non-actionable lint categories are documented with reasons in `app/lint.xml`.
 - The emulator suite passed 16 Android tests, including the Espresso account-to-task journey, future-task visibility, clinic-share import, and migrations. The earlier 14-test suite also passed at 200% font scale.
 - The unit suite contains 20 tests; with 16 connected tests, the automated total is 36.
 - `:app:assembleRelease` produced an unsigned APK without signing credentials. Setting all four `PETCARE_RELEASE_*` environment variables signs the release build.
-- The debug APK was installed and launched on a connected Samsung API 36 device without clearing app data. Its accelerometer was visible to PetCare, and both clinic-share UI tests passed on the unlocked phone.
+- The v4 Today build was installed and launched on the Xiaomi Redmi Note 9 Pro Max (API 31) without clearing app data. The physical-device review found and fixed the 12-hour time-column wrap. MIUI blocks ADB input injection, and the phone disconnected before the final gallery capture.
 
 ## Limits that still require a configured device or service
 
