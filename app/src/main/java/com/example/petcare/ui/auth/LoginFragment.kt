@@ -57,18 +57,6 @@ class LoginFragment : Fragment() {
         binding.signUpButton.setOnClickListener {
             findNavController().navigate(com.example.petcare.R.id.action_login_to_register)
         }
-        playEntrance()
-    }
-
-    private fun playEntrance() {
-        binding.authHeader.alpha = 0f
-        binding.authHeader.animate().alpha(1f).setDuration(420L).start()
-        binding.authFormCard.alpha = 0f
-        binding.authFormCard.translationY = 42f
-        binding.authFormCard.scaleX = 0.98f
-        binding.authFormCard.scaleY = 0.98f
-        binding.authFormCard.animate().alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
-            .setStartDelay(110L).setDuration(480L).start()
     }
 
     private fun isValidInput(): Boolean {
