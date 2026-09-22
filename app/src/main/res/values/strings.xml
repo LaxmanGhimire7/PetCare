@@ -187,6 +187,7 @@
     <string name="biometric_account_unavailable">That account is unavailable. Sign in with your password.</string>
     <string name="onboarding_title">Welcome to PetCare</string>
     <string name="onboarding_skip">Skip for now</string>
+    <string name="onboarding_step">Step %1$d of %2$d</string>
     <string name="onboarding_next">Continue</string>
     <string name="onboarding_finish">Open PetCare</string>
     <string name="onboarding_care_title">Care in one place</string>
@@ -482,6 +483,7 @@
     <string name="marker_supply_symbol">S</string>
     <string name="marker_shelter_symbol">H</string>
     <string name="import_review_title">Review appointment</string>
+    <string name="import_detected_fields">Review detected fields</string>
     <string name="import_review_intro">Check what PetCare found before adding a care task.</string>
     <string name="import_recognized">Recognised: %1$s</string>
     <string name="import_missing">Please add: %1$s</string>
@@ -498,6 +500,13 @@
     <string name="import_field_list_separator">,\u0020</string>
     <string name="import_clinic_note">Clinic: %1$s</string>
     <string name="delegation_preview_title">Care checklist preview</string>
+    <string name="delegation_contact">Caregiver</string>
+    <string name="delegation_include">Include</string>
+    <string name="delegation_feeding">Feeding</string>
+    <string name="delegation_walks">Walks</string>
+    <string name="delegation_medication">Medication</string>
+    <string name="delegation_notes">Notes</string>
+    <string name="delegation_message_preview">Message preview</string>
     <string name="delegation_preview_intro">Review the message, choose a caregiver, then send it from your own app.</string>
     <string name="caregiver_name">Caregiver name</string>
     <string name="caregiver_phone">Caregiver phone number</string>
