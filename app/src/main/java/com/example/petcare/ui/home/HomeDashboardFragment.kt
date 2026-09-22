@@ -259,7 +259,6 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         if (selectedId != null && latestPets.none { it.id == selectedId }) {
             viewModel.selectedPetId = null
         }
-        filterAdapter.submit(latestPets, viewModel.selectedPetId)
         val selected = viewModel.selectedPetId
         val today = todayEpochDay()
         // The list includes future appointments; the ring still counts only today's care.
@@ -269,6 +268,13 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         }
         val doneCount = latestCompleted.count { it.dueDateEpochDay == today }
         val dueCount = latestUpcoming.count { it.dueDateEpochDay == today }
+        val petProgress = latestPets.associate { pet ->
+            val done = latestCompleted.count { it.petId == pet.id && it.dueDateEpochDay == today }
+            val open = latestUpcoming.count { it.petId == pet.id && it.dueDateEpochDay == today }
+            pet.id to (done to done + open)
+        }
+        filterAdapter.submit(latestPets, viewModel.selectedPetId, petProgress,
+            doneCount to (doneCount + dueCount))
         val firstEntrance = viewModel.consumeFirstEntrance()
         val progress = doneCount to (doneCount + dueCount)
         val hasTasksToday = doneCount + dueCount > 0

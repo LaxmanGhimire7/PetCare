@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import coil.load
 import com.example.petcare.R
 import com.example.petcare.data.local.care.CareTaskSummary
@@ -40,11 +41,15 @@ class PetFilterAdapter(private val onSelect: (Long?) -> Unit) :
     RecyclerView.Adapter<PetFilterAdapter.Holder>() {
     private var pets = emptyList<PetEntity>()
     private var selectedPetId: Long? = null
+    private var progress = emptyMap<Long, Pair<Int, Int>>()
+    private var allProgress = 0 to 0
 
     @SuppressLint("NotifyDataSetChanged")
-    fun submit(items: List<PetEntity>, selectedId: Long?) {
+    fun submit(items: List<PetEntity>, selectedId: Long?, values: Map<Long, Pair<Int, Int>> = emptyMap(), total: Pair<Int, Int> = 0 to 0) {
         pets = items
         selectedPetId = selectedId
+        progress = values
+        allProgress = total
         notifyDataSetChanged()
     }
 
@@ -59,33 +64,16 @@ class PetFilterAdapter(private val onSelect: (Long?) -> Unit) :
         fun bind(pet: PetEntity?) {
             val context = row.root.context
             val selected = pet?.id == selectedPetId
-            val color = pet?.let { PetColor.fromIndex(it.colorIndex).primary }
-                ?: MaterialColors.getColor(row.root, androidx.appcompat.R.attr.colorPrimary)
-            row.filterAvatarCard.strokeColor = color
-            val identity = pet?.let { PetColor.fromIndex(it.colorIndex) }
-            row.filterAvatarCard.setCardBackgroundColor(identity?.container(context)
-                ?: MaterialColors.getColor(row.root, com.google.android.material.R.attr.colorSurfaceContainerHigh))
-            row.filterAvatarCard.strokeWidth = context.resources.getDimensionPixelSize(
-                if (selected) R.dimen.space_4 else R.dimen.space_2
-            )
+            val value = pet?.let { progress[it.id] } ?: allProgress
             row.filterNameText.text = pet?.name ?: context.getString(R.string.today_all_pets)
+            row.filterProgressText.text = context.getString(R.string.pet_progress_count, value.first, value.second)
             row.root.contentDescription = if (pet == null) context.getString(R.string.today_filter_all)
                 else context.getString(R.string.today_filter_pet, pet.name)
-            val photo = pet?.photos()?.firstOrNull()
-            if (photo == null) {
-                row.filterAvatarImage.visibility = View.GONE
-                row.filterAvatarInitial.visibility = View.VISIBLE
-                row.filterAvatarInitial.text = pet?.name?.trim()?.take(1)?.uppercase()
-                    ?: context.getString(R.string.today_all_pets)
-                row.filterAvatarInitial.setTextColor(identity?.onContainer(context)
-                    ?: MaterialColors.getColor(row.root, com.google.android.material.R.attr.colorOnSurface))
-            } else {
-                row.filterAvatarInitial.visibility = View.GONE
-                row.filterAvatarImage.visibility = View.VISIBLE
-                row.filterAvatarImage.clearColorFilter()
-                row.filterAvatarImage.setPadding(0, 0, 0, 0)
-                row.filterAvatarImage.load(photo)
-            }
+            row.filterAvatarView.setPet(
+                pet?.name ?: context.getString(R.string.today_all_pets), pet?.colorIndex ?: 0,
+                value.first, value.second, selected,
+                if (pet == null) ContextCompat.getColor(context, R.color.brass) else null
+            )
             row.root.setOnClickListener { onSelect(pet?.id) }
         }
     }

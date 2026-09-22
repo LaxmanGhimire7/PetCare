@@ -24,6 +24,7 @@ class PetAvatarView @JvmOverloads constructor(
     private var completed = 0
     private var total = 0
     private var selected = false
+    private var accentOverride: Int? = null
 
     init {
         minimumWidth = resources.getDimensionPixelSize(R.dimen.pet_filter_avatar)
@@ -33,12 +34,13 @@ class PetAvatarView @JvmOverloads constructor(
     }
 
     /** Updates identity and progress together so drawing and TalkBack never disagree. */
-    fun setPet(name: String, colorIndex: Int, done: Int, taskCount: Int, isSelected: Boolean = false) {
+    fun setPet(name: String, colorIndex: Int, done: Int, taskCount: Int, isSelected: Boolean = false, accent: Int? = null) {
         petName = name.trim().ifBlank { context.getString(R.string.pet_avatar_default_name) }
         petColor = PetColor.fromIndex(colorIndex)
         completed = done.coerceAtLeast(0)
         total = taskCount.coerceAtLeast(0)
         selected = isSelected
+        accentOverride = accent
         updateDescription()
         invalidate()
     }
@@ -52,7 +54,8 @@ class PetAvatarView @JvmOverloads constructor(
         val radius = minOf(width, height) / 2f - ring - outer
 
         paint.style = Paint.Style.FILL
-        paint.color = petColor.container(context)
+        paint.color = if (accentOverride == null) petColor.container(context)
+            else ContextCompat.getColor(context, R.color.brass_soft)
         canvas.drawCircle(cx, cy, radius - ring, paint)
 
         paint.style = Paint.Style.STROKE
@@ -60,7 +63,7 @@ class PetAvatarView @JvmOverloads constructor(
         paint.strokeCap = Paint.Cap.ROUND
         paint.color = ContextCompat.getColor(context, R.color.hairline)
         canvas.drawCircle(cx, cy, radius, paint)
-        paint.color = petColor.primary
+        paint.color = accentOverride ?: petColor.primary
         arc.set(cx - radius, cy - radius, cx + radius, cy + radius)
         val sweep = if (total == 0) 0f else 360f * completed.coerceAtMost(total) / total
         canvas.drawArc(arc, -90f, sweep, false, paint)
@@ -72,7 +75,8 @@ class PetAvatarView @JvmOverloads constructor(
         }
 
         paint.style = Paint.Style.FILL
-        paint.color = petColor.onContainer(context)
+        paint.color = if (accentOverride == null) petColor.onContainer(context)
+            else ContextCompat.getColor(context, R.color.text_primary)
         paint.textAlign = Paint.Align.CENTER
         paint.textSize = resources.getDimension(R.dimen.pet_avatar_initial_text)
         paint.typeface = ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_semibold)
