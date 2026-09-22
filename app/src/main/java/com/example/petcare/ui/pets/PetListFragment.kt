@@ -1,5 +1,6 @@
 package com.example.petcare.ui.pets
 
+import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -61,7 +62,7 @@ class PetListFragment : Fragment() {
                         is ScreenState.Error -> {
                             adapter.submit(emptyList())
                             binding.emptyCard.visibility = View.VISIBLE
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                            UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -86,7 +87,7 @@ class PetListFragment : Fragment() {
             val snapshot = viewModel.delete(pet.id) ?: return@launch
             val scheduler = CareReminderScheduler(requireContext())
             snapshot.tasks.forEach { scheduler.cancel(it.id) }
-            Snackbar.make(binding.root, R.string.pet_deleted, Snackbar.LENGTH_LONG)
+            UiSnackbar.make(binding.root, R.string.pet_deleted, Snackbar.LENGTH_LONG)
                 .setDuration(6000)
                 .setAction(R.string.undo) {
                     restoringId = pet.id
@@ -133,6 +134,7 @@ class PetListFragment : Fragment() {
                 }
                 val color = PetColor.fromIndex(pet.colorIndex)
                 row.petColorRail.setBackgroundColor(color.primary)
+                row.petInitialText.setTextColor(color.onContainer(requireContext()))
                 row.petNameText.text = pet.name
                 row.petSpeciesText.text = pet.species
                 row.petSpeciesText.setTextColor(color.onContainer(requireContext()))
@@ -143,8 +145,17 @@ class PetListFragment : Fragment() {
                 }
                 row.petHealthNotesText.visibility =
                     if (row.petHealthNotesText.text.isBlank()) View.GONE else View.VISIBLE
-                pet.photos().firstOrNull()?.let { row.petPhotoImage.load(it) }
-                    ?: row.petPhotoImage.setImageResource(R.drawable.ic_pets)
+                pet.photos().firstOrNull()?.let {
+                    row.petInitialText.visibility = View.GONE
+                    row.petPhotoImage.visibility = View.VISIBLE
+                    row.petPhotoImage.setPadding(0, 0, 0, 0)
+                    row.petPhotoImage.load(it)
+                } ?: run {
+                    row.petPhotoImage.visibility = View.GONE
+                    row.petInitialText.visibility = View.VISIBLE
+                    row.petInitialText.text = pet.name.trim().take(1).uppercase()
+                    row.petInitialText.setBackgroundColor(color.container(requireContext()))
+                }
                 row.root.transitionName = "pet_${pet.id}"
                 if (restoringId == pet.id) {
                     restoringId = null

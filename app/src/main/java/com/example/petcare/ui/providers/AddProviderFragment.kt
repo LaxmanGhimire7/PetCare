@@ -1,5 +1,6 @@
 package com.example.petcare.ui.providers
 
+import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -71,7 +72,7 @@ class AddProviderFragment : Fragment() {
         val longitude = lonText.toDoubleOrNull()
         if ((latText.isNotEmpty() || lonText.isNotEmpty()) &&
             (latitude == null || longitude == null || latitude !in -90.0..90.0 || longitude !in -180.0..180.0)) {
-            com.google.android.material.snackbar.Snackbar.make(binding.root,
+            com.example.petcare.ui.UiSnackbar.make(binding.root,
                 R.string.place_coordinate_invalid, com.google.android.material.snackbar.Snackbar.LENGTH_LONG).show()
             return
         }

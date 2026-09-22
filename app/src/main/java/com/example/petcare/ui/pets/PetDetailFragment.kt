@@ -1,5 +1,6 @@
 package com.example.petcare.ui.pets
 
+import com.example.petcare.ui.UiSnackbar
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -69,7 +70,7 @@ class PetDetailFragment : Fragment() {
             val start = pets.indexOfFirst { it.id == requestedId }
             if (start < 0) {
                 startPostponedEnterTransition()
-                Snackbar.make(requireActivity().findViewById(R.id.main),
+                UiSnackbar.make(requireActivity().findViewById(R.id.main),
                     R.string.pet_unavailable, Snackbar.LENGTH_LONG).show()
                 findNavController().navigate(R.id.petListFragment, null,
                     androidx.navigation.NavOptions.Builder()

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft error pill used instead of a full red task background. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="@color/error_soft" /><corners android:radius="@dimen/radius_pill" /></shape>

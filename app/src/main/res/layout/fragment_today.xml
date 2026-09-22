@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Today dashboard: collapsible greeting, progress, pet filter and care lists. -->
+<!-- Today dashboard compact header and care list; implements redesign fixes B4, B5, B8 and B11. -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -10,31 +10,54 @@
         android:id="@+id/today_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:elevation="@dimen/layout_zero">
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
+        android:background="@color/canvas"
+        app:elevation="@dimen/layout_zero"
+        app:liftOnScroll="true"
+        app:liftOnScrollTargetViewId="@id/today_scroll">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/today_appbar_expanded"
-            android:minHeight="@dimen/today_appbar_collapsed"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:contentScrim="?attr/colorSurface"
-            app:expandedTitleMarginStart="@dimen/space_20"
-            app:expandedTitleMarginBottom="@dimen/space_24"
-            app:expandedTitleTextAppearance="@style/TextAppearance.PetCare.Display"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.PetCare.Title">
-            <androidx.appcompat.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/today_appbar_collapsed"
-                app:layout_collapseMode="pin">
-                <ImageView
-                    android:layout_width="@dimen/space_32"
-                    android:layout_height="@dimen/space_32"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="@dimen/space_20"
-                    android:src="@drawable/ic_pets"
-                    android:contentDescription="@string/app_logo" />
-            </androidx.appcompat.widget.Toolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="@dimen/space_20"
+            android:paddingEnd="@dimen/space_20">
+            <LinearLayout
+                android:layout_width="@dimen/layout_zero"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/today_date_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.PetCare.Supporting" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/greeting_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textAppearance="@style/TextAppearance.PetCare.Display"
+                    app:autoSizeMaxTextSize="@dimen/greeting_max_text"
+                    app:autoSizeMinTextSize="@dimen/greeting_min_text"
+                    app:autoSizeStepGranularity="@dimen/greeting_text_step"
+                    app:autoSizeTextType="uniform" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/profile_avatar_text"
+                android:layout_width="@dimen/space_40"
+                android:layout_height="@dimen/space_40"
+                android:layout_marginStart="@dimen/space_12"
+                android:background="@drawable/bg_profile_avatar"
+                android:contentDescription="@string/open_settings"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.PetCare.Label" />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/space_2"
+            android:background="@color/hairline" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -48,7 +71,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="@dimen/space_32">
+        android:paddingBottom="@dimen/fab_clearance">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -109,6 +132,12 @@
                 android:textAppearance="@style/TextAppearance.PetCare.Headline" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/reorder_mode_button"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/task_options" app:icon="@drawable/ic_more" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/add_task_inline"
                 style="@style/Widget.PetCare.Button.Text"
                 android:layout_width="wrap_content"
@@ -166,21 +195,34 @@
                 android:nestedScrollingEnabled="false"
                 android:visibility="gone" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_32"
-                android:text="@string/today_care_tools"
-                android:textAppearance="@style/TextAppearance.PetCare.Headline" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_32" android:text="@string/quick_actions"
+                android:textAppearance="@style/TextAppearance.PetCare.Title" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/generate_routine_button"
-                style="@style/Widget.PetCare.Button.Tonal"
+            <LinearLayout
+                android:id="@+id/quick_actions_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_12"
-                android:text="@string/generate_routine"
-                app:icon="@drawable/ic_routine" />
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+                <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_horizontal" android:orientation="vertical">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/generate_routine_button" style="@style/Widget.PetCare.QuickActionButton" android:layout_width="@dimen/quick_action_size" android:layout_height="@dimen/quick_action_size" android:contentDescription="@string/new_routine" app:icon="@drawable/ic_routine" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4" android:gravity="center" android:maxLines="2" android:text="@string/new_routine" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_horizontal" android:orientation="vertical">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/share_checklist_button" style="@style/Widget.PetCare.QuickActionButton" android:layout_width="@dimen/quick_action_size" android:layout_height="@dimen/quick_action_size" android:contentDescription="@string/share_list" app:icon="@drawable/ic_share" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4" android:gravity="center" android:maxLines="2" android:text="@string/share_list" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_horizontal" android:orientation="vertical">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/import_appointment_button" style="@style/Widget.PetCare.QuickActionButton" android:layout_width="@dimen/quick_action_size" android:layout_height="@dimen/quick_action_size" android:contentDescription="@string/import_plan" app:icon="@drawable/ic_import" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4" android:gravity="center" android:maxLines="2" android:text="@string/import_plan" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_horizontal" android:orientation="vertical">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/export_plan_button" style="@style/Widget.PetCare.QuickActionButton" android:layout_width="@dimen/quick_action_size" android:layout_height="@dimen/quick_action_size" android:contentDescription="@string/export_plan" app:icon="@drawable/ic_export" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4" android:gravity="center" android:maxLines="2" android:text="@string/export_plan" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                </LinearLayout>
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/reset_checklist_button"
@@ -188,34 +230,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_8"
-                android:text="@string/reset_today_checklist" />
-
-              <com.google.android.material.button.MaterialButton
-                  android:id="@+id/share_checklist_button"
-                style="@style/Widget.PetCare.Button.Tonal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_8"
-                android:text="@string/share_checklist"
-                  app:icon="@drawable/ic_share" />
-
-              <com.google.android.material.button.MaterialButton
-                  android:id="@+id/export_plan_button"
-                  style="@style/Widget.PetCare.Button.Tonal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="@dimen/space_8"
-                  android:text="@string/export_care_plan" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/import_appointment_button"
-                style="@style/Widget.PetCare.Button.Tonal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_8"
-                android:text="@string/import_appointment"
-                app:icon="@drawable/ic_import" />
+                android:text="@string/reset_today_checklist"
+                android:visibility="gone"
+                app:icon="@drawable/ic_refresh" />
             <TextView
+                android:id="@+id/import_sources_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_8"
@@ -232,6 +251,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/space_16"
-        android:text="@string/add_task"
+        android:text="@string/new_task"
         app:icon="@drawable/ic_add" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

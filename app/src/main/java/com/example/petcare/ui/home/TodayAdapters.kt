@@ -3,6 +3,9 @@ package com.example.petcare.ui.home
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.drawable.Animatable
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.drawable.GradientDrawable
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -59,6 +62,9 @@ class PetFilterAdapter(private val onSelect: (Long?) -> Unit) :
             val color = pet?.let { PetColor.fromIndex(it.colorIndex).primary }
                 ?: MaterialColors.getColor(row.root, androidx.appcompat.R.attr.colorPrimary)
             row.filterAvatarCard.strokeColor = color
+            val identity = pet?.let { PetColor.fromIndex(it.colorIndex) }
+            row.filterAvatarCard.setCardBackgroundColor(identity?.container(context)
+                ?: MaterialColors.getColor(row.root, com.google.android.material.R.attr.colorSurfaceContainerHigh))
             row.filterAvatarCard.strokeWidth = context.resources.getDimensionPixelSize(
                 if (selected) R.dimen.space_4 else R.dimen.space_2
             )
@@ -67,15 +73,15 @@ class PetFilterAdapter(private val onSelect: (Long?) -> Unit) :
                 else context.getString(R.string.today_filter_pet, pet.name)
             val photo = pet?.photos()?.firstOrNull()
             if (photo == null) {
-                row.filterAvatarImage.setImageResource(R.drawable.ic_pets)
-                row.filterAvatarImage.setColorFilter(color)
-                row.filterAvatarImage.setPadding(
-                    context.resources.getDimensionPixelSize(R.dimen.space_12),
-                    context.resources.getDimensionPixelSize(R.dimen.space_12),
-                    context.resources.getDimensionPixelSize(R.dimen.space_12),
-                    context.resources.getDimensionPixelSize(R.dimen.space_12)
-                )
+                row.filterAvatarImage.visibility = View.GONE
+                row.filterAvatarInitial.visibility = View.VISIBLE
+                row.filterAvatarInitial.text = pet?.name?.trim()?.take(1)?.uppercase()
+                    ?: context.getString(R.string.today_all_pets)
+                row.filterAvatarInitial.setTextColor(identity?.onContainer(context)
+                    ?: MaterialColors.getColor(row.root, com.google.android.material.R.attr.colorOnSurface))
             } else {
+                row.filterAvatarInitial.visibility = View.GONE
+                row.filterAvatarImage.visibility = View.VISIBLE
                 row.filterAvatarImage.clearColorFilter()
                 row.filterAvatarImage.setPadding(0, 0, 0, 0)
                 row.filterAvatarImage.load(photo)
@@ -98,6 +104,11 @@ class TodayTaskAdapter(
     var restoringTaskId: Long? = null
     private var draggedItems: MutableList<CareTaskSummary>? = null
     private var originalSlots: List<Long> = emptyList()
+    var reorderMode: Boolean = false
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     fun beginDrag() {
         draggedItems = currentList.toMutableList()
@@ -138,13 +149,20 @@ class TodayTaskAdapter(
                 height = ViewGroup.LayoutParams.WRAP_CONTENT
             }
             val overdue = !completed && task.dueDateEpochDay < todayEpochDay
-            row.taskColorRail.setBackgroundColor(
-                if (overdue) androidx.core.content.ContextCompat.getColor(context, R.color.error)
-                else PetColor.fromIndex(task.petColorIndex).primary
-            )
+            val petColor = PetColor.fromIndex(task.petColorIndex)
+            row.taskColorRail.setBackgroundColor(petColor.primary)
             row.taskTimeText.text = formatTime(task.reminderMinutesOfDay)
+            row.taskTimeText.visibility = if (overdue) View.GONE else View.VISIBLE
             row.taskTitleText.text = task.title
             row.taskPetText.text = task.petName
+            row.taskPetText.setTextColor(petColor.onContainer(context))
+            row.taskPetText.background = GradientDrawable().apply {
+                setColor(petColor.container(context))
+                cornerRadius = context.resources.getDimension(R.dimen.radius_pill)
+            }
+            val tagHorizontal = context.resources.getDimensionPixelSize(R.dimen.space_8)
+            val tagVertical = context.resources.getDimensionPixelSize(R.dimen.space_4)
+            row.taskPetText.setPadding(tagHorizontal, tagVertical, tagHorizontal, tagVertical)
             row.taskDueDateText.visibility = if (task.dueDateEpochDay == todayEpochDay)
                 View.GONE else View.VISIBLE
             if (task.dueDateEpochDay != todayEpochDay) {
@@ -176,8 +194,21 @@ class TodayTaskAdapter(
             row.root.animate().cancel()
             row.root.scaleX = 1f
             row.root.scaleY = 1f
-            row.completeTaskButton.visibility = if (completed) View.GONE else View.VISIBLE
+            row.completeTaskButton.visibility = View.VISIBLE
             row.completeTaskButton.isEnabled = !completed
+            row.completeTaskButton.strokeColor = ColorStateList.valueOf(petColor.primary)
+            row.completeTaskButton.backgroundTintList = ColorStateList.valueOf(
+                if (completed) petColor.primary else Color.TRANSPARENT
+            )
+            row.completeTaskButton.icon = if (completed)
+                AppCompatResources.getDrawable(context, R.drawable.ic_check) else null
+            row.completeTaskButton.iconTint = ColorStateList.valueOf(Color.WHITE)
+            row.taskTitleText.paintFlags = if (completed)
+                row.taskTitleText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            else row.taskTitleText.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            row.taskTitleText.setTextColor(context.getColor(
+                if (completed) R.color.text_secondary else R.color.text_primary
+            ))
             row.completeTaskButton.setOnClickListener {
                 row.completeTaskButton.isEnabled = false
                 GestureHaptics.confirm(row.root)
@@ -194,7 +225,7 @@ class TodayTaskAdapter(
                 }
                 onComplete(task)
             }
-            row.taskDragHandle.visibility = if (completed) View.GONE else View.VISIBLE
+            row.taskDragHandle.visibility = if (!completed && reorderMode) View.VISIBLE else View.GONE
             row.taskDragHandle.setOnLongClickListener {
                 GestureHaptics.confirm(row.taskDragHandle)
                 onDrag(this@Holder)

@@ -122,12 +122,13 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/category_layout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                style="@style/Widget.PetCare.TextInput.Dropdown"
                 android:layout_width="@dimen/layout_zero"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/layout_6_dp"
                 android:layout_weight="1"
                 android:hint="@string/task_category"
+                android:labelFor="@id/category_input"
                 app:boxBackgroundColor="@color/surface_container_low">
 
                 <AutoCompleteTextView
@@ -135,18 +136,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="@string/task_category"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/frequency_layout"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                style="@style/Widget.PetCare.TextInput.Dropdown"
                 android:layout_width="@dimen/layout_zero"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/layout_6_dp"
                 android:layout_weight="1"
                 android:hint="@string/task_frequency"
+                android:labelFor="@id/frequency_input"
                 app:boxBackgroundColor="@color/surface_container_low">
 
                 <AutoCompleteTextView
@@ -154,18 +155,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:focusable="false"
-                    android:hint="@string/task_frequency"
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/pet_layout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            style="@style/Widget.PetCare.TextInput.Dropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/layout_14_dp"
             android:hint="@string/select_pet"
+            android:labelFor="@id/pet_input"
             app:boxBackgroundColor="@color/surface_container_low"
             app:boxCornerRadiusBottomEnd="@dimen/space_16"
             app:boxCornerRadiusBottomStart="@dimen/space_16"
@@ -177,17 +178,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:focusable="false"
-                android:hint="@string/select_pet"
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/task_place_layout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            style="@style/Widget.PetCare.TextInput.Dropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_12"
-            android:hint="@string/task_place">
+            android:hint="@string/task_place"
+            android:labelFor="@id/task_place_input">
             <AutoCompleteTextView
                 android:id="@+id/task_place_input"
                 android:layout_width="match_parent"

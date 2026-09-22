@@ -1,5 +1,6 @@
 package com.example.petcare.ui.settings
 
+import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
 import android.net.Uri
 import android.view.LayoutInflater
@@ -89,7 +90,7 @@ class SettingsFragment : Fragment() {
                 if (available) biometric.setEnabledFor(auth.ownerId(), true)
                 else {
                     binding.biometricSwitch.isChecked = false
-                    Snackbar.make(binding.root, R.string.biometric_unavailable,
+                    UiSnackbar.make(binding.root, R.string.biometric_unavailable,
                         Snackbar.LENGTH_LONG).show()
                 }
             }
@@ -121,7 +122,7 @@ class SettingsFragment : Fragment() {
                         val snapshot = repository.clear()
                         snapshot.tasks.forEach { scheduler.cancel(it.id) }
                         CareWidgetProvider.refresh(app)
-                        Snackbar.make(requireActivity().findViewById(R.id.main),
+                        UiSnackbar.make(requireActivity().findViewById(R.id.main),
                             R.string.care_data_cleared, Snackbar.LENGTH_LONG)
                             .setDuration(10_000)
                             .setAction(R.string.undo) {
@@ -151,7 +152,7 @@ class SettingsFragment : Fragment() {
                     } ?: error("Document stream unavailable")
                 }
             }.isSuccess
-            Snackbar.make(binding.root, if (success) R.string.backup_saved else
+            UiSnackbar.make(binding.root, if (success) R.string.backup_saved else
                 R.string.backup_failed, Snackbar.LENGTH_LONG).show()
         }
     }
@@ -171,7 +172,7 @@ class SettingsFragment : Fragment() {
                             } ?: error("Document stream unavailable")
                         }
                     }.getOrNull()
-                    Snackbar.make(binding.root, if (count == null) getString(R.string.restore_failed)
+                    UiSnackbar.make(binding.root, if (count == null) getString(R.string.restore_failed)
                         else resources.getQuantityString(R.plurals.restore_finished, count, count),
                         Snackbar.LENGTH_LONG).show()
                 }

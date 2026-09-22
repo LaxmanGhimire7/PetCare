@@ -11,11 +11,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.data.local.AuthPreferences
-import com.example.petcare.ui.BrandFonts
 import com.example.petcare.ui.MotionTransitions
 import com.example.petcare.ui.home.HomeDashboardFragment
 import com.example.petcare.ui.pets.PetListFragment
@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
             pendingDeepLinkUri = intent.data
             setIntent(Intent(this, MainActivity::class.java).apply { action = Intent.ACTION_MAIN })
         }
-        val brandFonts = BrandFonts(this)
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentPreCreated(
@@ -71,19 +70,12 @@ class MainActivity : AppCompatActivity() {
                         is AddProviderFragment -> MotionTransitions.forward(fragment)
                     }
                 }
-                override fun onFragmentViewCreated(
-                    fm: FragmentManager,
-                    fragment: Fragment,
-                    view: android.view.View,
-                    savedInstanceState: Bundle?
-                ) {
-                    brandFonts.applyTo(view)
-                }
             },
             true
         )
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
+        updateSystemBarAppearance()
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
             .navController
         val primaryDestinations = setOf(
@@ -128,7 +120,6 @@ class MainActivity : AppCompatActivity() {
                     if (destination.id in primaryDestinations) android.view.View.VISIBLE else android.view.View.GONE
             }
         }
-        brandFonts.load()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -153,6 +144,16 @@ class MainActivity : AppCompatActivity() {
                         .withEndAction { provider.remove() }
                         .start()
             }
+        }
+    }
+
+    /** Keeps status and navigation controls visible against the app's designed canvas. */
+    private fun updateSystemBarAppearance() {
+        val dark = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
         }
     }
 

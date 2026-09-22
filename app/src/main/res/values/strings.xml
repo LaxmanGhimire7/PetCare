@@ -340,6 +340,16 @@
     <string name="location_services_off">Turn on device location to see nearby places.</string>
     <string name="location_ready">Showing nearby places first.</string>
     <string name="open_settings">Open settings</string>
+    <string name="today_nothing_due">Nothing due today</string>
+    <string name="quick_actions">Quick actions</string>
+    <string name="new_routine">New routine</string>
+    <string name="share_list">Share list</string>
+    <string name="import_plan">Import plan</string>
+    <string name="export_plan">Export plan</string>
+    <string name="reorder_tasks">Reorder tasks</string>
+    <string name="done_reordering">Done reordering</string>
+    <string name="task_options">Task options</string>
+    <string name="new_task">New task</string>
     <string name="place_hours_unknown">Opening hours not provided</string>
     <string name="place_coordinate_invalid">Enter valid latitude and longitude, or leave both blank.</string>
     <string name="location_chip">Directions to this task</string>

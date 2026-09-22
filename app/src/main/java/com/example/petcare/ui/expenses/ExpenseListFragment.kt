@@ -1,5 +1,6 @@
 package com.example.petcare.ui.expenses
 
+import com.example.petcare.ui.UiSnackbar
 import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -68,7 +69,7 @@ class ExpenseListFragment : Fragment() {
                         is ScreenState.Content -> render(state.data)
                         is ScreenState.Error -> {
                             render(emptyList())
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                            UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -145,7 +146,7 @@ class ExpenseListFragment : Fragment() {
             row.deleteButton.setOnClickListener {
                 RowMotion.collapse(row.root) { viewLifecycleOwner.lifecycleScope.launch {
                     val deleted = viewModel.delete(expense.id) ?: return@launch
-                    Snackbar.make(binding.root, R.string.expense_deleted, Snackbar.LENGTH_LONG)
+                    UiSnackbar.make(binding.root, R.string.expense_deleted, Snackbar.LENGTH_LONG)
                         .setDuration(6000)
                         .setAction(R.string.undo) {
                             restoringId = deleted.id
@@ -172,7 +173,7 @@ class ExpenseListFragment : Fragment() {
                     } ?: error("Document stream unavailable")
                 }.isSuccess
             }
-            Snackbar.make(binding.root, if (success) R.string.expense_exported else
+            UiSnackbar.make(binding.root, if (success) R.string.expense_exported else
                 R.string.expense_export_failed, Snackbar.LENGTH_LONG).show()
         }
     }

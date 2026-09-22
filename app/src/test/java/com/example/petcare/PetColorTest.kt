@@ -10,7 +10,7 @@ class PetColorTest {
     @Test fun newPetsCycleThroughSixColours() {
         assertEquals(1, ColorAssignment.forNewPet(0))
         assertEquals(0, ColorAssignment.forNewPet(5))
-        assertEquals(PetColor.LAKE, PetColor.fromIndex(1))
-        assertEquals(PetColor.PLUM, PetColor.fromIndex(-1))
+        assertEquals(PetColor.IRIS, PetColor.fromIndex(1))
+        assertEquals(PetColor.STONE, PetColor.fromIndex(-1))
     }
 }

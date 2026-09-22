@@ -24,7 +24,7 @@ class ProgressRingView @JvmOverloads constructor(
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
         textSize = resources.getDimension(R.dimen.progress_ring_text)
-        typeface = ResourcesCompat.getFont(context, R.font.manrope_semibold)
+        typeface = ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_bold)
     }
     private val arc = RectF()
     private var sweep = 0f

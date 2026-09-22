@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#2E6B5E</color>
-    <color name="on_primary">#FFFFFF</color>
-    <color name="primary_container">#D7EBE4</color>
-    <color name="on_primary_container">#083D32</color>
-    <color name="secondary">#53665F</color>
-    <color name="on_secondary">#FFFFFF</color>
-    <color name="secondary_container">#E3EBE6</color>
-    <color name="on_secondary_container">#263D34</color>
-    <color name="tertiary">#5B6359</color>
-    <color name="background">#FAFAF8</color>
-    <color name="surface">#FAFAF8</color>
-    <color name="surface_container_low">#F7F7F4</color>
-    <color name="surface_container">#F1F1EE</color>
-    <color name="surface_container_high">#EAEAE6</color>
-    <color name="surface_variant">#F1F1EE</color>
-    <color name="on_surface">#16171A</color>
-    <color name="on_surface_variant">#5E635F</color>
-    <color name="on_background">#16171A</color>
-    <color name="outline">#858B85</color>
-    <color name="outline_variant">#DCDCD6</color>
-    <color name="error">#B3261E</color>
-    <color name="on_error">#FFFFFF</color>
-    <color name="hero_start">#E7F2EC</color>
-    <color name="hero_end">#F1F1EE</color>
-    <color name="on_hero">#16171A</color>
-    <color name="hero_muted">#5E635F</color>
-    <color name="hero_button">#2E6B5E</color>
+    <!-- UI redesign colour tokens: neutral chrome, brass actions, pet-owned colour. -->
+    <color name="canvas">#F4F5F7</color><color name="surface">#FFFFFF</color>
+    <color name="surface_muted">#ECEEF2</color><color name="hairline">#E3E5EA</color>
+    <color name="text_primary">#1A1D24</color><color name="text_secondary">#5A6070</color><color name="text_tertiary">#6E7482</color>
+    <color name="brass">#FFC83D</color><color name="on_brass">#1A1D24</color><color name="brass_soft">#FFF3CC</color>
+    <color name="error">#D92D20</color><color name="error_soft">#FDECEA</color><color name="on_error">#FFFFFF</color>
+    <!-- Material aliases keep existing views on the same tokens. -->
+    <color name="primary">@color/brass</color><color name="on_primary">@color/on_brass</color>
+    <color name="primary_container">@color/brass_soft</color><color name="on_primary_container">@color/text_primary</color>
+    <color name="secondary">@color/text_secondary</color><color name="on_secondary">@color/surface</color>
+    <color name="secondary_container">@color/surface_muted</color><color name="on_secondary_container">@color/text_primary</color>
+    <color name="tertiary">@color/text_secondary</color><color name="background">@color/canvas</color>
+    <color name="surface_container_low">@color/surface</color><color name="surface_container">@color/surface</color>
+    <color name="surface_container_high">@color/surface_muted</color><color name="surface_variant">@color/surface_muted</color>
+    <color name="on_surface">@color/text_primary</color><color name="on_surface_variant">@color/text_secondary</color>
+    <color name="on_background">@color/text_primary</color><color name="outline">@color/text_tertiary</color><color name="outline_variant">@color/hairline</color>
+    <color name="hero_start">@color/brass_soft</color><color name="hero_end">@color/surface</color><color name="on_hero">@color/text_primary</color>
+    <color name="hero_muted">@color/text_secondary</color><color name="hero_button">@color/brass</color>
 </resources>

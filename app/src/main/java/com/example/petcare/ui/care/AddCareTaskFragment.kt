@@ -1,5 +1,6 @@
 package com.example.petcare.ui.care
 
+import com.example.petcare.ui.UiSnackbar
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -274,7 +275,7 @@ class AddCareTaskFragment : Fragment() {
             placeId = selectedPlace?.id,
             onError = {
                 binding.saveCareTaskButton.isEnabled = true
-                Snackbar.make(binding.root, R.string.task_save_failed, Snackbar.LENGTH_LONG).show()
+                UiSnackbar.make(binding.root, R.string.task_save_failed, Snackbar.LENGTH_LONG).show()
             },
             onSaved = { savedCareTask ->
                 CareReminderScheduler(requireContext()).schedule(savedCareTask)
@@ -284,7 +285,7 @@ class AddCareTaskFragment : Fragment() {
                         .savedStateHandle[SAVED_TASK_RESULT_KEY] = savedCareTask.id
                 }
                 findNavController().navigateUp()
-                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
                     getString(R.string.task_saved_for_date,
                         formatDate(savedCareTask.dueDateEpochDay)), Snackbar.LENGTH_LONG).show()
             }

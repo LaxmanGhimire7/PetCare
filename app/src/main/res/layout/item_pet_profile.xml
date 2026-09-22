@@ -37,6 +37,15 @@
                 android:padding="@dimen/layout_18_dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_pets" />
+
+            <TextView
+                android:id="@+id/pet_initial_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:importantForAccessibility="no"
+                android:textAppearance="@style/TextAppearance.PetCare.Headline"
+                android:visibility="gone" />
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout

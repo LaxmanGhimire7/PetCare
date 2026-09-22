@@ -1,5 +1,6 @@
 package com.example.petcare.ui.pets
 
+import com.example.petcare.ui.UiSnackbar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -112,11 +113,11 @@ class AddPetFragment : Fragment() {
             selectedColorIndex = selectedColorIndex,
             onError = {
                 binding.savePetButton.isEnabled = true
-                Snackbar.make(binding.root, R.string.pet_save_failed, Snackbar.LENGTH_LONG).show()
+                UiSnackbar.make(binding.root, R.string.pet_save_failed, Snackbar.LENGTH_LONG).show()
             },
             onSaved = { _ ->
                 findNavController().navigateUp()
-                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
                     R.string.pet_saved, Snackbar.LENGTH_SHORT).show()
             }
         )

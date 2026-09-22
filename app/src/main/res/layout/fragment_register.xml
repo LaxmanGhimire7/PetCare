@@ -18,7 +18,7 @@
             </LinearLayout>
             <TextView android:id="@+id/auth_display_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_26_dp"
                 android:text="@string/register_title" android:textColor="@color/on_hero" android:textSize="@dimen/layout_33_sp"
-                android:fontFamily="@font/fraunces_semibold" />
+        android:fontFamily="@font/plus_jakarta_sans_extrabold" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_7_dp"
                 android:text="@string/register_subtitle" android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="@color/hero_muted" />
         </LinearLayout>

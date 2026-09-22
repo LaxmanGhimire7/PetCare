@@ -1,5 +1,6 @@
 package com.example.petcare.ui.home
 
+import com.example.petcare.ui.UiSnackbar
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.Context
@@ -13,6 +14,7 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import android.view.animation.AlphaAnimation
 import android.view.animation.AnimationSet
 import android.view.animation.TranslateAnimation
@@ -43,7 +45,6 @@ import com.example.petcare.reminders.CareReminderScheduler
 import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.GestureCoachPrefs
-import com.example.petcare.ui.BrandFonts
 import com.example.petcare.ui.RowMotion
 import com.example.petcare.widget.CareWidgetProvider
 import com.example.petcare.ui.integration.DelegationPreviewFragment
@@ -84,6 +85,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     }
     private var lastScrollAt = 0L
     private var resetDialogShowing = false
+    private var reorderMode = false
 
     private val icsDocument = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/calendar")
@@ -117,12 +119,16 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             in 12..17 -> R.string.today_greeting_afternoon
             else -> R.string.today_greeting_evening
         }
-        binding.collapsingToolbar.title = getString(
-            greeting,
-            AuthPreferences(requireContext()).userName().orEmpty().ifBlank {
-                getString(R.string.default_pet_parent_name)
-            }
-        )
+        val userName = AuthPreferences(requireContext()).userName().orEmpty().ifBlank {
+            getString(R.string.default_pet_parent_name)
+        }
+        binding.greetingText.text = getString(greeting, userName)
+        binding.todayDateText.text = DateFormat.getDateInstance(DateFormat.FULL).format(Date())
+        binding.profileAvatarText.text = userName.trim().split(Regex("\\s+"))
+            .filter(String::isNotBlank).take(2).joinToString("") { it.take(1).uppercase() }
+        binding.profileAvatarText.setOnClickListener {
+            findNavController().navigate(R.id.settingsFragment)
+        }
         binding.petFilterRecycler.layoutManager =
             LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
         binding.petFilterRecycler.adapter = filterAdapter
@@ -143,6 +149,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             findNavController().navigate(R.id.action_home_to_add_care_task)
         }
         binding.todayEmptyAction.setOnClickListener { openEmptyAction() }
+        binding.reorderModeButton.setOnClickListener { showTaskOptions() }
         binding.completedHeader.setOnClickListener {
             completedExpanded = !completedExpanded
             binding.completedRecycler.visibility = if (completedExpanded) View.VISIBLE else View.GONE
@@ -173,7 +180,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                 // Re-read Room and the local calendar day so midnight and overdue state refresh.
                 viewModel.refresh()
                 binding.todayRefresh.isRefreshing = false
-                Snackbar.make(binding.root, R.string.today_refreshed, Snackbar.LENGTH_SHORT).show()
+                UiSnackbar.make(binding.root, R.string.today_refreshed, Snackbar.LENGTH_SHORT).show()
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -201,14 +208,14 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                                     .firstOrNull { it.id == pendingDeepLinkTaskId }
                                 pendingDeepLinkTaskId = 0L
                                 if (target != null) openDetail(target)
-                                else Snackbar.make(binding.root, R.string.task_unavailable,
+                                else UiSnackbar.make(binding.root, R.string.task_unavailable,
                                     Snackbar.LENGTH_LONG).show()
                             }
                         }
                         is ScreenState.Error -> {
                             binding.loadingSkeleton.visibility = View.GONE
                             binding.loadingSkeleton.stop()
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                            UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
@@ -231,7 +238,6 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         val preferences = GestureCoachPrefs(requireContext())
         if (!preferences.shouldShow()) return
         val content = layoutInflater.inflate(R.layout.dialog_gesture_coach, null)
-        BrandFonts(requireContext()).applyTo(content)
         val dialog = MaterialAlertDialogBuilder(requireContext()).setView(content).create()
         content.findViewById<MaterialButton>(R.id.gesture_coach_done)
             .setOnClickListener { GestureHaptics.confirm(it); dialog.dismiss() }
@@ -265,13 +271,16 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         val dueCount = latestUpcoming.count { it.dueDateEpochDay == today }
         val firstEntrance = viewModel.consumeFirstEntrance()
         val progress = doneCount to (doneCount + dueCount)
-        binding.progressRing.setProgress(
+        val hasTasksToday = doneCount + dueCount > 0
+        binding.progressRing.visibility = if (hasTasksToday) View.VISIBLE else View.GONE
+        if (hasTasksToday) binding.progressRing.setProgress(
             doneCount, doneCount + dueCount,
             firstEntrance || (previousProgress != null && previousProgress != progress)
         )
         previousProgress = progress
-        binding.progressCountText.text =
+        binding.progressCountText.text = if (hasTasksToday)
             getString(R.string.today_progress_count, doneCount, doneCount + dueCount)
+        else getString(R.string.today_nothing_due)
         val nextToday = latestUpcoming.filter { it.dueDateEpochDay == today }
             .minByOrNull(CareTaskSummary::reminderMinutesOfDay)
         val nextFuture = latestUpcoming.filter { it.dueDateEpochDay > today }
@@ -286,6 +295,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             else -> getString(R.string.today_nothing_next)
         }
         binding.upcomingHeader.text = getString(R.string.today_upcoming_count, upcoming.size)
+        binding.reorderModeButton.visibility = if (upcoming.isNotEmpty()) View.VISIBLE else View.GONE
         binding.completedHeader.text = getString(R.string.today_completed_count, completedToday.size)
         binding.completedHeader.visibility =
             if (completedToday.isEmpty()) View.GONE else View.VISIBLE
@@ -311,8 +321,36 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         binding.addTaskInline.visibility = if (inlineAdd) View.VISIBLE else View.GONE
         binding.addTaskFab.visibility = if (latestPets.isEmpty() || inlineAdd) View.GONE
             else View.VISIBLE
-        binding.generateRoutineButton.isEnabled = latestPets.isNotEmpty()
+        val hasPets = latestPets.isNotEmpty()
+        binding.quickActionsContainer.visibility = if (hasPets) View.VISIBLE else View.GONE
+        binding.resetChecklistButton.visibility = View.GONE
+        binding.importSourcesText.visibility = View.GONE
         if (firstEntrance && MotionPrefs.animationsEnabled(requireContext())) playTaskEntrance()
+    }
+
+    /** Keeps reorder and destructive reset discoverable without placing controls under the FAB. */
+    private fun showTaskOptions() {
+        PopupMenu(requireContext(), binding.reorderModeButton).apply {
+            inflate(R.menu.today_task_options)
+            menu.findItem(R.id.action_reorder_tasks).setTitle(
+                if (reorderMode) R.string.done_reordering else R.string.reorder_tasks
+            )
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_reorder_tasks -> {
+                        reorderMode = !reorderMode
+                        upcomingAdapter.reorderMode = reorderMode
+                        true
+                    }
+                    R.id.action_reset_checklist -> {
+                        confirmChecklistReset()
+                        true
+                    }
+                    else -> false
+                }
+            }
+            show()
+        }
     }
 
     /** A 40 ms row interval makes the first data arrival legible without replaying on tab return. */
@@ -385,7 +423,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     private fun confirmChecklistReset() {
         if (resetDialogShowing) return
         if (latestCompleted.none { it.dueDateEpochDay == todayEpochDay() }) {
-            Snackbar.make(binding.root, R.string.reset_today_empty, Snackbar.LENGTH_SHORT).show()
+            UiSnackbar.make(binding.root, R.string.reset_today_empty, Snackbar.LENGTH_SHORT).show()
             return
         }
         resetDialogShowing = true
@@ -405,7 +443,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                 it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)
             }
             snapshots.filter { it.reminderMinutesOfDay > minutesNow }.forEach(scheduler::schedule)
-            Snackbar.make(binding.root, R.string.reset_today_done, Snackbar.LENGTH_LONG)
+            UiSnackbar.make(binding.root, R.string.reset_today_done, Snackbar.LENGTH_LONG)
                 .setDuration(6000)
                 .setAction(R.string.undo) {
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -420,7 +458,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         viewLifecycleOwner.lifecycleScope.launch {
             val snapshot = viewModel.deleteTask(task.id) ?: return@launch
             scheduler.cancel(task.id)
-            Snackbar.make(binding.root, R.string.task_deleted, Snackbar.LENGTH_LONG)
+            UiSnackbar.make(binding.root, R.string.task_deleted, Snackbar.LENGTH_LONG)
                 .setDuration(6000)
                 .setAction(R.string.undo) {
                     upcomingAdapter.restoringTaskId = snapshot.id
@@ -446,7 +484,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun shareChecklist(items: List<CareTaskSummary>) {
         if (items.isEmpty()) {
-            Snackbar.make(binding.root, R.string.nothing_to_share, Snackbar.LENGTH_SHORT).show()
+            UiSnackbar.make(binding.root, R.string.nothing_to_share, Snackbar.LENGTH_SHORT).show()
             return
         }
         val body = carePlanBody(items)
@@ -477,7 +515,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun chooseCarePlanExport() {
         if (latestUpcoming.isEmpty()) {
-            Snackbar.make(binding.root, R.string.nothing_to_share, Snackbar.LENGTH_SHORT).show()
+            UiSnackbar.make(binding.root, R.string.nothing_to_share, Snackbar.LENGTH_SHORT).show()
             return
         }
         MaterialAlertDialogBuilder(requireContext())
@@ -509,7 +547,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                     } ?: error("No output stream")
                 }.isSuccess
             }
-            Snackbar.make(binding.root,
+            UiSnackbar.make(binding.root,
                 if (saved) R.string.export_saved else R.string.export_failed,
                 Snackbar.LENGTH_LONG).show()
         }

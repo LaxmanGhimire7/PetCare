@@ -1,5 +1,6 @@
 package com.example.petcare
 
+import com.example.petcare.ui.UiSnackbar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -13,7 +14,6 @@ import com.example.petcare.databinding.ActivityImportBinding
 import com.example.petcare.integration.AppointmentDraft
 import com.example.petcare.integration.SharedAppointmentParser
 import com.example.petcare.integration.IcsAppointmentParser
-import com.example.petcare.ui.BrandFonts
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,7 +37,6 @@ class ImportActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityImportBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        BrandFonts(this).applyTo(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.importRoot) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -50,7 +49,7 @@ class ImportActivity : AppCompatActivity() {
             val content = state?.getString(STATE_CONTENT)
                 ?: withContext(Dispatchers.IO) { readSharedContent(intent) }
             if (content.isNullOrBlank()) {
-                Snackbar.make(binding.root, R.string.import_error_read, Snackbar.LENGTH_INDEFINITE).show()
+                UiSnackbar.make(binding.root, R.string.import_error_read, Snackbar.LENGTH_INDEFINITE).show()
             } else {
                 sharedContent = content
                 drafts = if (isCalendarType(intent.type) || content.contains("BEGIN:VEVENT"))
@@ -59,7 +58,7 @@ class ImportActivity : AppCompatActivity() {
                             appointment.minutesOfDay, appointment.location, appointment.notes)
                     }
                 else listOf(SharedAppointmentParser.parse(content, intent.type))
-                if (drafts.isEmpty()) Snackbar.make(binding.root, R.string.import_error_read,
+                if (drafts.isEmpty()) UiSnackbar.make(binding.root, R.string.import_error_read,
                     Snackbar.LENGTH_INDEFINITE).show()
                 else {
                     // Keep every reviewed event and the current edits across rotation.

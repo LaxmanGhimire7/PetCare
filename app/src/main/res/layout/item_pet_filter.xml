@@ -23,6 +23,14 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ic_pets"
             android:contentDescription="@string/pet_photo" />
+        <TextView
+            android:id="@+id/filter_avatar_initial"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:textAppearance="@style/TextAppearance.PetCare.Title"
+            android:visibility="gone" />
     </com.google.android.material.card.MaterialCardView>
 
     <TextView

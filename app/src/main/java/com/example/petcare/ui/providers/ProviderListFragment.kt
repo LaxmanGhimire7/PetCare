@@ -1,5 +1,6 @@
 package com.example.petcare.ui.providers
 
+import com.example.petcare.ui.UiSnackbar
 import android.content.Intent
 import android.content.ActivityNotFoundException
 import android.Manifest
@@ -90,7 +91,7 @@ class ProviderListFragment : Fragment() {
                     is ScreenState.Content -> { places = state.data; render(places); updateMarkers() }
                     is ScreenState.Error -> {
                         places = emptyList(); render(places); updateMarkers()
-                        Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                        UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
@@ -248,7 +249,7 @@ class ProviderListFragment : Fragment() {
         val action: () -> Unit = {
             viewLifecycleOwner.lifecycleScope.launch {
                 val deleted = viewModel.delete(id) ?: return@launch
-                Snackbar.make(binding.root, R.string.place_deleted, Snackbar.LENGTH_LONG)
+                UiSnackbar.make(binding.root, R.string.place_deleted, Snackbar.LENGTH_LONG)
                     .setDuration(6000).setAction(R.string.undo) {
                         restoringId = deleted.id
                         viewLifecycleOwner.lifecycleScope.launch { viewModel.restore(deleted) }
@@ -263,7 +264,7 @@ class ProviderListFragment : Fragment() {
         if (query.isBlank()) return
         viewLifecycleOwner.lifecycleScope.launch {
             val result = PlaceLocation.search(requireContext(), query)
-            if (result == null) Snackbar.make(binding.root, R.string.place_search_empty, Snackbar.LENGTH_LONG).show()
+            if (result == null) UiSnackbar.make(binding.root, R.string.place_search_empty, Snackbar.LENGTH_LONG).show()
             else if (map != null) map?.animateCamera(CameraUpdateFactory.newLatLngZoom(
                 LatLng(result.first, result.second), 14f))
             else openIntent(Intent(Intent.ACTION_VIEW, Uri.parse(

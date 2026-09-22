@@ -1,5 +1,6 @@
 package com.example.petcare.ui.auth
 
+import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -116,7 +117,7 @@ class LoginFragment : Fragment() {
                             findNavController().navigate(if (OnboardingPrefs(requireContext()).isComplete())
                                 R.id.action_login_to_home else R.id.action_login_to_onboarding)
                         } else {
-                            Snackbar.make(binding.root, R.string.biometric_account_unavailable,
+                            UiSnackbar.make(binding.root, R.string.biometric_account_unavailable,
                                 Snackbar.LENGTH_LONG).show()
                         }
                     }
@@ -125,7 +126,7 @@ class LoginFragment : Fragment() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
                         errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                        Snackbar.make(binding.root, R.string.biometric_failed,
+                        UiSnackbar.make(binding.root, R.string.biometric_failed,
                             Snackbar.LENGTH_LONG).show()
                     }
                 }

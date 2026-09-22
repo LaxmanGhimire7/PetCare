@@ -1,5 +1,6 @@
 package com.example.petcare.ui.search
 
+import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -64,7 +65,7 @@ class SearchFragment : Fragment() {
                         is ScreenState.Content -> showData(state.data)
                         is ScreenState.Error -> {
                             binding.resultsContainer.removeAllViews()
-                            Snackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
+                            UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }

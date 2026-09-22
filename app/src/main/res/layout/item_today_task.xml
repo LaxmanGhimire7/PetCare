@@ -1,108 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Today task row: rail identifies the pet; time, title and state remain separate. -->
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Core task row from redesign C5: checkbox first, task hierarchy, time or overdue at right. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/space_8"
-    app:cardBackgroundColor="?attr/colorSurfaceContainer"
-    app:cardCornerRadius="@dimen/radius_card"
-    app:cardElevation="@dimen/layout_zero">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="@dimen/space_8"
-        android:paddingEnd="@dimen/space_8">
-
-        <View
-            android:id="@+id/task_color_rail"
-            android:layout_width="@dimen/task_rail_width"
-            android:layout_height="@dimen/task_rail_height"
-            android:background="?attr/colorPrimary" />
-
-        <TextView
-            android:id="@+id/task_time_text"
-            android:layout_width="@dimen/task_time_width"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.PetCare.Label"
-            android:fontFeatureSettings="tnum" />
-
-        <LinearLayout
-            android:layout_width="@dimen/layout_zero"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingVertical="@dimen/space_12">
-            <TextView
-                android:id="@+id/task_title_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:textAppearance="@style/TextAppearance.PetCare.Title" />
-            <TextView
-                android:id="@+id/task_pet_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_4"
-                android:textAppearance="@style/TextAppearance.PetCare.Label"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-            <TextView
-                android:id="@+id/task_due_date_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_4"
-                android:textAppearance="@style/TextAppearance.PetCare.Label"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:visibility="gone" />
-            <com.google.android.material.chip.Chip
-                android:id="@+id/task_category_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_4"
-                android:clickable="false"
-                android:checkable="false" />
-            <com.google.android.material.chip.Chip
-                android:id="@+id/task_location_chip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_4"
-                android:text="@string/directions"
-                android:contentDescription="@string/location_chip"
-                android:visibility="gone" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/task_overdue_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/space_8"
-            android:text="@string/overdue"
-            android:textAppearance="@style/TextAppearance.PetCare.Label"
-            android:textColor="?attr/colorError"
-            android:visibility="gone" />
-
-        <ImageView
-            android:id="@+id/task_drag_handle"
-            android:layout_width="@dimen/space_48"
-            android:layout_height="@dimen/space_48"
-            android:padding="@dimen/space_12"
-            android:src="@drawable/ic_drag_handle"
-            android:contentDescription="@string/task_drag_description" />
-
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_8" app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="@dimen/radius_card" app:cardElevation="@dimen/layout_zero">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="@dimen/task_row_min_height" android:gravity="center_vertical"
+        android:orientation="horizontal" android:paddingStart="@dimen/space_8"
+        android:paddingTop="@dimen/space_12" android:paddingEnd="@dimen/space_12" android:paddingBottom="@dimen/space_12">
+        <View android:id="@+id/task_color_rail" android:layout_width="@dimen/layout_zero"
+            android:layout_height="@dimen/layout_zero" android:visibility="gone" />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/complete_task_button"
-            style="@style/Widget.PetCare.Button.Text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/pet_filter_avatar"
-            android:text=""
-            android:contentDescription="@string/task_done_content_description"
-            app:icon="@drawable/ic_check" />
+            android:id="@+id/complete_task_button" style="@style/Widget.PetCare.TaskCheckbox"
+            android:layout_width="@dimen/touch_target" android:layout_height="@dimen/touch_target"
+            android:contentDescription="@string/task_done_content_description" />
+        <LinearLayout android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content"
+            android:layout_weight="1" android:layout_marginStart="@dimen/space_8" android:orientation="vertical">
+            <TextView android:id="@+id/task_title_text" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.PetCare.BodyStrong" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:id="@+id/task_pet_text" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                <com.google.android.material.chip.Chip android:id="@+id/task_category_chip"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_8" android:checkable="false" android:clickable="false"
+                    android:minHeight="@dimen/space_32" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+            </LinearLayout>
+            <TextView android:id="@+id/task_due_date_text" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4"
+                android:textAppearance="@style/TextAppearance.PetCare.Supporting" android:visibility="gone" />
+            <com.google.android.material.chip.Chip android:id="@+id/task_location_chip"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4" android:contentDescription="@string/location_chip"
+                android:text="@string/directions" android:visibility="gone" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="match_parent"
+            android:gravity="end|center_vertical" android:orientation="vertical">
+            <TextView android:id="@+id/task_time_text" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:fontFeatureSettings="tnum"
+                android:textAppearance="@style/TextAppearance.PetCare.Numeric" />
+            <TextView android:id="@+id/task_overdue_text" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:background="@drawable/bg_overdue_pill"
+                android:paddingHorizontal="@dimen/space_8" android:paddingVertical="@dimen/space_4"
+                android:text="@string/overdue" android:textAppearance="@style/TextAppearance.PetCare.Label"
+                android:textColor="@color/error" android:visibility="gone" />
+            <ImageView android:id="@+id/task_drag_handle" android:layout_width="@dimen/touch_target"
+                android:layout_height="@dimen/touch_target" android:contentDescription="@string/task_drag_description"
+                android:padding="@dimen/space_12" android:src="@drawable/ic_drag_handle" android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

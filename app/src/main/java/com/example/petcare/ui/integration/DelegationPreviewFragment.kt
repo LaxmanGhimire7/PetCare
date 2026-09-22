@@ -1,5 +1,6 @@
 package com.example.petcare.ui.integration
 
+import com.example.petcare.ui.UiSnackbar
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -89,7 +90,7 @@ class DelegationPreviewFragment : Fragment() {
     }
 
     private fun showContactError() {
-        Snackbar.make(binding.root, R.string.contact_unavailable, Snackbar.LENGTH_LONG).show()
+        UiSnackbar.make(binding.root, R.string.contact_unavailable, Snackbar.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() { _binding = null; super.onDestroyView() }

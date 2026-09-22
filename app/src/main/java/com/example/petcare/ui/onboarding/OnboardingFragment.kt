@@ -1,5 +1,6 @@
 package com.example.petcare.ui.onboarding
 
+import com.example.petcare.ui.UiSnackbar
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -24,7 +25,7 @@ class OnboardingFragment : Fragment() {
     private val binding get() = _binding!!
     private val notificationPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()) { granted ->
-        Snackbar.make(binding.root, if (granted) R.string.onboarding_notifications_ready
+        UiSnackbar.make(binding.root, if (granted) R.string.onboarding_notifications_ready
             else R.string.onboarding_notifications_later, Snackbar.LENGTH_SHORT).show()
     }
 
