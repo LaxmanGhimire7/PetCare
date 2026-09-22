@@ -193,10 +193,10 @@
         <action android:id="@+id/action_expenses_to_add_expense" app:destination="@id/addExpenseFragment" />
         <action android:id="@+id/action_expenses_to_edit_expense" app:destination="@id/addExpenseFragment" />
     </fragment>
-    <fragment android:id="@+id/addExpenseFragment" android:name="com.example.petcare.ui.expenses.AddExpenseFragment"
+    <dialog android:id="@+id/addExpenseFragment" android:name="com.example.petcare.ui.expenses.AddExpenseFragment"
         android:label="@string/navigation_add_expense" tools:layout="@layout/fragment_add_expense">
         <argument android:name="expenseId" app:argType="long" android:defaultValue="0L" />
-    </fragment>
+    </dialog>
     <fragment android:id="@+id/providerListFragment" android:name="com.example.petcare.ui.providers.ProviderListFragment"
         android:label="@string/navigation_providers" tools:layout="@layout/fragment_feature_list">
         <action android:id="@+id/action_providers_to_add_provider" app:destination="@id/addProviderFragment" />

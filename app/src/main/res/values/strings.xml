@@ -305,6 +305,7 @@
     <string name="add_expense">Add expense</string>
     <string name="expense_amount">Amount</string>
     <string name="expense_category">Category</string>
+    <string name="expense_for_pet">For</string>
     <string name="expense_date">Date</string>
     <string name="expense_note">Note (optional)</string>
     <string name="total_spent">Total: %1$s</string>
