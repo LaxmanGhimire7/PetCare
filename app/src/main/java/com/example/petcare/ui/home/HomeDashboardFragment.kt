@@ -67,6 +67,7 @@ import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 
 /** Today's care, progress, pet filtering and the main care actions. */
@@ -733,11 +734,8 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         }
     }
 
-    private fun formatTime(minutes: Int): String = DateFormat.getTimeInstance(DateFormat.SHORT).format(
-        Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, minutes / 60)
-            set(Calendar.MINUTE, minutes % 60)
-        }.time
+    private fun formatTime(minutes: Int): String = String.format(
+        Locale.getDefault(), "%02d:%02d", minutes / 60, minutes % 60
     )
     private fun formatDate(day: Long): String = DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
         timeZone = TimeZone.getTimeZone("UTC")

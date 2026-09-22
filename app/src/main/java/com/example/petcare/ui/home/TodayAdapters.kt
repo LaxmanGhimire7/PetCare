@@ -27,7 +27,6 @@ import com.example.petcare.databinding.ItemPetFilterBinding
 import com.example.petcare.databinding.ItemTodayTaskBinding
 import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.RowMotion
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -218,13 +217,10 @@ class TodayTaskAdapter(
             timeZone = TimeZone.getTimeZone("UTC")
         }.format(Date(day * DAY_MILLIS))
 
-        private fun formatTime(minutes: Int): String {
-            val calendar = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, minutes / 60)
-                set(Calendar.MINUTE, minutes % 60)
-            }
-            return DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time)
-        }
+        /** Keeps the fixed 44dp instrument column stable across 12/24-hour device settings. */
+        private fun formatTime(minutes: Int): String = String.format(
+            Locale.getDefault(), "%02d:%02d", minutes / 60, minutes % 60
+        )
     }
 
     companion object {
