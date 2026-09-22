@@ -1,70 +1,81 @@
 package com.example.petcare.ui.expenses
 
-import com.example.petcare.ui.UiSnackbar
 import android.animation.ValueAnimator
+import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.activity.result.contract.ActivityResultContracts
-import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
-import com.example.petcare.data.local.expense.ExpenseSummary
-import com.example.petcare.data.local.expense.ExpenseInsights
 import com.example.petcare.data.local.expense.ExpenseCsv
+import com.example.petcare.data.local.expense.ExpenseInsights
+import com.example.petcare.data.local.expense.ExpenseSummary
 import com.example.petcare.data.local.pet.PetColor
+import com.example.petcare.databinding.FragmentExpenseListBinding
+import com.example.petcare.databinding.ItemMoneyCategoryBinding
+import com.example.petcare.databinding.ItemMoneyExpenseBinding
 import com.example.petcare.ui.MotionPrefs
-import com.example.petcare.ui.RowMotion
 import com.example.petcare.ui.ScreenState
-import com.example.petcare.databinding.FragmentFeatureListBinding
-import com.example.petcare.databinding.ItemFeatureBinding
+import com.example.petcare.ui.UiSnackbar
+import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 
-/** Shows expense totals and entries with pet identity colours. */
+/** Shows the Pit Lane monthly spending instrument and editable expense history. */
 class ExpenseListFragment : Fragment() {
-    private var _binding: FragmentFeatureListBinding? = null
+    private var _binding: FragmentExpenseListBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ExpenseListViewModel by viewModels()
+    private var items = emptyList<ExpenseSummary>()
+    private var selectedPet: String? = null
     private var displayedTotal: Long? = null
     private var totalAnimator: ValueAnimator? = null
-    private var restoringId: Long? = null
-    private var currentItems = emptyList<ExpenseSummary>()
-    private val csvDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) {
-        uri -> if (uri != null) writeExport(uri, false)
-    }
-    private val pdfDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) {
-        uri -> if (uri != null) writeExport(uri, true)
-    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) =
-        FragmentFeatureListBinding.inflate(inflater, container, false).also { _binding = it }.root
+    private val csvDocument = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri -> if (uri != null) writeExport(uri, false) }
+    private val pdfDocument = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri -> if (uri != null) writeExport(uri, true) }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View =
+        FragmentExpenseListBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        binding.titleText.setText(R.string.expense_title)
-        binding.summaryText.setTextAppearance(R.style.TextAppearance_PetCare_Numeric)
-        binding.subtitleText.setText(R.string.expense_subtitle)
-        binding.addButton.setText(R.string.add_expense)
-        binding.emptyText.setText(R.string.expense_empty)
-        binding.backButton.visibility = View.GONE
-        binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_expenses_to_add_expense) }
+        binding.monthButton.text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
+        binding.addButton.setOnClickListener {
+            findNavController().navigate(R.id.action_expenses_to_add_expense)
+        }
+        binding.exportCsvButton.setOnClickListener {
+            csvDocument.launch(getString(R.string.expense_csv_filename))
+        }
+        binding.exportPdfButton.setOnClickListener {
+            pdfDocument.launch(getString(R.string.expense_pdf_filename))
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
                     when (state) {
-                        ScreenState.Loading -> binding.emptyText.visibility = View.GONE
+                        ScreenState.Loading -> Unit
                         ScreenState.Empty -> render(emptyList())
                         is ScreenState.Content -> render(state.data)
                         is ScreenState.Error -> {
@@ -77,93 +88,145 @@ class ExpenseListFragment : Fragment() {
         }
     }
 
-    private fun render(items: List<ExpenseSummary>) {
-        currentItems = items
-        val total = items.sumOf { it.amountCents }
+    /** Rebuilds all summaries after Room or the pet filter changes. */
+    private fun render(newItems: List<ExpenseSummary>) {
+        items = newItems
+        buildPetFilters(newItems)
+        val filtered = selectedPet?.let { name -> newItems.filter { it.petName == name } } ?: newItems
+        val current = filtered.filter(::isCurrentMonth)
+        val total = current.sumOf(ExpenseSummary::amountCents)
+        animateTotal(total)
+
+        val insights = ExpenseInsights.calculate(filtered, System.currentTimeMillis() / MILLIS_PER_DAY)
+        binding.insightsView.summary = insights
+        binding.changeText.text = insights.monthChangePercent?.let {
+            getString(R.string.expense_month_change, it)
+        } ?: getString(R.string.expense_month_change_unavailable)
+        buildSplitBar(current)
+        buildCategories(current)
+        buildRecent(filtered.take(10))
+        binding.emptyText.isVisible = filtered.isEmpty()
+        binding.categoryContainer.parent.let { (it as View).isVisible = filtered.isNotEmpty() }
+        binding.recentContainer.parent.let { (it as View).isVisible = filtered.isNotEmpty() }
+    }
+
+    private fun buildPetFilters(source: List<ExpenseSummary>) {
+        val pets = source.distinctBy { it.petName }.map { it.petName to it.petColorIndex }
+        val expected = listOf<String?>(null) + pets.map { it.first }
+        if (binding.petFilterGroup.childCount == expected.size &&
+            (0 until binding.petFilterGroup.childCount).map {
+                binding.petFilterGroup.getChildAt(it).tag as? String
+            } == expected.map { it.orEmpty() }) return
+
+        binding.petFilterGroup.removeAllViews()
+        addFilterChip(null, getString(R.string.money_all_pets), null)
+        pets.forEach { (name, colorIndex) -> addFilterChip(name, name, colorIndex) }
+    }
+
+    private fun addFilterChip(value: String?, label: String, colorIndex: Int?) {
+        val chip = Chip(requireContext()).apply {
+            id = View.generateViewId()
+            text = label
+            tag = value.orEmpty()
+            isCheckable = true
+            isChecked = value == selectedPet
+            minHeight = resources.getDimensionPixelSize(R.dimen.space_40)
+            if (colorIndex != null) {
+                val petColor = PetColor.fromIndex(colorIndex)
+                chipIconTint = ColorStateList.valueOf(petColor.color(context))
+                isChipIconVisible = true
+                chipIcon = requireContext().getDrawable(R.drawable.bg_now_dot)
+            }
+            setOnCheckedChangeListener { _, checked ->
+                if (checked && selectedPet != value) {
+                    selectedPet = value
+                    render(items)
+                }
+            }
+        }
+        binding.petFilterGroup.addView(chip)
+    }
+
+    private fun animateTotal(total: Long) {
         val previous = displayedTotal
         totalAnimator?.cancel()
         if (previous != null && previous != total && MotionPrefs.animationsEnabled(requireContext())) {
             totalAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
                 duration = 200L
-                addUpdateListener { frame ->
-                    val shown = previous + ((total - previous) * (frame.animatedValue as Float)).toLong()
-                    binding.summaryText.text = getString(R.string.total_spent, money(shown))
+                addUpdateListener { animation ->
+                    val shown = previous + ((total - previous) * animation.animatedFraction).toLong()
+                    binding.totalText.text = money(shown)
                 }
                 start()
             }
-        } else {
-            binding.summaryText.text = getString(R.string.total_spent, money(total))
-        }
+        } else binding.totalText.text = money(total)
         displayedTotal = total
-        val petBreakdown = items.groupBy { it.petName }.entries.joinToString("  ·  ") {
-            getString(R.string.pet_spent, it.key, money(it.value.sumOf(ExpenseSummary::amountCents)))
+    }
+
+    private fun buildSplitBar(current: List<ExpenseSummary>) {
+        binding.petSplitBar.removeAllViews()
+        val groups = current.groupBy { it.petName }
+        val total = current.sumOf(ExpenseSummary::amountCents).coerceAtLeast(1L)
+        groups.values.forEach { rows ->
+            binding.petSplitBar.addView(View(requireContext()).apply {
+                setBackgroundColor(PetColor.fromIndex(rows.first().petColorIndex).color(context))
+            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,
+                rows.sumOf(ExpenseSummary::amountCents).toFloat() / total))
         }
-        val insightSummary = ExpenseInsights.calculate(items, System.currentTimeMillis() / 86_400_000L)
-        val change = insightSummary.monthChangePercent?.let {
-            getString(R.string.expense_month_change, it)
-        } ?: getString(R.string.expense_month_change_unavailable)
-        binding.secondarySummaryText.text = getString(R.string.expense_breakdown_with_change,
-            petBreakdown, change)
-        binding.secondarySummaryText.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
-        binding.emptyText.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-        binding.itemContainer.removeAllViews()
-        if (items.isNotEmpty()) {
-            val tools = layoutInflater.inflate(R.layout.item_expense_tools,
-                binding.itemContainer, false)
-            tools.findViewById<com.google.android.material.button.MaterialButton>(R.id.export_csv_button)
-                .setOnClickListener { csvDocument.launch(getString(R.string.expense_csv_filename)) }
-            tools.findViewById<com.google.android.material.button.MaterialButton>(R.id.export_pdf_button)
-                .setOnClickListener { pdfDocument.launch(getString(R.string.expense_pdf_filename)) }
-            binding.itemContainer.addView(tools)
-            val insights = insightSummary
-            binding.itemContainer.addView(ExpenseInsightsView(requireContext()).apply {
-                summary = insights
-                val categories = insights.categoryTotals.entries.joinToString(", ") {
-                    getString(R.string.expense_legend, it.key, money(it.value))
-                }
-                val months = insights.months.joinToString(", ") {
-                    "${java.text.DateFormatSymbols().months[it.month]} ${it.year}: ${money(it.totalCents)}"
-                }
-                contentDescription = getString(R.string.expense_insights_accessibility,
-                    categories, months, change)
-            })
-        }
-        items.forEach { expense ->
-            val row = ItemFeatureBinding.inflate(layoutInflater, binding.itemContainer, false)
-            row.itemColorRail.setBackgroundColor(PetColor.fromIndex(expense.petColorIndex).primary)
-            row.itemTitleText.text = money(expense.amountCents)
-            row.itemDetailText.text = getString(R.string.expense_detail, expense.petName, expense.category, date(expense.dateEpochDay))
-            row.itemNoteText.text = expense.note
-            row.itemNoteText.visibility = if (expense.note.isBlank()) View.GONE else View.VISIBLE
-            row.primaryButton.visibility = View.VISIBLE
-            row.primaryButton.setText(R.string.edit_expense)
-            row.primaryButton.setOnClickListener {
+        binding.petSplitBar.isVisible = groups.isNotEmpty()
+    }
+
+    private fun buildCategories(current: List<ExpenseSummary>) {
+        binding.categoryContainer.removeAllViews()
+        current.groupBy { it.category }.mapValues { (_, rows) -> rows.sumOf(ExpenseSummary::amountCents) }
+            .entries.sortedByDescending { it.value }.forEach { (category, amount) ->
+                val row = ItemMoneyCategoryBinding.inflate(layoutInflater, binding.categoryContainer, false)
+                row.categoryName.text = category
+                row.categoryAmount.text = money(amount)
+                binding.categoryContainer.addView(row.root)
+            }
+    }
+
+    private fun buildRecent(recent: List<ExpenseSummary>) {
+        binding.recentContainer.removeAllViews()
+        recent.forEach { expense ->
+            val row = ItemMoneyExpenseBinding.inflate(layoutInflater, binding.recentContainer, false)
+            row.petDot.setBackgroundColor(PetColor.fromIndex(expense.petColorIndex).color(requireContext()))
+            row.expenseTitle.text = expense.note.ifBlank { expense.category }
+            row.expenseDetail.text = getString(R.string.expense_detail, expense.petName,
+                expense.category, date(expense.dateEpochDay))
+            row.expenseAmount.text = money(expense.amountCents)
+            row.root.contentDescription = getString(R.string.money_expense_accessibility,
+                row.expenseTitle.text, expense.petName, row.expenseAmount.text)
+            row.root.setOnClickListener {
                 findNavController().navigate(R.id.action_expenses_to_edit_expense,
                     Bundle().apply { putLong("expenseId", expense.id) })
             }
-            row.secondaryButton.visibility = View.GONE
-            row.tertiaryButton.visibility = View.GONE
-            row.deleteButton.setOnClickListener {
-                RowMotion.collapse(row.root) { viewLifecycleOwner.lifecycleScope.launch {
+            row.root.setOnLongClickListener {
+                viewLifecycleOwner.lifecycleScope.launch {
                     val deleted = viewModel.delete(expense.id) ?: return@launch
                     UiSnackbar.make(binding.root, R.string.expense_deleted, Snackbar.LENGTH_LONG)
-                        .setDuration(6000)
                         .setAction(R.string.undo) {
-                            restoringId = deleted.id
                             viewLifecycleOwner.lifecycleScope.launch { viewModel.restore(deleted) }
                         }.show()
-                } }
+                }
+                true
             }
-            binding.itemContainer.addView(row.root)
-            if (restoringId == expense.id) {
-                restoringId = null
-                RowMotion.expand(row.root)
-            }
+            binding.recentContainer.addView(row.root)
         }
     }
 
+    private fun isCurrentMonth(expense: ExpenseSummary): Boolean {
+        val now = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        val date = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            timeInMillis = expense.dateEpochDay * MILLIS_PER_DAY
+        }
+        return now.get(Calendar.YEAR) == date.get(Calendar.YEAR) &&
+            now.get(Calendar.MONTH) == date.get(Calendar.MONTH)
+    }
+
     private fun writeExport(uri: Uri, pdf: Boolean) {
-        val snapshot = currentItems.toList()
+        val snapshot = items.toList()
         viewLifecycleOwner.lifecycleScope.launch {
             val success = withContext(Dispatchers.IO) {
                 runCatching {
@@ -181,6 +244,15 @@ class ExpenseListFragment : Fragment() {
     private fun money(cents: Long) = NumberFormat.getCurrencyInstance().format(cents / 100.0)
     private fun date(day: Long) = DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
         timeZone = TimeZone.getTimeZone("UTC")
-    }.format(Date(day * 86_400_000L))
-    override fun onDestroyView() { totalAnimator?.cancel(); _binding = null; super.onDestroyView() }
+    }.format(Date(day * MILLIS_PER_DAY))
+
+    override fun onDestroyView() {
+        totalAnimator?.cancel()
+        _binding = null
+        super.onDestroyView()
+    }
+
+    private companion object {
+        const val MILLIS_PER_DAY = 86_400_000L
+    }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One grouped Money category row with an icon well and aligned amount. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:gravity="center_vertical" android:minHeight="@dimen/money_row_height"
+    android:orientation="horizontal" android:paddingHorizontal="@dimen/space_16">
+    <ImageView android:layout_width="@dimen/space_40" android:layout_height="@dimen/space_40"
+        android:background="@drawable/bg_profile_avatar" android:contentDescription="@null"
+        android:padding="@dimen/space_8" android:src="@drawable/ic_wallet" app:tint="?attr/colorOnSurfaceVariant"
+        xmlns:app="http://schemas.android.com/apk/res-auto" />
+    <TextView android:id="@+id/category_name" android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_12" android:layout_weight="1"
+        android:textAppearance="@style/TextAppearance.PetCare.RowTitle" />
+    <TextView android:id="@+id/category_amount" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Figure" />
+</LinearLayout>
