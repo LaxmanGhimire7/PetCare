@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug component gallery implementing redesign Part F3 for real-device comparison. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/gallery_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/canvas" android:clipToPadding="false" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_20">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/gallery_title" android:textAppearance="@style/TextAppearance.PetCare.Display" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4" android:text="@string/gallery_subtitle"
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_32" android:text="@string/gallery_avatar"
+            android:textAppearance="@style/TextAppearance.PetCare.Title" />
+        <com.example.petcare.ui.PetAvatarView android:id="@+id/gallery_pet_avatar"
+            android:layout_width="@dimen/pet_filter_avatar" android:layout_height="@dimen/pet_filter_avatar"
+            android:layout_marginTop="@dimen/space_12" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_32" android:text="@string/gallery_buttons"
+            android:textAppearance="@style/TextAppearance.PetCare.Title" />
+        <com.google.android.material.button.MaterialButton style="@style/Widget.PetCare.Button.Primary"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12" android:text="@string/gallery_primary" />
+        <com.google.android.material.button.MaterialButton style="@style/Widget.PetCare.Button.Tonal"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8" android:text="@string/gallery_secondary" />
+        <com.google.android.material.button.MaterialButton style="@style/Widget.PetCare.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_4" android:text="@string/gallery_text" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_24" android:text="@string/gallery_inputs"
+            android:textAppearance="@style/TextAppearance.PetCare.Title" />
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12" android:hint="@string/gallery_pet_name">
+            <com.google.android.material.textfield.TextInputEditText android:layout_width="match_parent" android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.chip.ChipGroup android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12" app:singleSelection="true">
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:checkable="true" android:text="@string/gallery_chip_all" />
+            <com.google.android.material.chip.Chip android:layout_width="wrap_content" android:layout_height="wrap_content" android:checkable="true" android:text="@string/gallery_chip_max" />
+        </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_24">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="@dimen/space_24">
+                <ImageView android:layout_width="@dimen/space_48" android:layout_height="@dimen/space_48" android:contentDescription="@null" android:src="@drawable/ic_pets" app:tint="@color/text_secondary" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12" android:text="@string/gallery_empty_title" android:textAppearance="@style/TextAppearance.PetCare.Title" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8" android:gravity="center" android:text="@string/gallery_empty_body" android:textAppearance="@style/TextAppearance.PetCare.Supporting" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>

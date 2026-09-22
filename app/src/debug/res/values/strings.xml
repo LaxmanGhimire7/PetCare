@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gallery_title">Component gallery</string><string name="gallery_subtitle">PetCare redesign states</string>
+    <string name="gallery_buttons">Buttons</string><string name="gallery_primary">Save task</string><string name="gallery_secondary">Share</string><string name="gallery_text">Cancel</string>
+    <string name="gallery_inputs">Inputs and filters</string><string name="gallery_pet_name">Pet name</string><string name="gallery_chip_all">All</string><string name="gallery_chip_max">Max</string>
+    <string name="gallery_avatar">Pet progress ring</string><string name="gallery_empty_title">Add your first pet</string>
+    <string name="gallery_empty_body">Their feeding, walks, grooming and vet visits will show up here.</string>
+</resources>

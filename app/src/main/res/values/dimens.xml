@@ -34,6 +34,9 @@
     <dimen name="greeting_min_text">22sp</dimen>
     <dimen name="greeting_max_text">28sp</dimen>
     <dimen name="greeting_text_step">1sp</dimen>
+    <dimen name="pet_avatar_ring_stroke">3dp</dimen>
+    <dimen name="pet_avatar_selected_stroke">2dp</dimen>
+    <dimen name="pet_avatar_initial_text">17sp</dimen>
     <dimen name="task_rail_width">4dp</dimen>
     <dimen name="pet_filter_width">80dp</dimen>
     <dimen name="pet_filter_avatar">56dp</dimen>

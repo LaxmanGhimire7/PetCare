@@ -350,6 +350,8 @@
     <string name="done_reordering">Done reordering</string>
     <string name="task_options">Task options</string>
     <string name="new_task">New task</string>
+    <string name="pet_avatar_default_name">Pet</string>
+    <string name="pet_avatar_progress">%1$s, %2$d of %3$d done</string>
     <string name="place_hours_unknown">Opening hours not provided</string>
     <string name="place_coordinate_invalid">Enter valid latitude and longitude, or leave both blank.</string>
     <string name="location_chip">Directions to this task</string>
