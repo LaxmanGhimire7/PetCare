@@ -30,6 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.example.petcare.databinding.FragmentSettingsBinding
 import com.example.petcare.ui.GestureCoachPrefs
 import com.example.petcare.ui.GestureHaptics
+import com.example.petcare.debugdata.DemoDataSeeder
+import android.content.pm.ApplicationInfo
 
 /** Primary Settings destination, reached from both phone and tablet navigation. */
 class SettingsFragment : Fragment() {
@@ -108,6 +110,21 @@ class SettingsFragment : Fragment() {
         }
         binding.restoreButton.setOnClickListener {
             restoreDocument.launch(arrayOf("application/json", "text/plain"))
+        }
+        val debugBuild = requireContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        binding.loadDemoButton.visibility = if (debugBuild) View.VISIBLE else View.GONE
+        binding.loadDemoButton.setOnClickListener {
+            binding.loadDemoButton.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                val loaded = runCatching { DemoDataSeeder(requireContext()).load() }.isSuccess
+                binding.loadDemoButton.isEnabled = true
+                if (loaded) {
+                    UiSnackbar.make(binding.root, R.string.demo_data_loaded, Snackbar.LENGTH_SHORT).show()
+                    requireActivity().recreate()
+                } else {
+                    UiSnackbar.make(binding.root, R.string.demo_data_failed, Snackbar.LENGTH_LONG).show()
+                }
+            }
         }
         binding.clearDataButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())

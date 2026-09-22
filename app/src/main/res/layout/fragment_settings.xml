@@ -64,6 +64,10 @@
         style="@style/Widget.PetCare.Button.Outlined" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
         android:text="@string/restore_data" />
+    <com.google.android.material.button.MaterialButton android:id="@+id/load_demo_button"
+        style="@style/Widget.PetCare.Button.Tonal" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
+        android:text="@string/load_demo_data" android:visibility="gone" />
     <com.google.android.material.button.MaterialButton android:id="@+id/clear_data_button"
         style="@style/Widget.PetCare.Button.Outlined" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
