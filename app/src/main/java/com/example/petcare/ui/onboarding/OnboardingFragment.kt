@@ -51,8 +51,8 @@ class OnboardingFragment : Fragment() {
         }
         binding.onboardingExtra.setOnClickListener {
             when (binding.onboardingPager.currentItem) {
-                1 -> findNavController().navigate(R.id.action_onboarding_to_add_pet)
-                2 -> if (Build.VERSION.SDK_INT >= 33 && requireContext().checkSelfPermission(
+                0 -> findNavController().navigate(R.id.action_onboarding_to_add_pet)
+                1 -> if (Build.VERSION.SDK_INT >= 33 && requireContext().checkSelfPermission(
                         Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                     notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                 else -> Unit
@@ -61,12 +61,14 @@ class OnboardingFragment : Fragment() {
     }
 
     private fun updateActions(page: Int) {
+        binding.onboardingIndicator.text = getString(R.string.onboarding_step, page + 1, 3)
         binding.onboardingNext.setText(if (page == 2) R.string.onboarding_finish
             else R.string.onboarding_next)
-        binding.onboardingExtra.visibility = if (page == 0) View.GONE else View.VISIBLE
-        binding.onboardingExtra.setText(if (page == 1) R.string.add_pet
+        binding.onboardingExtra.visibility = if (page == 2) View.GONE else View.VISIBLE
+        binding.onboardingExtra.setText(if (page == 0) R.string.add_pet
             else R.string.onboarding_allow_notifications)
-        if (page == 2) binding.onboardingExtra.isEnabled = Build.VERSION.SDK_INT >= 33 &&
+        binding.onboardingExtra.isEnabled = true
+        if (page == 1) binding.onboardingExtra.isEnabled = Build.VERSION.SDK_INT >= 33 &&
             requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
     }
@@ -88,11 +90,11 @@ class OnboardingFragment : Fragment() {
     }
 
     private inner class PageAdapter : RecyclerView.Adapter<PageAdapter.Holder>() {
-        private val titles = intArrayOf(R.string.onboarding_care_title,
-            R.string.onboarding_pet_title, R.string.onboarding_notification_title)
-        private val bodies = intArrayOf(R.string.onboarding_care_body,
-            R.string.onboarding_pet_body, R.string.onboarding_notification_body)
-        private val icons = intArrayOf(R.drawable.ic_pets, R.drawable.ic_add, R.drawable.ic_alarm)
+        private val titles = intArrayOf(R.string.onboarding_pet_title,
+            R.string.onboarding_notification_title, R.string.gesture_coach_title)
+        private val bodies = intArrayOf(R.string.onboarding_pet_body,
+            R.string.onboarding_notification_body, R.string.gesture_coach_swipe)
+        private val icons = intArrayOf(R.drawable.ic_add, R.drawable.ic_alarm, R.drawable.ic_refresh)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             Holder(ItemOnboardingBinding.inflate(layoutInflater, parent, false))

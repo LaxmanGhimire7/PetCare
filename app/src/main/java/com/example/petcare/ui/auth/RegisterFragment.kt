@@ -42,16 +42,6 @@ class RegisterFragment : Fragment() {
         binding.signInInsteadButton.setOnClickListener {
             findNavController().navigate(R.id.action_register_to_login)
         }
-        playEntrance()
-    }
-
-    private fun playEntrance() {
-        binding.authHeader.alpha = 0f
-        binding.authHeader.animate().alpha(1f).setDuration(420L).start()
-        binding.authFormCard.alpha = 0f
-        binding.authFormCard.translationY = 42f
-        binding.authFormCard.animate().alpha(1f).translationY(0f)
-            .setStartDelay(100L).setDuration(470L).start()
     }
 
     private fun isValidInput(): Boolean {

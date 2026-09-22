@@ -9,6 +9,10 @@
         android:layout_height="wrap_content" android:text="@string/onboarding_skip" />
     <androidx.viewpager2.widget.ViewPager2 android:id="@+id/onboarding_pager"
         android:layout_width="match_parent" android:layout_height="@dimen/layout_zero" android:layout_weight="1" />
+    <TextView android:id="@+id/onboarding_indicator" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:gravity="center"
+        android:textAppearance="@style/TextAppearance.PetCare.Label"
+        android:textColor="?attr/colorOnSurfaceVariant" />
     <com.google.android.material.button.MaterialButton android:id="@+id/onboarding_extra"
         style="@style/Widget.PetCare.Button.Outlined" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:visibility="gone" />
