@@ -410,6 +410,16 @@
     <string name="pets_no_notable_tasks">No vet, grooming, vaccination or medication visits in the next seven days.</string>
     <string name="pets_coming_up_row">%1$s · %2$s · %3$s</string>
     <string name="pet_tasks_progress">%1$d of %2$d today</string>
+    <string name="pet_done_figure">%1$d/%2$d</string>
+    <string name="pet_care_task_line">%1$s · %2$s · %3$s</string>
+    <string name="pet_care_done">Done</string>
+    <string name="pet_care_open">Open</string>
+    <string name="pet_care_empty_today">Nothing planned for today.</string>
+    <string name="pet_care_empty_upcoming">Nothing notable in the next seven days.</string>
+    <string name="pet_care_upcoming_line">%1$s · %2$s</string>
+    <string name="pet_care_coming_up">Coming up\n%1$s</string>
+    <string name="pet_spending_month">This month · %1$s</string>
+    <string name="pet_spending_category">%1$s · %2$s</string>
     <string name="load_demo_data">Load demo data</string>
     <string name="demo_data_loaded">Max and Luna are ready.</string>
     <string name="demo_data_failed">Demo data could not be loaded. Try again.</string>
