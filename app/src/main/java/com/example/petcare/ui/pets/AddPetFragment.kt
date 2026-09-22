@@ -17,6 +17,7 @@ import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import coil.load
+import com.google.android.material.snackbar.Snackbar
 
 /** Creates a pet profile with optional photos and a stable identity colour. */
 class AddPetFragment : Fragment() {
@@ -108,10 +109,17 @@ class AddPetFragment : Fragment() {
             groomingRoutine = binding.groomingRoutineInput.text?.toString()?.trim().orEmpty(),
             healthNotes = binding.healthNotesInput.text?.toString()?.trim().orEmpty(),
             photoUris = selectedPhotoUris.map(Uri::toString),
-            selectedColorIndex = selectedColorIndex
-        ) { _ ->
-            findNavController().navigateUp()
-        }
+            selectedColorIndex = selectedColorIndex,
+            onError = {
+                binding.savePetButton.isEnabled = true
+                Snackbar.make(binding.root, R.string.pet_save_failed, Snackbar.LENGTH_LONG).show()
+            },
+            onSaved = { _ ->
+                findNavController().navigateUp()
+                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                    R.string.pet_saved, Snackbar.LENGTH_SHORT).show()
+            }
+        )
     }
 
     private fun updatePhotoCount() {

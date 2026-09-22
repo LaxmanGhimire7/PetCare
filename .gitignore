@@ -20,5 +20,6 @@ local.properties
 *.db-wal
 **/build/
 .idea/
+.kotlin/
 *.jks
 *.keystore

@@ -34,12 +34,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="text/calendar" />
+                <data android:mimeType="application/ics" />
+                <data android:mimeType="text/x-vcalendar" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/calendar" android:scheme="content" />
                 <data android:mimeType="text/calendar" android:scheme="file" />
+                <data android:mimeType="application/ics" android:scheme="content" />
+                <data android:mimeType="application/ics" android:scheme="file" />
+                <data android:mimeType="text/x-vcalendar" android:scheme="content" />
+                <data android:mimeType="text/x-vcalendar" android:scheme="file" />
             </intent-filter>
         </activity>
         <activity

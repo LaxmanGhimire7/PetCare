@@ -52,6 +52,14 @@
                 android:layout_marginTop="@dimen/space_4"
                 android:textAppearance="@style/TextAppearance.PetCare.Label"
                 android:textColor="?attr/colorOnSurfaceVariant" />
+            <TextView
+                android:id="@+id/task_due_date_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:textAppearance="@style/TextAppearance.PetCare.Label"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone" />
             <com.google.android.material.chip.Chip
                 android:id="@+id/task_category_chip"
                 android:layout_width="wrap_content"

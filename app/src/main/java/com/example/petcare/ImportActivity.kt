@@ -53,7 +53,7 @@ class ImportActivity : AppCompatActivity() {
                 Snackbar.make(binding.root, R.string.import_error_read, Snackbar.LENGTH_INDEFINITE).show()
             } else {
                 sharedContent = content
-                drafts = if (intent.type == "text/calendar" || content.contains("BEGIN:VEVENT"))
+                drafts = if (isCalendarType(intent.type) || content.contains("BEGIN:VEVENT"))
                     IcsAppointmentParser.parseAll(content).map { appointment ->
                         AppointmentDraft(appointment.title, appointment.dateEpochDay,
                             appointment.minutesOfDay, appointment.location, appointment.notes)
@@ -172,12 +172,24 @@ class ImportActivity : AppCompatActivity() {
     }
 
     private fun readSharedContent(incoming: Intent): String? {
-        incoming.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.takeIf(String::isNotBlank)?.let {
-            return it.take(MAX_CHARS)
-        }
         @Suppress("DEPRECATION")
         val stream = incoming.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-        val uri = stream ?: incoming.data ?: return null
+        val uri = stream ?: incoming.data
+        // A clinic can share a calendar attachment alongside an email body. Read the
+        // attachment first so all VEVENTs reach the review screen.
+        val attachmentIsCalendar = uri != null &&
+            isCalendarType(runCatching { contentResolver.getType(uri) }.getOrNull())
+        if ((isCalendarType(incoming.type) || attachmentIsCalendar) && uri != null)
+            readUri(uri)?.let { return it }
+        incoming.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+            ?.takeIf(String::isNotBlank)?.let { return it.take(MAX_CHARS) }
+        return uri?.let(::readUri)
+    }
+
+    private fun isCalendarType(type: String?): Boolean = type == "text/calendar" ||
+        type == "application/ics" || type == "text/x-vcalendar"
+
+    private fun readUri(uri: Uri): String? {
         return runCatching {
             contentResolver.openInputStream(uri)?.use { input ->
                 val output = ByteArrayOutputStream()

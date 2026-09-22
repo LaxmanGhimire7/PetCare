@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /** Persists a validated new care task through its account-scoped repository. */
@@ -22,10 +23,11 @@ class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) :
         latitude: Double?,
         longitude: Double?,
         placeId: Long?,
+        onError: (Throwable) -> Unit,
         onSaved: (CareTaskEntity) -> Unit
     ) {
         viewModelScope.launch {
-            onSaved(
+            val saved = try {
                 careTaskRepository.addTask(
                     petId,
                     title,
@@ -39,7 +41,13 @@ class AddCareTaskViewModel(private val careTaskRepository: CareTaskRepository) :
                     longitude,
                     placeId
                 )
-            )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                onError(error)
+                return@launch
+            }
+            onSaved(saved)
         }
     }
 }

@@ -6,11 +6,12 @@ PetCare is a native Android app for managing pets, care schedules, expenses, and
 
 ## What the app does
 
-- **Today:** shows upcoming and completed tasks, a completion ring, pet filters, reminders, routine generation, drag ordering, swipe actions, and undo for destructive actions.
+- **Today:** shows upcoming tasks including future appointments with their due dates, completed tasks, a completion ring, pet filters, reminders, routine generation, and undo for destructive actions. Save a pet profile before adding its first task.
 - **Pets:** stores profiles, health details, caregiver contacts, and photos. Pet colours consistently identify their tasks and cards.
 - **Money:** records and edits expenses, shows per-pet totals and Canvas charts, and exports CSV or PDF.
 - **Places:** saves care locations, sorts by distance when location is available, and opens directions, calls, or booking links. With a Maps key, it also shows clustered markers, a pin picker, and map previews.
-- **Integration:** reviews shared text and calendar invites before import, exports care plans, sends caregiver checklists through SMS or the share sheet, inserts calendar events, and opens pet/task deep links.
+- **Integration:** imports clinic or pet care website messages shared as text, plus `.ics` calendar exports and attachments (`text/calendar`, `application/ics`, `text/x-vcalendar`). Every recognised field is editable before a task is saved. PetCare also exports care plans, sends caregiver checklists through SMS or the share sheet, inserts calendar events, and opens pet/task deep links. No vendor-specific account or live clinic API is required.
+- **Gestures:** swipe right on a task to complete it, swipe left to delete it with Undo, and shake three times to reset today's completed checklist with confirmation and Undo. Dragging, double tap, long press, pull to refresh, and photo zoom are also available. Replay the guide from Settings.
 - **Accounts and settings:** supports multiple local accounts with PBKDF2 password hashes and account-scoped records, optional biometric unlock, local JSON backup/restore, theme and reminder settings, and a home-screen widget.
 
 The app stores data locally in Room. Its core care, expense, and place lists work offline. Maps tiles, geocoding, and external directions require their respective services.

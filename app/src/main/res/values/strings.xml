@@ -36,8 +36,14 @@
     <string name="today_progress_count">Completed today: %1$d / %2$d</string>
     <string name="today_progress_percent">%1$d%%</string>
     <string name="today_next_task">Next: %1$s at %2$s</string>
+    <string name="today_next_future_task">Next: %1$s on %2$s at %3$s</string>
     <string name="today_nothing_next">You’re all caught up for today.</string>
     <string name="today_upcoming_count">Upcoming (%1$d)</string>
+    <string name="task_due_date">Due %1$s</string>
+    <string name="task_saved_for_date">Task saved for %1$s.</string>
+    <string name="task_save_failed">Task could not be saved. Check storage and try again.</string>
+    <string name="pet_saved">Pet saved.</string>
+    <string name="pet_save_failed">Pet could not be saved. Check storage and try again.</string>
     <string name="today_completed_count">Completed today (%1$d)</string>
     <string name="today_all_pets">All</string>
     <string name="today_empty_tasks">Nothing due yet. Add a care task to start a routine.</string>
@@ -251,7 +257,8 @@
     <string name="generate_routine">Generate routine</string>
     <string name="share_checklist">Share checklist</string>
     <string name="places">Places</string>
-    <string name="import_appointment">Import appointment</string>
+    <string name="import_appointment">Import clinic or website plan</string>
+    <string name="import_sources_hint">Share an appointment message from a clinic or pet care website to PetCare, or choose its calendar file here.</string>
     <string name="nothing_to_share">Add an upcoming care task before sharing a checklist.</string>
     <string name="share_checklist_title">Send care checklist</string>
     <string name="routine_generator_title">Routine generator</string>

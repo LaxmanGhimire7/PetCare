@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.PetCareDatabase
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.ui.GestureCoachPrefs
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -107,6 +108,19 @@ class CareJourneyUiTest {
             onView(withId(R.id.completed_header)).perform(scrollTo(), click())
             onView(withText(taskTitle)).check(matches(
                 withEffectiveVisibility(androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE)))
+
+            // A future appointment must remain visible in Upcoming after it is saved.
+            val original = runBlocking { dao.getById(taskId, ownerId)!! }
+            val futureTitle = "Journey future appointment"
+            runBlocking {
+                PetCareRepositories(context).tasks.addTask(original.petId, futureTitle,
+                    original.dueDateEpochDay + 7, 10 * 60)
+            }
+            waitFor(withText(futureTitle))
+            onView(withText(futureTitle)).check(matches(withEffectiveVisibility(
+                androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE)))
+            onView(withId(R.id.today_empty_card)).check(matches(withEffectiveVisibility(
+                androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE)))
         }
     }
 

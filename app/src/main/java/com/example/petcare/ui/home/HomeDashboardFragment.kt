@@ -34,6 +34,7 @@ import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.ui.ScreenState
+import com.example.petcare.ui.care.SAVED_TASK_RESULT_KEY
 import com.example.petcare.databinding.FragmentTodayBinding
 import com.example.petcare.integration.IcsAppointmentParser
 import com.example.petcare.integration.CarePlanEntry
@@ -213,6 +214,17 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                 }
             }
         }
+        findNavController().currentBackStackEntry?.savedStateHandle
+            ?.getLiveData<Long?>(SAVED_TASK_RESULT_KEY)
+            ?.observe(viewLifecycleOwner) { savedId ->
+                if (savedId != null) {
+                    // A task saved for another pet must not remain hidden by an old filter.
+                    viewModel.selectedPetId = null
+                    findNavController().currentBackStackEntry?.savedStateHandle
+                        ?.remove<Long>(SAVED_TASK_RESULT_KEY)
+                    render()
+                }
+            }
     }
 
     private fun showGestureCoachIfNeeded() {
@@ -244,9 +256,8 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         filterAdapter.submit(latestPets, viewModel.selectedPetId)
         val selected = viewModel.selectedPetId
         val today = todayEpochDay()
-        val upcoming = latestUpcoming.filter {
-            it.dueDateEpochDay <= today && (selected == null || it.petId == selected)
-        }
+        // The list includes future appointments; the ring still counts only today's care.
+        val upcoming = latestUpcoming.filter { selected == null || it.petId == selected }
         val completedToday = latestCompleted.filter {
             it.dueDateEpochDay == today && (selected == null || it.petId == selected)
         }
@@ -261,10 +272,19 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         previousProgress = progress
         binding.progressCountText.text =
             getString(R.string.today_progress_count, doneCount, doneCount + dueCount)
-        val next = latestUpcoming.filter { it.dueDateEpochDay == today }
+        val nextToday = latestUpcoming.filter { it.dueDateEpochDay == today }
             .minByOrNull(CareTaskSummary::reminderMinutesOfDay)
-        binding.nextTaskText.text = if (next == null) getString(R.string.today_nothing_next)
-            else getString(R.string.today_next_task, next.title, formatTime(next.reminderMinutesOfDay))
+        val nextFuture = latestUpcoming.filter { it.dueDateEpochDay > today }
+            .minWithOrNull(compareBy(CareTaskSummary::dueDateEpochDay)
+                .thenBy(CareTaskSummary::reminderMinutesOfDay))
+        binding.nextTaskText.text = when {
+            nextToday != null -> getString(R.string.today_next_task, nextToday.title,
+                formatTime(nextToday.reminderMinutesOfDay))
+            nextFuture != null -> getString(R.string.today_next_future_task, nextFuture.title,
+                formatDate(nextFuture.dueDateEpochDay),
+                formatTime(nextFuture.reminderMinutesOfDay))
+            else -> getString(R.string.today_nothing_next)
+        }
         binding.upcomingHeader.text = getString(R.string.today_upcoming_count, upcoming.size)
         binding.completedHeader.text = getString(R.string.today_completed_count, completedToday.size)
         binding.completedHeader.visibility =
@@ -327,8 +347,8 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
 
     private fun finishTaskDrag() {
         val (ids, slots) = upcomingAdapter.finishDrag() ?: return
-        if (ids == latestUpcoming.filter { it.dueDateEpochDay <= todayEpochDay() &&
-                (viewModel.selectedPetId == null || it.petId == viewModel.selectedPetId) }
+        if (ids == latestUpcoming.filter {
+                viewModel.selectedPetId == null || it.petId == viewModel.selectedPetId }
                 .map(CareTaskSummary::id)) return
         viewLifecycleOwner.lifecycleScope.launch { viewModel.saveOrder(ids, slots) }
     }

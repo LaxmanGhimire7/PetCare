@@ -91,13 +91,19 @@ Updated: 21 September 2026. This records what is implemented and verified in the
 - Added this overview, a submission-focused README, and an updated status file. No new phase screenshots were collected at the user's request.
 - Verified all 14 emulator tests at normal and 200% font scale. At large text sizes, Today moves Add task into the scrollable content so the floating button cannot cover a task control.
 
+### Follow-up — task visibility, app integration, and Samsung run
+
+- Today now keeps future tasks in Upcoming, shows their due dates, and points to the next future appointment when nothing is due today. Saving a task clears any pet filter that would hide it; pet and task forms confirm success or show a useful save error.
+- Clinic or pet care website messages and calendar exports enter the editable review flow. The share receiver also accepts `application/ics` and `text/x-vcalendar`; when an email includes a calendar attachment, it reads the attachment before the body. Two new clinic-share UI tests and the future-task journey passed on the emulator.
+- Swipe right to complete, swipe left to delete, and shake to reset today's checklist remain available with confirmation/Undo as appropriate. The connected Samsung API 36 device launched the app, exposed its accelerometer to PetCare, and passed both clinic-share UI tests. The physical gestures still need a hands-on check.
+
 ## Current known limitations
 
 - No valid Maps API key is present in this workspace; the live map path has not been visually checked.
 - The emulator did not return a device location during the Phase 4 smoke test. Distance arithmetic has unit tests, and the no-location fallback was observed.
 - Live biometrics and widget placement need a compatible physical or configured device for a full manual check; automated tests cover their data paths.
 - Release signing needs the owner's private keystore and four `PETCARE_RELEASE_*` environment variables. Without these, the APK is unsigned.
-- API 24 and API 36 runtime testing remains open because only an API 37 emulator image is installed in this workspace.
+- API 24 runtime testing remains open. Basic launch passed on a connected Samsung API 36 device; the full acceptance journey was not run on the user's account.
 - Phase 5 contact selection could not be exercised on the emulator because it has no contacts with phone numbers. The system picker opens, and the SMS composer receives the checklist; selecting a real contact still needs a populated device.
 - The shake threshold and debounce passed unit tests and the accelerometer lifecycle was checked on the emulator. Its virtual sensor could not be driven through this emulator's console, so a physical shake still needs a device check.
 

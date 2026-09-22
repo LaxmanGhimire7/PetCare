@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /** Saves a new profile through the current account's pet repository. */
@@ -25,16 +26,23 @@ class AddPetViewModel(private val petRepository: PetRepository) : ViewModel() {
         healthNotes: String,
         photoUris: List<String>,
         selectedColorIndex: Int?,
+        onError: (Throwable) -> Unit,
         onSaved: (PetEntity) -> Unit
     ) {
         viewModelScope.launch {
-            onSaved(
+            val saved = try {
                 petRepository.addPet(
                     name, species, breed, age, weight, dietaryPreferences,
                     vaccinationHistory, allergies, favoriteToys, medicalRecords,
                     groomingRoutine, healthNotes, photoUris, selectedColorIndex
                 )
-            )
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                onError(error)
+                return@launch
+            }
+            onSaved(saved)
         }
     }
 }

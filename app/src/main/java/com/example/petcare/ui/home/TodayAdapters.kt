@@ -29,6 +29,8 @@ import com.example.petcare.databinding.ItemTodayTaskBinding
 import com.google.android.material.color.MaterialColors
 import java.text.DateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.TimeZone
 
 /** Horizontal pet identity filter; null represents all pets. */
 class PetFilterAdapter(private val onSelect: (Long?) -> Unit) :
@@ -143,6 +145,14 @@ class TodayTaskAdapter(
             row.taskTimeText.text = formatTime(task.reminderMinutesOfDay)
             row.taskTitleText.text = task.title
             row.taskPetText.text = task.petName
+            row.taskDueDateText.visibility = if (task.dueDateEpochDay == todayEpochDay)
+                View.GONE else View.VISIBLE
+            if (task.dueDateEpochDay != todayEpochDay) {
+                val date = DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }.format(Date(task.dueDateEpochDay * 86_400_000L))
+                row.taskDueDateText.text = context.getString(R.string.task_due_date, date)
+            }
             row.taskCategoryChip.text = task.category
             row.taskCategoryChip.chipBackgroundColor = ColorStateList.valueOf(
                 MaterialColors.getColor(row.root, com.google.android.material.R.attr.colorSurfaceContainerHigh)

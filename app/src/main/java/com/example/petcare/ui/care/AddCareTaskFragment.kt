@@ -34,11 +34,14 @@ import com.example.petcare.reminders.CareReminderScheduler
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
+
+internal const val SAVED_TASK_RESULT_KEY = "saved_task_result_id"
 
 /** Edits a new care task and reviews imported appointment fields before saving. */
 class AddCareTaskFragment : Fragment() {
@@ -268,12 +271,24 @@ class AddCareTaskFragment : Fragment() {
             notes = binding.careNotesInput.text?.toString()?.trim().orEmpty(),
             latitude = selectedPlace?.latitude,
             longitude = selectedPlace?.longitude,
-            placeId = selectedPlace?.id
-        ) { savedCareTask ->
-            CareReminderScheduler(requireContext()).schedule(savedCareTask)
-            requestNotificationPermission()
-            findNavController().navigateUp()
-        }
+            placeId = selectedPlace?.id,
+            onError = {
+                binding.saveCareTaskButton.isEnabled = true
+                Snackbar.make(binding.root, R.string.task_save_failed, Snackbar.LENGTH_LONG).show()
+            },
+            onSaved = { savedCareTask ->
+                CareReminderScheduler(requireContext()).schedule(savedCareTask)
+                requestNotificationPermission()
+                runCatching {
+                    findNavController().getBackStackEntry(R.id.homeDashboardFragment)
+                        .savedStateHandle[SAVED_TASK_RESULT_KEY] = savedCareTask.id
+                }
+                findNavController().navigateUp()
+                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                    getString(R.string.task_saved_for_date,
+                        formatDate(savedCareTask.dueDateEpochDay)), Snackbar.LENGTH_LONG).show()
+            }
+        )
     }
 
     private fun requestNotificationPermission() {

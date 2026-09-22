@@ -11,15 +11,16 @@ Release hygiene includes working backup rules, an adaptive and monochrome launch
 ## Verification
 
 - `:app:assembleDebug`, `:app:testDebugUnitTest`, and `:app:lintDebug` pass. The current lint report says **No issues found**.
-- The final connected run passed 14 Android tests, including the Espresso account-to-task journey and migration tests. The same suite also passed at 200% font scale; the emulator was restored to 100% afterward.
-- The unit suite contains 20 tests; with 14 connected tests, the automated total is 34.
+- The emulator suite passed 16 Android tests, including the Espresso account-to-task journey, future-task visibility, clinic-share import, and migrations. The earlier 14-test suite also passed at 200% font scale.
+- The unit suite contains 20 tests; with 16 connected tests, the automated total is 36.
 - `:app:assembleRelease` produced an unsigned APK without signing credentials. Setting all four `PETCARE_RELEASE_*` environment variables signs the release build.
+- The debug APK was installed and launched on a connected Samsung API 36 device without clearing app data. Its accelerometer was visible to PetCare, and both clinic-share UI tests passed on the unlocked phone.
 
 ## Limits that still require a configured device or service
 
 - No Maps API key is stored in this checkout. The empty-key fallback has been exercised, but live tiles, clustering, and pin placement need a valid key for a visual end-to-end check.
 - A real contact selection, biometric prompt, widget placement, and physical shake need a suitably configured device. Their entry points and data paths are implemented; the emulator has limited data/hardware for those checks.
-- API 24 and API 36 runtime behaviour has not been checked on those exact system images. The installed test emulator is API 37. The project compiles with `minSdk 24` and guards newer APIs, but that does not replace device testing.
+- API 24 runtime behaviour has not been checked on an API 24 device. Basic launch on Samsung API 36 passed, but full API 36 scenario coverage remains open.
 - A distributable release APK requires a private signing key supplied by the app owner. The checked-in project intentionally contains no private key.
 - Map imagery, geocoding, SMS, calendars, contacts, and booking depend on device services or external apps; core care records remain available offline.
 
@@ -27,6 +28,6 @@ Release hygiene includes working backup rules, an adaptive and monochrome launch
 
 - Phase 8 calls for MVVM with `StateFlow` and explicit Loading/Empty/Content/Error handling **on every screen**. The main list screens have this structure, but some forms and detail screens still obtain repository data directly from Fragments and do not expose all four screen states.
 - The 4.5:1 contrast target, full TalkBack walkthrough, and rotation coverage across every screen have not been independently measured or exercised. The 200% font-scale automated journey passes, but it does not prove the whole accessibility checklist.
-- The brief's API 24 and API 36 runtime acceptance checks and the live/device-specific flows listed above remain open. A signed distributable APK remains pending the owner's keystore.
+- The brief's API 24 runtime check and full API 36 acceptance checks, plus the live/device-specific flows listed above, remain open. A signed distributable APK remains pending the owner's keystore.
 
 Screenshots by phase are no longer being collected, per the user's request.
