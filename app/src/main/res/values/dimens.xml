@@ -59,4 +59,7 @@
     <dimen name="timeline_row_min_height">56dp</dimen>
     <dimen name="layout_1_dp">1dp</dimen>
     <dimen name="layout_34_sp">34sp</dimen>
+    <dimen name="pet_grid_photo_height">148dp</dimen>
+    <dimen name="pet_badge_size">30dp</dimen>
+    <dimen name="pet_picker_avatar">44dp</dimen>
 </resources>

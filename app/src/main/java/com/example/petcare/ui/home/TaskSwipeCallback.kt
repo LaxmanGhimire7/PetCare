@@ -18,7 +18,8 @@ class TaskSwipeCallback(
     private val onAction: (RecyclerView.ViewHolder, Int) -> Unit,
     private val onDragStart: () -> Unit,
     private val onDragMove: (Int, Int) -> Boolean,
-    private val onDragFinish: () -> Unit
+    private val onDragFinish: () -> Unit,
+    private val completeColor: (RecyclerView.ViewHolder) -> Int
 ) : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
     ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -80,7 +81,7 @@ class TaskSwipeCallback(
             val view = viewHolder.itemView
             val fraction = min(1f, abs(dX) / (view.width * 0.3f))
             val complete = dX > 0f
-            paint.color = if (complete) ContextCompat.getColor(view.context, R.color.primary)
+            paint.color = if (complete) completeColor(viewHolder)
                 else ContextCompat.getColor(view.context, R.color.error)
             val radius = view.resources.getDimension(R.dimen.radius_card)
             val left = if (complete) view.left.toFloat() else view.right + dX

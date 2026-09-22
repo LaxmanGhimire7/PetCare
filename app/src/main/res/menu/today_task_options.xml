@@ -2,5 +2,6 @@
 <!-- Today section actions keep reorder and destructive reset out of the task rows. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_reorder_tasks" android:title="@string/reorder_tasks" />
+    <item android:id="@+id/action_hide_completed" android:title="@string/hide_completed" />
     <item android:id="@+id/action_reset_checklist" android:title="@string/reset_today_checklist" />
 </menu>

@@ -45,8 +45,8 @@
     <!-- Circular completion control placed inside a 48dp touch target. -->
     <style name="Widget.PetCare.TaskCheckbox" parent="Widget.Material3.Button.OutlinedButton">
         <item name="cornerRadius">@dimen/radius_pill</item><item name="strokeWidth">@dimen/task_checkbox_stroke</item>
-        <item name="android:insetLeft">@dimen/space_8</item><item name="android:insetRight">@dimen/space_8</item>
-        <item name="android:insetTop">@dimen/space_8</item><item name="android:insetBottom">@dimen/space_8</item>
+        <item name="android:insetLeft">@dimen/space_12</item><item name="android:insetRight">@dimen/space_12</item>
+        <item name="android:insetTop">@dimen/space_12</item><item name="android:insetBottom">@dimen/space_12</item>
         <item name="iconPadding">0dp</item><item name="android:minWidth">@dimen/touch_target</item><item name="android:minHeight">@dimen/touch_target</item>
     </style>
 

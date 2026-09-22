@@ -59,7 +59,11 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao, private val owner
     }
 
     /** Reopens one completed task for completion Undo without changing its timeline slot. */
-    suspend fun reopenTask(careTaskId: Long) = careTaskDao.reopen(careTaskId, ownerId)
+    suspend fun reopenTask(careTaskId: Long): CareTaskEntity? {
+        val task = careTaskDao.getById(careTaskId, ownerId) ?: return null
+        careTaskDao.reopen(careTaskId, ownerId)
+        return task.copy(isCompleted = false)
+    }
 
     /** Moves an open task forward while carrying minutes past midnight onto the next day. */
     suspend fun snoozeTask(careTaskId: Long, delayMinutes: Int): CareTaskEntity? {

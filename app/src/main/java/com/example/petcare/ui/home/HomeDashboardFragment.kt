@@ -63,13 +63,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
-import java.time.LocalDate
 
 /** Today's care, progress, pet filtering and the main care actions. */
 class HomeDashboardFragment : Fragment(), SensorEventListener {
@@ -87,6 +85,8 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     private var latestCompleted = emptyList<CareTaskSummary>()
     private var nextCardTask: CareTaskSummary? = null
     private var hideCompleted = false
+    private var lastClockDay = 0L
+    private var lastNowMinute = -1
     private var pendingDeepLinkTaskId: Long = 0L
     private val shakeDetector = ShakeDetector()
     private val sensorManager by lazy {
@@ -153,7 +153,11 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
                     if (task.isCompleted) reopen(task) else complete(task)
                 }
                 else RowMotion.collapse(viewHolder.itemView) { delete(task) }
-        }, taskAdapter::beginDrag, taskAdapter::moveItem, ::finishTaskDrag))
+        }, taskAdapter::beginDrag, taskAdapter::moveItem, ::finishTaskDrag, { holder ->
+            val task = taskAdapter.taskAt(holder.bindingAdapterPosition)
+            com.example.petcare.data.local.pet.PetColor.fromIndex(task.petColorIndex)
+                .color(requireContext())
+        }))
         taskTouchHelper.attachToRecyclerView(binding.taskRecycler)
         binding.addTaskFab.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_add_care_task)
@@ -290,14 +294,10 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         val overdue = if (selectedDay == today) allTasks.filter {
             !it.isCompleted && it.dueDateEpochDay < today
         } else emptyList()
-        val chronological = (overdue + onSelectedDay).distinctBy(CareTaskSummary::id)
-            .filter { selectedPet == null || it.petId == selectedPet }
-            .sortedWith(compareBy(CareTaskSummary::dueDateEpochDay)
-                .thenBy(CareTaskSummary::reminderMinutesOfDay)
-                .thenBy(CareTaskSummary::sortOrder))
+        val chronological = TodayTimeline.select(latestUpcoming, latestCompleted, selectedDay,
+            today, selectedPet, hideCompleted = false)
         val hiddenCount = chronological.count(CareTaskSummary::isCompleted)
-        val visible = if (hideCompleted) chronological.filterNot(CareTaskSummary::isCompleted)
-            else chronological
+        val visible = if (hideCompleted) chronological.filterNot(CareTaskSummary::isCompleted) else chronological
         val progressTasks = onSelectedDay.filter { selectedPet == null || it.petId == selectedPet }
         val doneCount = progressTasks.count(CareTaskSummary::isCompleted)
 
@@ -421,16 +421,27 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     private fun updateClockPresentation() {
         if (_binding == null) return
         val today = todayEpochDay()
+        if (lastClockDay == 0L) lastClockDay = today
+        if (today != lastClockDay) {
+            if (viewModel.selectedEpochDay == lastClockDay) viewModel.selectedEpochDay = today
+            lastClockDay = today
+            viewModel.refresh()
+            render()
+            return
+        }
         if (viewModel.selectedEpochDay == today) {
             val minutes = currentMinutes()
             binding.nowAfterTime.text = formatTime(minutes)
-            val current = taskAdapter.currentList
-            taskAdapter.nowBeforeTaskId = current.firstOrNull {
-                it.dueDateEpochDay == today && it.reminderMinutesOfDay > minutes
-            }?.id
-            binding.nowAfterTimeline.visibility = if (current.isNotEmpty() && taskAdapter.nowBeforeTaskId == null)
-                View.VISIBLE else View.GONE
-            taskAdapter.notifyDataSetChanged()
+            if (minutes != lastNowMinute) {
+                lastNowMinute = minutes
+                val current = taskAdapter.currentList
+                taskAdapter.nowBeforeTaskId = current.firstOrNull {
+                    it.dueDateEpochDay == today && it.reminderMinutesOfDay > minutes
+                }?.id
+                binding.nowAfterTimeline.visibility = if (current.isNotEmpty() && taskAdapter.nowBeforeTaskId == null)
+                    View.VISIBLE else View.GONE
+                taskAdapter.notifyDataSetChanged()
+            }
         }
         val task = nextCardTask ?: return
         if (viewModel.selectedEpochDay != today) return
@@ -466,9 +477,8 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         return resources.getQuantityString(R.plurals.minutes_count, minutes.toInt(), minutes)
     }
 
-    private fun taskDueMillis(task: CareTaskSummary): Long = LocalDate.ofEpochDay(task.dueDateEpochDay)
-        .atStartOfDay(java.time.ZoneId.systemDefault()).plusMinutes(task.reminderMinutesOfDay.toLong())
-        .toInstant().toEpochMilli()
+    private fun taskDueMillis(task: CareTaskSummary): Long =
+        LocalDayClock.dueMillis(task.dueDateEpochDay, task.reminderMinutesOfDay)
 
     private fun currentMinutes(): Int = Calendar.getInstance().let {
         it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)
@@ -513,18 +523,6 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         }
     }
 
-    /** A 40 ms row interval makes the first data arrival legible without replaying on tab return. */
-    private fun playTaskEntrance() {
-        val animation = AnimationSet(true).apply {
-            addAnimation(AlphaAnimation(0f, 1f))
-            addAnimation(TranslateAnimation(0f, 0f, 24f, 0f))
-            duration = 300L
-            interpolator = FastOutSlowInInterpolator()
-        }
-        binding.taskRecycler.layoutAnimation = LayoutAnimationController(animation, 40f / 300f)
-        binding.taskRecycler.scheduleLayoutAnimation()
-    }
-
     private fun openEmptyAction() {
         findNavController().navigate(
             if (latestPets.isEmpty()) R.id.action_home_to_add_pet else R.id.action_home_to_add_care_task
@@ -536,6 +534,31 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             val next = viewModel.completeTask(task.id)
             scheduler.cancel(task.id)
             next?.let(scheduler::schedule)
+            UiSnackbar.make(binding.root, getString(R.string.task_done_message, task.title),
+                Snackbar.LENGTH_LONG).setAction(R.string.undo) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.reopenTask(task.id)?.let(scheduler::schedule)
+                }
+            }.show()
+        }
+    }
+
+    private fun reopen(task: CareTaskSummary) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.reopenTask(task.id)?.let(scheduler::schedule)
+            UiSnackbar.make(binding.root, getString(R.string.task_reopened_message, task.title),
+                Snackbar.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun snooze(task: CareTaskSummary) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.snoozeTask(task.id, 30)?.let { moved ->
+                scheduler.cancel(task.id)
+                scheduler.schedule(moved)
+                UiSnackbar.make(binding.root, R.string.snoozed_thirty_minutes,
+                    Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -544,10 +567,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     }
 
     private fun finishTaskDrag() {
-        val (ids, slots) = upcomingAdapter.finishDrag() ?: return
-        if (ids == latestUpcoming.filter {
-                viewModel.selectedPetId == null || it.petId == viewModel.selectedPetId }
-                .map(CareTaskSummary::id)) return
+        val (ids, slots) = taskAdapter.finishDrag() ?: return
         viewLifecycleOwner.lifecycleScope.launch { viewModel.saveOrder(ids, slots) }
     }
 
@@ -621,7 +641,7 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             UiSnackbar.make(binding.root, R.string.task_deleted, Snackbar.LENGTH_LONG)
                 .setDuration(6000)
                 .setAction(R.string.undo) {
-                    upcomingAdapter.restoringTaskId = snapshot.id
+                    taskAdapter.restoringTaskId = snapshot.id
                     viewLifecycleOwner.lifecycleScope.launch {
                     viewModel.restoreTask(snapshot)
                         if (!snapshot.isCompleted) scheduler.schedule(snapshot)
@@ -735,9 +755,14 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     override fun onDestroyView() {
         binding.loadingSkeleton.stop()
         binding.petFilterRecycler.adapter = null
+        binding.weekRecycler.adapter = null
         binding.taskRecycler.adapter = null
-        binding.completedRecycler.adapter = null
         _binding = null
         super.onDestroyView()
+    }
+
+    private companion object {
+        const val TODAY_PREFS = "today_display"
+        const val HIDE_COMPLETED = "hide_completed"
     }
 }

@@ -31,7 +31,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     private val repositories = PetCareRepositories(application)
     private val refreshTick = MutableStateFlow(0)
     var selectedPetId: Long? = null
-    var selectedEpochDay: Long = java.time.LocalDate.now().toEpochDay()
+    var selectedEpochDay: Long = LocalDayClock.todayEpochDay()
 
     val state: StateFlow<ScreenState<TodayData>> = combine(
         repositories.pets.observePets(), repositories.tasks.observeUpcoming(),
@@ -53,7 +53,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     fun refresh() { refreshTick.value++ }
 
     suspend fun completeTask(id: Long): CareTaskEntity? = repositories.tasks.completeTask(id)
-    suspend fun reopenTask(id: Long) = repositories.tasks.reopenTask(id)
+    suspend fun reopenTask(id: Long): CareTaskEntity? = repositories.tasks.reopenTask(id)
     suspend fun snoozeTask(id: Long, minutes: Int): CareTaskEntity? =
         repositories.tasks.snoozeTask(id, minutes)
     suspend fun saveOrder(ids: List<Long>, slots: List<Long>) =
