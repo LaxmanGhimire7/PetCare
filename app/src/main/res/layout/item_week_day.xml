@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One selectable day in the seven-day Today strip. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:minHeight="@dimen/touch_target"
+    android:orientation="vertical"
+    android:paddingVertical="@dimen/space_4">
+    <TextView android:id="@+id/week_day_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Label" />
+    <TextView android:id="@+id/week_day_number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Figure" />
+    <View android:id="@+id/week_task_dot" android:layout_width="@dimen/space_4" android:layout_height="@dimen/space_4" android:layout_marginTop="@dimen/space_2" />
+</LinearLayout>

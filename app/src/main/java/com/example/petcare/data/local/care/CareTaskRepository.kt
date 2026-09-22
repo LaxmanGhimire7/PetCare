@@ -58,6 +58,21 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao, private val owner
         return nextTask.copy(id = careTaskDao.insert(nextTask))
     }
 
+    /** Reopens one completed task for completion Undo without changing its timeline slot. */
+    suspend fun reopenTask(careTaskId: Long) = careTaskDao.reopen(careTaskId, ownerId)
+
+    /** Moves an open task forward while carrying minutes past midnight onto the next day. */
+    suspend fun snoozeTask(careTaskId: Long, delayMinutes: Int): CareTaskEntity? {
+        val task = careTaskDao.getById(careTaskId, ownerId) ?: return null
+        val total = task.reminderMinutesOfDay + delayMinutes
+        val moved = task.copy(
+            dueDateEpochDay = task.dueDateEpochDay + total.floorDiv(MINUTES_PER_DAY),
+            reminderMinutesOfDay = Math.floorMod(total, MINUTES_PER_DAY)
+        )
+        careTaskDao.moveDueTime(moved.id, moved.dueDateEpochDay, moved.reminderMinutesOfDay, ownerId)
+        return moved
+    }
+
     suspend fun deleteTask(careTaskId: Long): CareTaskEntity? {
         val snapshot = careTaskDao.getById(careTaskId, ownerId) ?: return null
         careTaskDao.deleteById(careTaskId, ownerId)
@@ -90,4 +105,6 @@ class CareTaskRepository(private val careTaskDao: CareTaskDao, private val owner
     suspend fun saveOrder(idsInOrder: List<Long>, slotsInOrder: List<Long>) {
         careTaskDao.setSortOrders(idsInOrder, slotsInOrder, ownerId)
     }
+
+    private companion object { const val MINUTES_PER_DAY = 24 * 60 }
 }

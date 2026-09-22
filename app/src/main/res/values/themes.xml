@@ -2,20 +2,25 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.PetCare" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
         <item name="colorPrimaryContainer">@color/primary_container</item>
-        <item name="colorSecondary">@color/secondary</item>
-        <item name="colorSecondaryContainer">@color/secondary_container</item>
-        <item name="colorTertiary">@color/tertiary</item>
         <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
         <item name="colorOnSecondaryContainer">@color/on_secondary_container</item>
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_tertiary_container</item>
         <item name="android:colorBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceContainerLowest">@color/surface_container_lowest</item>
         <item name="colorSurfaceVariant">@color/surface_variant</item>
         <item name="colorSurfaceContainerLow">@color/surface_container_low</item>
         <item name="colorSurfaceContainer">@color/surface_container</item>
         <item name="colorSurfaceContainerHigh">@color/surface_container_high</item>
-        <item name="colorOnPrimary">@color/on_primary</item>
-        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_container_highest</item>
         <item name="colorOnSurface">@color/on_surface</item>
         <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
         <item name="colorOnBackground">@color/on_background</item>
@@ -23,13 +28,15 @@
         <item name="colorOutlineVariant">@color/outline_variant</item>
         <item name="colorError">@color/error</item>
         <item name="colorOnError">@color/on_error</item>
-        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
-        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="colorErrorContainer">@color/error_container</item>
+        <item name="colorOnErrorContainer">@color/on_error_container</item>
+        <item name="android:fontFamily">@font/barlow_regular</item>
+        <item name="fontFamily">@font/barlow_regular</item>
         <item name="textAppearanceDisplayLarge">@style/TextAppearance.PetCare.Display</item>
         <item name="textAppearanceHeadlineLarge">@style/TextAppearance.PetCare.Headline</item>
         <item name="textAppearanceHeadlineMedium">@style/TextAppearance.PetCare.Headline</item>
-        <item name="textAppearanceTitleLarge">@style/TextAppearance.PetCare.Title</item>
-        <item name="textAppearanceTitleMedium">@style/TextAppearance.PetCare.Title</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.PetCare.Section</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.PetCare.Section</item>
         <item name="textAppearanceBodyLarge">@style/TextAppearance.PetCare.Body</item>
         <item name="textAppearanceBodyMedium">@style/TextAppearance.PetCare.Body</item>
         <item name="textAppearanceBodySmall">@style/TextAppearance.PetCare.Supporting</item>
@@ -43,12 +50,13 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
     <style name="Theme.PetCare" parent="Base.Theme.PetCare" />
 
     <style name="Theme.PetCare.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/surface</item>
+        <item name="windowSplashScreenBackground">@color/canvas</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_pets</item>
         <item name="postSplashScreenTheme">@style/Theme.PetCare</item>
     </style>

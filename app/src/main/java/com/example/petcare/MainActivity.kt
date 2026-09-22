@@ -3,14 +3,13 @@ package com.example.petcare
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Build
 import android.view.animation.OvershootInterpolator
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
@@ -39,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private var pendingDeepLinkUri: Uri? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
+        enableEdgeToEdge()
         // A restored activity must not expose its old back stack after a non-persistent session ends.
         val safeState = savedInstanceState.takeIf { AuthPreferences(this).isSignedIn() }
         super.onCreate(safeState)
@@ -73,7 +73,10 @@ class MainActivity : AppCompatActivity() {
             },
             true
         )
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // MIUI otherwise inserts an opaque contrast strip below the edge-to-edge nav bar.
+            window.isNavigationBarContrastEnforced = false
+        }
         setContentView(R.layout.activity_main)
         updateSystemBarAppearance()
         val navController = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
@@ -119,17 +122,6 @@ class MainActivity : AppCompatActivity() {
                 rail.visibility =
                     if (destination.id in primaryDestinations) android.view.View.VISIBLE else android.view.View.GONE
             }
-        }
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
-            v.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                maxOf(systemBars.bottom, keyboard.bottom)
-            )
-            insets
         }
         splash.setOnExitAnimationListener { provider ->
             if (!MotionPrefs.animationsEnabled(this)) {

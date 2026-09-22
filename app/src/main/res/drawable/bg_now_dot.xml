@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Compact profile avatar used by the Today header. -->
+<!-- Solid orange marker for the current time on Today's timeline. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-    <solid android:color="@color/primary_container" />
+    <solid android:color="@color/primary" />
 </shape>

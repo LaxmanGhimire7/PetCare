@@ -3,10 +3,10 @@
     <style name="Widget.PetCare.Button.Primary" parent="Widget.Material3.Button">
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="cornerRadius">@dimen/radius_pill</item>
-        <item name="backgroundTint">@color/brass</item>
-        <item name="android:textColor">@color/on_brass</item>
-        <item name="iconTint">@color/on_brass</item>
-        <item name="android:textAppearance">@style/TextAppearance.PetCare.Title</item>
+        <item name="backgroundTint">@color/primary</item>
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="iconTint">@color/on_primary</item>
+        <item name="android:textAppearance">@style/TextAppearance.PetCare.RowTitle</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0.01</item>
     </style>
@@ -22,7 +22,7 @@
     <style name="Widget.PetCare.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="cornerRadius">@dimen/radius_pill</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textAppearance">@style/TextAppearance.PetCare.RowTitle</item>
         <item name="android:textAllCaps">false</item>
     </style>
 
@@ -30,7 +30,7 @@
         <item name="android:minHeight">@dimen/touch_target</item>
         <item name="cornerRadius">@dimen/radius_pill</item>
         <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textAppearance">@style/TextAppearance.PetCare.RowTitle</item>
         <item name="android:textAllCaps">false</item>
     </style>
 
@@ -72,6 +72,11 @@
         <item name="cardElevation">0dp</item>
         <item name="strokeColor">@color/outline_variant</item>
         <item name="strokeWidth">0dp</item>
+    </style>
+
+    <!-- Squared-off floating action shape used by the instrument-inspired Today screen. -->
+    <style name="ShapeAppearance.PetCare.Fab" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerSize">@dimen/radius_icon_well</item>
     </style>
 
 </resources>

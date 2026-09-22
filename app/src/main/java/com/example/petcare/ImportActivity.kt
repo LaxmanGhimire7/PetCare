@@ -4,11 +4,10 @@ import com.example.petcare.ui.UiSnackbar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Build
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.petcare.databinding.ActivityImportBinding
 import com.example.petcare.integration.AppointmentDraft
@@ -33,16 +32,13 @@ class ImportActivity : AppCompatActivity() {
     private var sharedContent: String? = null
 
     override fun onCreate(state: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(state)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         binding = ActivityImportBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.importRoot) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            view.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
-            insets
-        }
         binding.continueButton.isEnabled = false
         binding.continueButton.setOnClickListener { continueToTask() }
         lifecycleScope.launch {

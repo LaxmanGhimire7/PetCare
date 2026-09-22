@@ -11,6 +11,9 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.SystemClock
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,12 +25,14 @@ import android.view.animation.LayoutAnimationController
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.example.petcare.R
@@ -55,12 +60,16 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
+import java.time.LocalDate
 
 /** Today's care, progress, pet filtering and the main care actions. */
 class HomeDashboardFragment : Fragment(), SensorEventListener {
@@ -70,14 +79,14 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
     private val filterAdapter = PetFilterAdapter(::selectPet)
     private lateinit var taskTouchHelper: ItemTouchHelper
-    private val upcomingAdapter = TodayTaskAdapter(false, ::complete, ::edit, ::shareOne,
+    private val taskAdapter = TodayTaskAdapter(::complete, ::reopen, ::edit, ::shareOne,
         ::openDetail, ::startTaskDrag)
-    private val completedAdapter = TodayTaskAdapter(true, {}, ::edit, ::shareOne, ::openDetail)
+    private val weekAdapter = WeekStripAdapter(::selectDay)
     private var latestPets = emptyList<PetEntity>()
     private var latestUpcoming = emptyList<CareTaskSummary>()
     private var latestCompleted = emptyList<CareTaskSummary>()
-    private var completedExpanded = false
-    private var previousProgress: Pair<Int, Int>? = null
+    private var nextCardTask: CareTaskSummary? = null
+    private var hideCompleted = false
     private var pendingDeepLinkTaskId: Long = 0L
     private val shakeDetector = ShakeDetector()
     private val sensorManager by lazy {
@@ -132,15 +141,19 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         binding.petFilterRecycler.layoutManager =
             LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
         binding.petFilterRecycler.adapter = filterAdapter
+        binding.weekRecycler.layoutManager = GridLayoutManager(requireContext(), 7)
+        binding.weekRecycler.adapter = weekAdapter
         binding.taskRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.taskRecycler.adapter = upcomingAdapter
-        binding.completedRecycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.completedRecycler.adapter = completedAdapter
+        binding.taskRecycler.adapter = taskAdapter
+        hideCompleted = requireContext().getSharedPreferences(TODAY_PREFS, Context.MODE_PRIVATE)
+            .getBoolean(HIDE_COMPLETED, false)
         taskTouchHelper = ItemTouchHelper(TaskSwipeCallback({ viewHolder, direction ->
-                val task = upcomingAdapter.taskAt(viewHolder.bindingAdapterPosition)
-                if (direction == ItemTouchHelper.RIGHT) complete(task)
+                val task = taskAdapter.taskAt(viewHolder.bindingAdapterPosition)
+                if (direction == ItemTouchHelper.RIGHT) {
+                    if (task.isCompleted) reopen(task) else complete(task)
+                }
                 else RowMotion.collapse(viewHolder.itemView) { delete(task) }
-        }, upcomingAdapter::beginDrag, upcomingAdapter::moveItem, ::finishTaskDrag))
+        }, taskAdapter::beginDrag, taskAdapter::moveItem, ::finishTaskDrag))
         taskTouchHelper.attachToRecyclerView(binding.taskRecycler)
         binding.addTaskFab.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_add_care_task)
@@ -150,25 +163,20 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         }
         binding.todayEmptyAction.setOnClickListener { openEmptyAction() }
         binding.reorderModeButton.setOnClickListener { showTaskOptions() }
-        binding.completedHeader.setOnClickListener {
-            completedExpanded = !completedExpanded
-            binding.completedRecycler.visibility = if (completedExpanded) View.VISIBLE else View.GONE
-        }
         binding.generateRoutineButton.setOnClickListener {
             findNavController().navigate(R.id.action_home_to_routine_generator)
         }
-        binding.resetChecklistButton.setOnClickListener { confirmChecklistReset() }
         binding.shareChecklistButton.setOnClickListener { shareChecklist(latestUpcoming) }
         binding.exportPlanButton.setOnClickListener { chooseCarePlanExport() }
         binding.importAppointmentButton.setOnClickListener {
             appointmentPicker.launch(arrayOf("text/calendar", "application/ics", "text/plain"))
         }
         binding.todayScroll.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            // This switches FAB state immediately; it does not animate while scrolling.
             lastScrollAt = SystemClock.elapsedRealtime()
             shakeDetector.clearWindow()
-            binding.addTaskFab.isExtended = scrollY < resources.getDimensionPixelSize(R.dimen.space_24)
         }
+        binding.nextMarkDoneButton.setOnClickListener { nextCardTask?.let(::complete) }
+        binding.nextSnoozeButton.setOnClickListener { nextCardTask?.let(::snooze) }
         binding.todayRefresh.setColorSchemeColors(MaterialColors.getColor(binding.root,
             androidx.appcompat.R.attr.colorPrimary))
         binding.todayRefresh.setOnChildScrollUpCallback { _, _ ->
@@ -185,38 +193,47 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collect { state ->
-                    when (state) {
-                        ScreenState.Loading -> {
-                            binding.loadingSkeleton.visibility = View.VISIBLE
-                            binding.loadingSkeleton.start()
-                        }
-                        ScreenState.Empty -> {
-                            latestPets = emptyList()
-                            latestUpcoming = emptyList()
-                            latestCompleted = emptyList()
-                            render()
-                        }
-                        is ScreenState.Content -> {
-                            latestPets = state.data.pets
-                            latestUpcoming = state.data.upcoming
-                            latestCompleted = state.data.completed
-                            render()
-                            CareWidgetProvider.refresh(requireContext().applicationContext)
-                            if (pendingDeepLinkTaskId > 0L) {
-                                val target = (latestUpcoming + latestCompleted)
-                                    .firstOrNull { it.id == pendingDeepLinkTaskId }
-                                pendingDeepLinkTaskId = 0L
-                                if (target != null) openDetail(target)
-                                else UiSnackbar.make(binding.root, R.string.task_unavailable,
-                                    Snackbar.LENGTH_LONG).show()
+                launch {
+                    viewModel.state.collect { state ->
+                        when (state) {
+                            ScreenState.Loading -> {
+                                binding.loadingSkeleton.visibility = View.VISIBLE
+                                binding.loadingSkeleton.start()
+                            }
+                            ScreenState.Empty -> {
+                                latestPets = emptyList()
+                                latestUpcoming = emptyList()
+                                latestCompleted = emptyList()
+                                render()
+                            }
+                            is ScreenState.Content -> {
+                                latestPets = state.data.pets
+                                latestUpcoming = state.data.upcoming
+                                latestCompleted = state.data.completed
+                                render()
+                                CareWidgetProvider.refresh(requireContext().applicationContext)
+                                if (pendingDeepLinkTaskId > 0L) {
+                                    val target = (latestUpcoming + latestCompleted)
+                                        .firstOrNull { it.id == pendingDeepLinkTaskId }
+                                    pendingDeepLinkTaskId = 0L
+                                    if (target != null) openDetail(target)
+                                    else UiSnackbar.make(binding.root, R.string.task_unavailable,
+                                        Snackbar.LENGTH_LONG).show()
+                                }
+                            }
+                            is ScreenState.Error -> {
+                                binding.loadingSkeleton.visibility = View.GONE
+                                binding.loadingSkeleton.stop()
+                                UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
                             }
                         }
-                        is ScreenState.Error -> {
-                            binding.loadingSkeleton.visibility = View.GONE
-                            binding.loadingSkeleton.stop()
-                            UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
-                        }
+                    }
+                }
+                launch {
+                    // Recalculate from the wall clock; background time and delayed ticks never drift.
+                    while (isActive) {
+                        updateClockPresentation()
+                        delay(1_000L)
                     }
                 }
             }
@@ -254,84 +271,214 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
         render()
     }
 
+    private fun selectDay(day: Long) {
+        if (viewModel.selectedEpochDay == day) return
+        viewModel.selectedEpochDay = day
+        render()
+    }
+
     private fun render() {
-        val selectedId = viewModel.selectedPetId
-        if (selectedId != null && latestPets.none { it.id == selectedId }) {
+        if (viewModel.selectedPetId != null && latestPets.none { it.id == viewModel.selectedPetId }) {
             viewModel.selectedPetId = null
         }
-        val selected = viewModel.selectedPetId
         val today = todayEpochDay()
-        // The list includes future appointments; the ring still counts only today's care.
-        val upcoming = latestUpcoming.filter { selected == null || it.petId == selected }
-        val completedToday = latestCompleted.filter {
-            it.dueDateEpochDay == today && (selected == null || it.petId == selected)
-        }
-        val doneCount = latestCompleted.count { it.dueDateEpochDay == today }
-        val dueCount = latestUpcoming.count { it.dueDateEpochDay == today }
+        if (viewModel.selectedEpochDay == 0L) viewModel.selectedEpochDay = today
+        val selectedDay = viewModel.selectedEpochDay
+        val selectedPet = viewModel.selectedPetId
+        val allTasks = (latestUpcoming + latestCompleted).distinctBy(CareTaskSummary::id)
+        val onSelectedDay = allTasks.filter { it.dueDateEpochDay == selectedDay }
+        val overdue = if (selectedDay == today) allTasks.filter {
+            !it.isCompleted && it.dueDateEpochDay < today
+        } else emptyList()
+        val chronological = (overdue + onSelectedDay).distinctBy(CareTaskSummary::id)
+            .filter { selectedPet == null || it.petId == selectedPet }
+            .sortedWith(compareBy(CareTaskSummary::dueDateEpochDay)
+                .thenBy(CareTaskSummary::reminderMinutesOfDay)
+                .thenBy(CareTaskSummary::sortOrder))
+        val hiddenCount = chronological.count(CareTaskSummary::isCompleted)
+        val visible = if (hideCompleted) chronological.filterNot(CareTaskSummary::isCompleted)
+            else chronological
+        val progressTasks = onSelectedDay.filter { selectedPet == null || it.petId == selectedPet }
+        val doneCount = progressTasks.count(CareTaskSummary::isCompleted)
+
         val petProgress = latestPets.associate { pet ->
-            val done = latestCompleted.count { it.petId == pet.id && it.dueDateEpochDay == today }
-            val open = latestUpcoming.count { it.petId == pet.id && it.dueDateEpochDay == today }
-            pet.id to (done to done + open)
+            val tasks = onSelectedDay.filter { it.petId == pet.id }
+            pet.id to (tasks.count(CareTaskSummary::isCompleted) to tasks.size)
         }
-        filterAdapter.submit(latestPets, viewModel.selectedPetId, petProgress,
-            doneCount to (doneCount + dueCount))
-        val firstEntrance = viewModel.consumeFirstEntrance()
-        val progress = doneCount to (doneCount + dueCount)
-        val hasTasksToday = doneCount + dueCount > 0
-        binding.progressRing.visibility = if (hasTasksToday) View.VISIBLE else View.GONE
-        if (hasTasksToday) binding.progressRing.setProgress(
-            doneCount, doneCount + dueCount,
-            firstEntrance || (previousProgress != null && previousProgress != progress)
-        )
-        previousProgress = progress
-        binding.progressCountText.text = if (hasTasksToday)
-            getString(R.string.today_progress_count, doneCount, doneCount + dueCount)
-        else getString(R.string.today_nothing_due)
-        val nextToday = latestUpcoming.filter { it.dueDateEpochDay == today }
-            .minByOrNull(CareTaskSummary::reminderMinutesOfDay)
-        val nextFuture = latestUpcoming.filter { it.dueDateEpochDay > today }
-            .minWithOrNull(compareBy(CareTaskSummary::dueDateEpochDay)
-                .thenBy(CareTaskSummary::reminderMinutesOfDay))
-        binding.nextTaskText.text = when {
-            nextToday != null -> getString(R.string.today_next_task, nextToday.title,
-                formatTime(nextToday.reminderMinutesOfDay))
-            nextFuture != null -> getString(R.string.today_next_future_task, nextFuture.title,
-                formatDate(nextFuture.dueDateEpochDay),
-                formatTime(nextFuture.reminderMinutesOfDay))
-            else -> getString(R.string.today_nothing_next)
+        filterAdapter.submit(latestPets, selectedPet, petProgress,
+            doneCount to progressTasks.size)
+        weekAdapter.submit(selectedDay, allTasks.map(CareTaskSummary::dueDateEpochDay).toSet())
+        binding.progressRing.setSegments(progressTasks.map { task ->
+            com.example.petcare.data.local.pet.PetColor.fromIndex(task.petColorIndex)
+                .color(requireContext()) to task.isCompleted
+        })
+        binding.progressRing.visibility = if (progressTasks.isEmpty()) View.GONE else View.VISIBLE
+        binding.progressCountText.text = getString(R.string.today_done_progress, doneCount, progressTasks.size)
+
+        taskAdapter.todayEpochDay = today
+        val nowMinutes = currentMinutes()
+        val nextAfterNow = if (selectedDay == today) visible.firstOrNull {
+            it.dueDateEpochDay == today && it.reminderMinutesOfDay > nowMinutes
+        } else null
+        taskAdapter.nowBeforeTaskId = nextAfterNow?.id
+        taskAdapter.submitList(visible)
+        binding.nowAfterTimeline.visibility = if (selectedDay == today && visible.isNotEmpty() && nextAfterNow == null)
+            View.VISIBLE else View.GONE
+        binding.nowAfterTime.text = formatTime(nowMinutes)
+
+        binding.upcomingHeader.text = if (hideCompleted && hiddenCount > 0)
+            getString(R.string.completed_hidden, hiddenCount) else getString(R.string.timeline)
+        binding.upcomingHeader.setOnClickListener {
+            if (hideCompleted && hiddenCount > 0) toggleCompletedVisibility()
         }
-        binding.upcomingHeader.text = getString(R.string.today_upcoming_count, upcoming.size)
-        binding.reorderModeButton.visibility = if (upcoming.isNotEmpty()) View.VISIBLE else View.GONE
-        binding.completedHeader.text = getString(R.string.today_completed_count, completedToday.size)
-        binding.completedHeader.visibility =
-            if (completedToday.isEmpty()) View.GONE else View.VISIBLE
-        binding.completedRecycler.visibility =
-            if (completedExpanded && completedToday.isNotEmpty()) View.VISIBLE else View.GONE
-        upcomingAdapter.todayEpochDay = today
-        completedAdapter.todayEpochDay = today
-        upcomingAdapter.submitList(upcoming)
-        completedAdapter.submitList(completedToday)
+
+        renderNextCard(progressTasks, overdue, selectedDay, today)
         binding.loadingSkeleton.visibility = View.GONE
         binding.loadingSkeleton.stop()
-        binding.todayEmptyCard.visibility = if (upcoming.isEmpty()) View.VISIBLE else View.GONE
-        binding.todayEmptyText.setText(
-            if (latestPets.isEmpty()) R.string.today_empty_pets else R.string.today_empty_tasks
-        )
-        binding.todayEmptyAction.setText(
-            if (latestPets.isEmpty()) R.string.add_a_pet else R.string.add_task
-        )
-        // At large text sizes the floating button can cover a task's completion control.
-        // Move the same action into the scrollable content once there are tasks.
-        val inlineAdd = resources.configuration.fontScale >= 1.5f &&
-            latestPets.isNotEmpty() && (upcoming.isNotEmpty() || completedToday.isNotEmpty())
-        binding.addTaskInline.visibility = if (inlineAdd) View.VISIBLE else View.GONE
-        binding.addTaskFab.visibility = if (latestPets.isEmpty() || inlineAdd) View.GONE
-            else View.VISIBLE
         val hasPets = latestPets.isNotEmpty()
-        binding.quickActionsContainer.visibility = if (hasPets) View.VISIBLE else View.GONE
-        binding.resetChecklistButton.visibility = View.GONE
-        binding.importSourcesText.visibility = View.GONE
-        if (firstEntrance && MotionPrefs.animationsEnabled(requireContext())) playTaskEntrance()
+        binding.todayContent.visibility = if (hasPets) View.VISIBLE else View.GONE
+        binding.todayEmptyCard.visibility = if (hasPets) View.GONE else View.VISIBLE
+        binding.todayEmptyText.setText(R.string.today_empty_pets_title)
+        binding.todayEmptyAction.setText(R.string.add_a_pet)
+        binding.reorderModeButton.visibility = if (hasPets) View.VISIBLE else View.GONE
+
+        val inlineAdd = resources.configuration.fontScale >= 1.5f && hasPets
+        binding.addTaskInline.visibility = if (inlineAdd) View.VISIBLE else View.GONE
+        binding.addTaskFab.visibility = if (!hasPets || inlineAdd) View.GONE else View.VISIBLE
+        if (viewModel.consumeFirstEntrance() && MotionPrefs.animationsEnabled(requireContext())) {
+            binding.progressRing.alpha = 0f
+            binding.progressRing.animate().alpha(1f).setDuration(600L).start()
+        }
+    }
+
+    /** Resolves every hero state from the selected date and current wall clock. */
+    private fun renderNextCard(
+        selectedDayTasks: List<CareTaskSummary>,
+        allOverdue: List<CareTaskSummary>,
+        selectedDay: Long,
+        today: Long
+    ) {
+        val selectedPet = viewModel.selectedPetId
+        val overdueCount = allOverdue.count { selectedPet == null || it.petId == selectedPet }
+        binding.nextOverdueText.visibility = if (overdueCount > 0) View.VISIBLE else View.GONE
+        binding.nextOverdueText.text = getString(R.string.overdue_count, overdueCount)
+        val open = selectedDayTasks.filterNot(CareTaskSummary::isCompleted)
+            .sortedBy(CareTaskSummary::reminderMinutesOfDay)
+        val now = currentMinutes()
+        val next = if (selectedDay == today)
+            open.firstOrNull { it.reminderMinutesOfDay >= now } ?: open.firstOrNull()
+        else open.firstOrNull()
+        nextCardTask = next
+
+        when {
+            next != null -> {
+                binding.nextTaskText.text = next.title
+                val petColor = com.example.petcare.data.local.pet.PetColor.fromIndex(next.petColorIndex)
+                binding.nextPetText.visibility = View.VISIBLE
+                binding.nextPetText.text = next.petName
+                binding.nextPetText.setTextColor(petColor.onContainer(requireContext()))
+                binding.nextPetText.background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = resources.getDimension(R.dimen.radius_pill)
+                    setColor(petColor.container(requireContext()))
+                }
+                binding.nextActions.visibility = View.VISIBLE
+                binding.nextMarkDoneButton.setText(R.string.mark_done)
+                binding.nextMarkDoneButton.setOnClickListener { nextCardTask?.let(::complete) }
+                binding.nextSnoozeButton.visibility = if (selectedDay == today) View.VISIBLE else View.GONE
+                if (selectedDay == today) updateClockPresentation()
+                else {
+                    binding.countdownText.visibility = View.GONE
+                    binding.countdownUntilText.visibility = View.VISIBLE
+                    binding.countdownUntilText.text = getString(R.string.first_task_on_date,
+                        formatTime(next.reminderMinutesOfDay))
+                }
+            }
+            selectedDayTasks.isNotEmpty() && selectedDayTasks.all(CareTaskSummary::isCompleted) -> {
+                showStaticNextState(R.string.all_done_today)
+            }
+            else -> {
+                showStaticNextState(R.string.nothing_planned_today)
+                binding.nextActions.visibility = View.VISIBLE
+                binding.nextMarkDoneButton.setText(R.string.plan_a_task)
+                binding.nextMarkDoneButton.setOnClickListener {
+                    findNavController().navigate(R.id.action_home_to_add_care_task)
+                }
+                binding.nextSnoozeButton.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun showStaticNextState(message: Int) {
+        nextCardTask = null
+        binding.nextTaskText.setText(message)
+        binding.nextPetText.visibility = View.GONE
+        binding.countdownText.visibility = View.GONE
+        binding.countdownUntilText.visibility = View.GONE
+        binding.nextActions.visibility = View.GONE
+    }
+
+    /** Recomputes the countdown and Now position from the clock on every active tick. */
+    private fun updateClockPresentation() {
+        if (_binding == null) return
+        val today = todayEpochDay()
+        if (viewModel.selectedEpochDay == today) {
+            val minutes = currentMinutes()
+            binding.nowAfterTime.text = formatTime(minutes)
+            val current = taskAdapter.currentList
+            taskAdapter.nowBeforeTaskId = current.firstOrNull {
+                it.dueDateEpochDay == today && it.reminderMinutesOfDay > minutes
+            }?.id
+            binding.nowAfterTimeline.visibility = if (current.isNotEmpty() && taskAdapter.nowBeforeTaskId == null)
+                View.VISIBLE else View.GONE
+            taskAdapter.notifyDataSetChanged()
+        }
+        val task = nextCardTask ?: return
+        if (viewModel.selectedEpochDay != today) return
+        val remaining = taskDueMillis(task) - System.currentTimeMillis()
+        binding.countdownText.visibility = View.VISIBLE
+        binding.countdownUntilText.visibility = View.VISIBLE
+        if (remaining <= 0L) {
+            binding.countdownText.setText(R.string.countdown_due_now)
+            binding.countdownText.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_text))
+            binding.countdownText.contentDescription = getString(R.string.countdown_due_now)
+        } else {
+            val totalSeconds = remaining / 1_000L
+            val formatted = String.format(java.util.Locale.ROOT, "%02d:%02d:%02d",
+                totalSeconds / 3_600L, totalSeconds / 60L % 60L, totalSeconds % 60L)
+            val styled = SpannableString(formatted)
+            formatted.indices.filter { formatted[it] == ':' }.forEach { index ->
+                styled.setSpan(ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.primary)),
+                    index, index + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            styled.setSpan(ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.text_secondary)),
+                formatted.length - 2, formatted.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            binding.countdownText.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            binding.countdownText.text = styled
+            binding.countdownText.contentDescription = getString(R.string.countdown_accessibility,
+                task.title, humanDuration(remaining))
+        }
+        binding.countdownUntilText.text = getString(R.string.countdown_until,
+            formatTime(task.reminderMinutesOfDay))
+    }
+
+    private fun humanDuration(milliseconds: Long): String {
+        val minutes = (milliseconds / 60_000L).coerceAtLeast(1L)
+        return resources.getQuantityString(R.plurals.minutes_count, minutes.toInt(), minutes)
+    }
+
+    private fun taskDueMillis(task: CareTaskSummary): Long = LocalDate.ofEpochDay(task.dueDateEpochDay)
+        .atStartOfDay(java.time.ZoneId.systemDefault()).plusMinutes(task.reminderMinutesOfDay.toLong())
+        .toInstant().toEpochMilli()
+
+    private fun currentMinutes(): Int = Calendar.getInstance().let {
+        it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE)
+    }
+
+    private fun toggleCompletedVisibility() {
+        hideCompleted = !hideCompleted
+        requireContext().getSharedPreferences(TODAY_PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(HIDE_COMPLETED, hideCompleted).apply()
+        render()
     }
 
     /** Keeps reorder and destructive reset discoverable without placing controls under the FAB. */
@@ -341,11 +488,18 @@ class HomeDashboardFragment : Fragment(), SensorEventListener {
             menu.findItem(R.id.action_reorder_tasks).setTitle(
                 if (reorderMode) R.string.done_reordering else R.string.reorder_tasks
             )
+            menu.findItem(R.id.action_hide_completed).setTitle(
+                if (hideCompleted) R.string.show_completed else R.string.hide_completed
+            )
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.action_reorder_tasks -> {
                         reorderMode = !reorderMode
-                        upcomingAdapter.reorderMode = reorderMode
+                        taskAdapter.reorderMode = reorderMode
+                        true
+                    }
+                    R.id.action_hide_completed -> {
+                        toggleCompletedVisibility()
                         true
                     }
                     R.id.action_reset_checklist -> {

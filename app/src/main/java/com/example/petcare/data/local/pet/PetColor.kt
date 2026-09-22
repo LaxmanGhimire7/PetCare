@@ -2,26 +2,32 @@ package com.example.petcare.data.local.pet
 
 import android.content.Context
 import android.content.res.Configuration
-/** Fixed identity colours with explicit readable tints for both app themes. */
+
+/** Fixed Pit Lane identity colours with explicit readable tints in both themes. */
 enum class PetColor(
-    val primary: Int,
-    private val lightContainer: Int,
-    private val darkContainer: Int,
-    private val lightOnContainer: Int,
-    private val darkOnContainer: Int
+    private val darkColor: Int,
+    private val lightColor: Int,
+    private val darkTint: Int,
+    private val lightTint: Int
 ) {
-    SKY(0xFF2F7DF6.toInt(), 0xFFE6EFFE.toInt(), 0xFF15233D.toInt(), 0xFF1E4FB3.toInt(), 0xFF9FC0FF.toInt()),
-    IRIS(0xFF7A5AF8.toInt(), 0xFFEFEBFE.toInt(), 0xFF221B3F.toInt(), 0xFF4F35C2.toInt(), 0xFFB9A9FF.toInt()),
-    ROSE(0xFFE5487D.toInt(), 0xFFFCE8EF.toInt(), 0xFF3A1826.toInt(), 0xFFA32458.toInt(), 0xFFFF9BBB.toInt()),
-    LAGOON(0xFF12A594.toInt(), 0xFFE3F6F3.toInt(), 0xFF0F2E2A.toInt(), 0xFF0B6B60.toInt(), 0xFF75D6C9.toInt()),
-    EMBER(0xFFF2701F.toInt(), 0xFFFEEEE3.toInt(), 0xFF3A2212.toInt(), 0xFFA8470C.toInt(), 0xFFFFAB73.toInt()),
-    STONE(0xFF6B7280.toInt(), 0xFFEEF0F2.toInt(), 0xFF23262C.toInt(), 0xFF3F4450.toInt(), 0xFFB5BBC5.toInt());
+    SKY(0xFF38BDF8.toInt(), 0xFF0284C7.toInt(), 0xFF0C2A3A.toInt(), 0xFFE0F2FE.toInt()),
+    VIOLET(0xFFA78BFA.toInt(), 0xFF7C3AED.toInt(), 0xFF241C3F.toInt(), 0xFFEDE9FE.toInt()),
+    LAGOON(0xFF2DD4BF.toInt(), 0xFF0F766E.toInt(), 0xFF0D2E2A.toInt(), 0xFFCCFBF1.toInt()),
+    LIME(0xFFA3E635.toInt(), 0xFF4D7C0F.toInt(), 0xFF1F2A0C.toInt(), 0xFFECFCCB.toInt()),
+    PINK(0xFFF472B6.toInt(), 0xFFBE185D.toInt(), 0xFF3A1530.toInt(), 0xFFFCE7F3.toInt()),
+    SILVER(0xFFD4D4D8.toInt(), 0xFF52525B.toInt(), 0xFF26262A.toInt(), 0xFFF4F4F5.toInt());
 
-    /** Returns the designed pet tint rather than blending against dynamic chrome. */
-    fun container(context: Context): Int = if (context.isDarkTheme()) darkContainer else lightContainer
+    /** Returns the stable identity colour for the current designed theme. */
+    fun color(context: Context): Int = if (context.isDarkTheme()) darkColor else lightColor
 
-    /** Returns a contrast-safe label colour for the current tint. */
-    fun onContainer(context: Context): Int = if (context.isDarkTheme()) darkOnContainer else lightOnContainer
+    /** Compatibility accessor for callers that do not have a Context yet. */
+    val primary: Int get() = darkColor
+
+    /** Returns the fixed tint used behind this pet's labels and fallback avatar. */
+    fun container(context: Context): Int = if (context.isDarkTheme()) darkTint else lightTint
+
+    /** Text on a pet tint uses the identity colour specified for that theme. */
+    fun onContainer(context: Context): Int = color(context)
 
     companion object {
         fun fromIndex(index: Int): PetColor = entries[Math.floorMod(index, entries.size)]

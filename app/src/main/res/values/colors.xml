@@ -1,21 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- UI redesign colour tokens: neutral chrome, brass actions, pet-owned colour. -->
-    <color name="canvas">#F4F5F7</color><color name="surface">#FFFFFF</color>
-    <color name="surface_muted">#ECEEF2</color><color name="hairline">#E3E5EA</color>
-    <color name="text_primary">#1A1D24</color><color name="text_secondary">#5A6070</color><color name="text_tertiary">#6E7482</color>
-    <color name="brass">#FFC83D</color><color name="on_brass">#1A1D24</color><color name="brass_soft">#FFF3CC</color>
-    <color name="error">#D92D20</color><color name="error_soft">#FDECEA</color><color name="on_error">#FFFFFF</color>
-    <!-- Material aliases keep existing views on the same tokens. -->
-    <color name="primary">@color/brass</color><color name="on_primary">@color/on_brass</color>
-    <color name="primary_container">@color/brass_soft</color><color name="on_primary_container">@color/text_primary</color>
-    <color name="secondary">@color/text_secondary</color><color name="on_secondary">@color/surface</color>
-    <color name="secondary_container">@color/surface_muted</color><color name="on_secondary_container">@color/text_primary</color>
-    <color name="tertiary">@color/text_secondary</color><color name="background">@color/canvas</color>
-    <color name="surface_container_low">@color/surface</color><color name="surface_container">@color/surface</color>
-    <color name="surface_container_high">@color/surface_muted</color><color name="surface_variant">@color/surface_muted</color>
-    <color name="on_surface">@color/text_primary</color><color name="on_surface_variant">@color/text_secondary</color>
-    <color name="on_background">@color/text_primary</color><color name="outline">@color/text_tertiary</color><color name="outline_variant">@color/hairline</color>
-    <color name="hero_start">@color/brass_soft</color><color name="hero_end">@color/surface</color><color name="on_hero">@color/text_primary</color>
-    <color name="hero_muted">@color/text_secondary</color><color name="hero_button">@color/brass</color>
+    <!-- Pit Lane light palette. Orange is reserved for action and time. -->
+    <color name="canvas">#F4F4F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_raised">#FFFFFF</color>
+    <color name="surface_muted">#EBEBEE</color>
+    <color name="hairline">#E4E4E7</color>
+    <color name="track">#E4E4E7</color>
+    <color name="text_primary">#09090B</color>
+    <color name="text_secondary">#52525B</color>
+    <color name="text_tertiary">#71717A</color>
+    <color name="primary">#FF6B00</color>
+    <color name="primary_text">#C2410C</color>
+    <color name="on_primary">#000000</color>
+    <color name="primary_container">#FFEDD5</color>
+    <color name="on_primary_container">#9A3412</color>
+    <color name="error">#DC2626</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#FEE2E2</color>
+    <color name="on_error_container">#991B1B</color>
+    <color name="error_soft">@color/error_container</color>
+    <color name="background">@color/canvas</color>
+    <color name="secondary">@color/primary</color>
+    <color name="on_secondary">@color/on_primary</color>
+    <color name="secondary_container">@color/primary_container</color>
+    <color name="on_secondary_container">@color/on_primary_container</color>
+    <color name="tertiary">@color/primary</color>
+    <color name="on_tertiary">@color/on_primary</color>
+    <color name="tertiary_container">@color/primary_container</color>
+    <color name="on_tertiary_container">@color/on_primary_container</color>
+    <color name="surface_container_lowest">@color/surface</color>
+    <color name="surface_container_low">@color/surface</color>
+    <color name="surface_container">@color/surface</color>
+    <color name="surface_container_high">@color/surface_raised</color>
+    <color name="surface_container_highest">@color/surface_muted</color>
+    <color name="surface_variant">@color/surface_muted</color>
+    <color name="on_surface">@color/text_primary</color>
+    <color name="on_surface_variant">@color/text_secondary</color>
+    <color name="on_background">@color/text_primary</color>
+    <color name="outline">@color/text_secondary</color>
+    <color name="outline_variant">@color/hairline</color>
+    <color name="hero_start">@color/surface</color>
+    <color name="hero_end">@color/surface</color>
+    <color name="on_hero">@color/text_primary</color>
+    <color name="hero_muted">@color/text_secondary</color>
+    <color name="hero_button">@color/primary</color>
 </resources>

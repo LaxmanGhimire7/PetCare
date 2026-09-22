@@ -73,6 +73,7 @@ interface CareTaskDao {
                care_tasks.reminderMinutesOfDay, care_tasks.category, care_tasks.frequency,
                care_tasks.requiredSupplies, care_tasks.notes, care_tasks.latitude,
                care_tasks.longitude, care_tasks.placeId, care_tasks.sortOrder,
+               care_tasks.isCompleted,
                pets.name AS petName, pets.colorIndex AS petColorIndex
         FROM care_tasks
         INNER JOIN pets ON pets.id = care_tasks.petId AND pets.ownerId = care_tasks.ownerId
@@ -88,6 +89,7 @@ interface CareTaskDao {
                care_tasks.reminderMinutesOfDay, care_tasks.category, care_tasks.frequency,
                care_tasks.requiredSupplies, care_tasks.notes, care_tasks.latitude,
                care_tasks.longitude, care_tasks.placeId, care_tasks.sortOrder,
+               care_tasks.isCompleted,
                pets.name AS petName, pets.colorIndex AS petColorIndex
         FROM care_tasks
         INNER JOIN pets ON pets.id = care_tasks.petId AND pets.ownerId = care_tasks.ownerId
@@ -96,6 +98,12 @@ interface CareTaskDao {
         """
     )
     fun observeCompleted(ownerId: Long): Flow<List<CareTaskSummary>>
+
+    @Query("UPDATE care_tasks SET isCompleted = 0 WHERE id = :careTaskId AND ownerId = :ownerId")
+    suspend fun reopen(careTaskId: Long, ownerId: Long)
+
+    @Query("UPDATE care_tasks SET dueDateEpochDay = :day, reminderMinutesOfDay = :minutes WHERE id = :careTaskId AND ownerId = :ownerId")
+    suspend fun moveDueTime(careTaskId: Long, day: Long, minutes: Int, ownerId: Long)
 
     @Query("""SELECT care_tasks.id, care_tasks.title, pets.name AS petName,
         care_tasks.reminderMinutesOfDay FROM care_tasks
