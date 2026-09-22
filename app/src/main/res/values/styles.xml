@@ -34,6 +34,44 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
+    <!-- Flat grouped-list row used by Settings without adding individual card shadows. -->
+    <style name="Widget.PetCare.SettingsRow" parent="Widget.Material3.Button.TextButton">
+        <item name="android:minHeight">56dp</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:textAppearance">@style/TextAppearance.PetCare.RowTitle</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="iconTint">@color/text_secondary</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">@dimen/space_16</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="cornerRadius">0dp</item>
+    </style>
+
+    <style name="Widget.PetCare.SettingsRow.Destructive" parent="Widget.PetCare.SettingsRow">
+        <item name="android:textColor">@color/error</item>
+        <item name="iconTint">@color/error</item>
+    </style>
+
+    <!-- Consistent section caption above every Settings group. -->
+    <style name="SettingsSectionTitle" parent="TextAppearance.PetCare.Section">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/space_28</item>
+        <item name="android:layout_marginBottom">@dimen/space_10</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Shared spacing for the two grouped sections on Money. -->
+    <style name="MoneySectionTitle" parent="TextAppearance.PetCare.Section">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/space_28</item>
+        <item name="android:layout_marginBottom">@dimen/space_10</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
     <!-- 56dp icon well used by the Today quick action row. -->
     <style name="Widget.PetCare.QuickActionButton" parent="Widget.Material3.Button.TonalButton">
         <item name="backgroundTint">@color/surface_muted</item><item name="iconTint">@color/text_primary</item>

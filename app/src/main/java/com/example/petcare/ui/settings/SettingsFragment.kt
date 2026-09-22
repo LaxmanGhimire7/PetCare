@@ -54,10 +54,10 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, state: Bundle?) {
         val auth = AuthPreferences(requireContext())
         val settings = SettingsPreferences(requireContext())
-        binding.accountText.text = getString(
-            R.string.settings_account,
-            auth.userName().orEmpty()
-        )
+        val accountName = auth.userName().orEmpty()
+        binding.accountText.text = accountName
+        binding.profileInitials.text = accountName.trim().split(Regex("\\s+"))
+            .filter(String::isNotBlank).take(2).joinToString("") { it.take(1) }.uppercase()
         binding.reminderSettingsButton.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_reminder_settings)
         }

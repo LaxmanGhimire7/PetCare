@@ -7,6 +7,8 @@
     <dimen name="space_16">16dp</dimen>
     <dimen name="space_20">20dp</dimen>
     <dimen name="space_24">24dp</dimen>
+    <dimen name="space_10">10dp</dimen>
+    <dimen name="space_28">28dp</dimen>
     <dimen name="space_32">32dp</dimen>
     <dimen name="space_40">40dp</dimen>
     <dimen name="space_48">48dp</dimen>
@@ -62,4 +64,10 @@
     <dimen name="pet_grid_photo_height">148dp</dimen>
     <dimen name="pet_badge_size">30dp</dimen>
     <dimen name="pet_picker_avatar">44dp</dimen>
+    <dimen name="money_split_height">8dp</dimen>
+    <dimen name="money_row_height">56dp</dimen>
+    <dimen name="money_chart_height">168dp</dimen>
+    <dimen name="money_chart_bar_height">92dp</dimen>
+    <dimen name="money_chart_label_text">12sp</dimen>
+    <dimen name="money_chart_title_text">17sp</dimen>
 </resources>

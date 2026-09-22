@@ -33,6 +33,12 @@
     <string name="pet_allergies_summary">Allergies: %1$s</string>
     <string name="settings_screen_subtitle">Care preferences and your account.</string>
     <string name="settings_account">Signed in as %1$s</string>
+    <string name="settings_account_type">PetCare account</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_your_data">Your data</string>
+    <string name="settings_help">Help</string>
     <string name="today_progress_count">Completed today: %1$d / %2$d</string>
     <string name="today_progress_percent">%1$d%%</string>
     <string name="today_next_task">Next: %1$s at %2$s</string>
@@ -272,6 +278,14 @@
     <string name="routine_medication">Daily medication</string>
     <string name="routine_healthcare">Monthly health check</string>
     <string name="expense_title">Pet expenses</string>
+    <string name="money_spent_this_month">Spent this month</string>
+    <string name="money_by_category">By category</string>
+    <string name="money_recent">Recent</string>
+    <string name="money_six_month_trend">Last six months</string>
+    <string name="money_chart_accessibility">%1$s %2$d, %3$s</string>
+    <string name="money_all_pets">All</string>
+    <string name="money_expense_accessibility">%1$s for %2$s, %3$s</string>
+    <string name="money_delete_hint">Touch and hold an expense to delete it</string>
     <string name="expense_subtitle">Track spending for every pet.</string>
     <string name="add_expense">Add expense</string>
     <string name="expense_amount">Amount</string>
