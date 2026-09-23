@@ -84,6 +84,9 @@
         <item name="textInputStyle">@style/Widget.PC.TextInput</item>
         <item name="materialCardViewStyle">@style/Widget.PC.Card</item>
         <item name="bottomSheetDialogTheme">@style/ThemeOverlay.PC.BottomSheet</item>
+        <item name="chipStyle">@style/Widget.PC.Chip</item>
+        <item name="toolbarStyle">@style/Widget.PC.Toolbar</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.PC.Dialog</item>
 
         <!-- Edge to edge: transparent bars, no scrim behind 3-button navigation. -->
         <item name="android:statusBarColor">@android:color/transparent</item>

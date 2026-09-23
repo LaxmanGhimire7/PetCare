@@ -13,5 +13,8 @@ data class UserEntity(
     val email: String,
     val passwordHash: String,
     val passwordSalt: String,
-    val hashAlgorithm: String = PasswordHasher.SHA256
+    val hashAlgorithm: String = PasswordHasher.SHA256,
+    val phone: String? = null,
+    val securityQuestion: String? = null,
+    val securityAnswerHash: String? = null,
 )

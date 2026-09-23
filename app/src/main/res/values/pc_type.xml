@@ -210,4 +210,18 @@
         <item name="android:fontFamily">@font/pc_barlow_bold</item>
         <item name="fontFamily">@font/pc_barlow_bold</item>
     </style>
+    <!-- Filter chips. -->
+    <style name="TextAppearance.PC.Chip">
+        <item name="android:fontFamily">@font/pc_barlow_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_semibold</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- Unread count on the bell. -->
+    <style name="TextAppearance.PC.Badge">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/pc_on_primary</item>
+    </style>
 </resources>

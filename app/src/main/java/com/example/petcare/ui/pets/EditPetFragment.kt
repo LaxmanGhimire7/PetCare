@@ -18,6 +18,7 @@ import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
+import com.example.petcare.design.applySystemBarTopPadding
 import kotlinx.coroutines.launch
 
 /** Updates an existing pet profile and its photos without changing its owner. */
@@ -49,6 +50,7 @@ class EditPetFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        view.applySystemBarTopPadding()
         val id = arguments?.getLong("petId") ?: 0L
         if (id == 0L) { findNavController().navigateUp(); return }
         binding.petFormTitle.setText(R.string.edit_pet_title)
@@ -62,6 +64,7 @@ class EditPetFragment : Fragment() {
             val savedPet = pet ?: run { findNavController().navigateUp(); return@launch }
             binding.petNameInput.setText(savedPet.name)
             binding.petSpeciesInput.setText(savedPet.species)
+            configureSpecies(savedPet.species)
             selectedColorIndex = savedPet.colorIndex
             PetColorPicker.bind(binding.petColorGroup, requireContext(), selectedColorIndex) {
                 selectedColorIndex = it
@@ -84,6 +87,25 @@ class EditPetFragment : Fragment() {
                 binding.petPhotoPreview.load(uri)
             }
             updatePhotoCount()
+        }
+    }
+
+    private fun configureSpecies(initial: String) {
+        binding.petSpeciesGroup.check(
+            when (initial.lowercase()) {
+                "cat" -> R.id.pet_species_cat
+                "dog" -> R.id.pet_species_dog
+                else -> R.id.pet_species_other
+            },
+        )
+        binding.petSpeciesGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            binding.petSpeciesInput.setText(
+                when (checkedIds.firstOrNull()) {
+                    R.id.pet_species_cat -> "Cat"
+                    R.id.pet_species_dog -> "Dog"
+                    else -> "Other"
+                },
+            )
         }
     }
 

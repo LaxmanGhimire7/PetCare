@@ -27,4 +27,9 @@
     <color name="pc_on_error_container">#991B1B</color>
     <!-- Unfilled part of rings and progress segments. -->
     <color name="pc_track">#D4D4D8</color>
+    <!-- Status: password strength, success states. -->
+    <color name="pc_warning">#B45309</color>
+    <color name="pc_success">#15803D</color>
+    <color name="pc_warning_container">#FEF3C7</color>
+    <color name="pc_success_container">#DCFCE7</color>
 </resources>

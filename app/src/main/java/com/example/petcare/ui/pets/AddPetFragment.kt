@@ -17,6 +17,7 @@ import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
+import com.example.petcare.design.applySystemBarTopPadding
 import coil.load
 import com.google.android.material.snackbar.Snackbar
 
@@ -60,6 +61,8 @@ class AddPetFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.applySystemBarTopPadding()
+        configureSpecies("Dog")
 
         binding.savePetButton.setOnClickListener {
             if (isValidInput()) {
@@ -73,6 +76,26 @@ class AddPetFragment : Fragment() {
 
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
+        }
+    }
+
+    private fun configureSpecies(initial: String) {
+        val checkedId = when (initial.lowercase()) {
+            "cat" -> R.id.pet_species_cat
+            "dog" -> R.id.pet_species_dog
+            else -> R.id.pet_species_other
+        }
+        binding.petSpeciesGroup.check(checkedId)
+        binding.petSpeciesInput.setText(initial)
+        binding.petSpeciesGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            binding.petSpeciesInput.setText(
+                when (checkedIds.firstOrNull()) {
+                    R.id.pet_species_cat -> "Cat"
+                    R.id.pet_species_dog -> "Dog"
+                    else -> "Other"
+                },
+            )
+            binding.petSpeciesLayout.error = null
         }
     }
 

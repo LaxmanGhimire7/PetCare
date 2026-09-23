@@ -132,6 +132,66 @@
         <item name="hintTextColor">@color/pc_primary_text</item>
         <item name="android:textColorHint">@color/pc_text_secondary</item>
         <item name="hintTextAppearance">@style/TextAppearance.PC.Label</item>
+        <item name="startIconTint">@color/pc_text_secondary</item>
+        <item name="endIconTint">@color/pc_text_secondary</item>
+        <item name="errorTextAppearance">@style/TextAppearance.PC.Meta</item>
+        <item name="helperTextTextAppearance">@style/TextAppearance.PC.Meta</item>
+    </style>
+
+    <!--
+        Exposed dropdown (e.g. "Saved place", "Security question"). Put the hint on the
+        TextInputLayout ONLY, never on the AutoCompleteTextView inside it, or the label and
+        the value draw on top of each other.
+    -->
+    <style name="Widget.PC.TextInput.Dropdown" parent="Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/pc_surface_muted</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.PC.Input</item>
+        <item name="hintTextColor">@color/pc_primary_text</item>
+        <item name="android:textColorHint">@color/pc_text_secondary</item>
+        <item name="hintTextAppearance">@style/TextAppearance.PC.Label</item>
+        <item name="endIconTint">@color/pc_text_secondary</item>
+    </style>
+
+    <!-- Filter chips: filled, no outline, orange with a black label when selected. -->
+    <style name="Widget.PC.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/pc_chip_bg</item>
+        <item name="android:textColor">@color/pc_chip_text</item>
+        <item name="chipIconTint">@color/pc_chip_text</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipMinHeight">36dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.PC.Pill</item>
+        <item name="android:textAppearance">@style/TextAppearance.PC.Chip</item>
+    </style>
+
+    <!-- Toolbars: left-aligned condensed title, no tint. -->
+    <style name="Widget.PC.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/pc_canvas</item>
+        <item name="titleTextAppearance">@style/TextAppearance.PC.Headline</item>
+        <item name="navigationIconTint">@color/pc_text_primary</item>
+    </style>
+
+    <!-- Dialogs: raised surface, condensed title, quiet text buttons. -->
+    <style name="ThemeOverlay.PC.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="alertDialogStyle">@style/Widget.PC.Dialog</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/Widget.PC.Dialog.Title</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/Widget.PC.Dialog.Body</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.PC.Button.Text</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.PC.Button.Text</item>
+    </style>
+    <style name="Widget.PC.Dialog" parent="MaterialAlertDialog.Material3">
+        <item name="backgroundTint">@color/pc_surface_raised</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.PC.Card</item>
+    </style>
+    <style name="Widget.PC.Dialog.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.PC.Headline</item>
+        <item name="android:textColor">@color/pc_text_primary</item>
+    </style>
+    <style name="Widget.PC.Dialog.Body" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textAppearance">@style/TextAppearance.PC.Body</item>
+        <item name="android:textColor">@color/pc_text_secondary</item>
     </style>
 
     <style name="Widget.PC.Card" parent="Widget.Material3.CardView.Filled">

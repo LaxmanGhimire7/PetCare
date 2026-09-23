@@ -1,9 +1,7 @@
 package com.example.petcare.ui.care
 
 import com.example.petcare.ui.UiSnackbar
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +9,9 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import android.widget.ImageView
+import androidx.core.view.ViewCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -39,7 +38,8 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.chip.Chip
-import com.example.petcare.ui.PetAvatarView
+import com.example.petcare.design.PetColor as DesignPetColor
+import com.example.petcare.design.PetRingView
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
@@ -62,10 +62,6 @@ class AddCareTaskFragment : Fragment() {
     private var selectedCategory = CARE_CATEGORY_GENERAL
     private var selectedFrequency = CARE_FREQUENCY_ONE_TIME
     private var selectedPlace: ProviderEntity? = null
-
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
 
     private val viewModel: AddCareTaskViewModel by viewModels {
         AddCareTaskViewModelFactory(
@@ -178,18 +174,36 @@ class AddCareTaskFragment : Fragment() {
                 isFocusable = true
                 contentDescription = getString(R.string.select_pet_named, pet.name)
             }
-            column.addView(PetAvatarView(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar),
-                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar)
+            val ringItem = layoutInflater.inflate(R.layout.pc_item_pet_ring, column, false)
+            val color = DesignPetColor.fromIndex(pet.colorIndex)
+            val main = color.main(requireContext())
+            ringItem.findViewById<PetRingView>(R.id.pcRing).apply {
+                setRingColor(main)
+                setProgress(if (selectedPet?.id == pet.id) 1f else 0f, animate = true)
+            }
+            ringItem.findViewById<ImageView>(R.id.pcRingPhoto).visibility = View.GONE
+            ringItem.findViewById<ImageView>(R.id.pcRingIcon).apply {
+                setImageResource(
+                    when (pet.species.lowercase()) {
+                        "dog" -> R.drawable.pc_ic_dog
+                        "cat" -> R.drawable.pc_ic_cat
+                        else -> R.drawable.pc_ic_paw
+                    },
                 )
-                setPet(pet.name, pet.colorIndex, 0, 0, selectedPet?.id == pet.id)
-            })
-            column.addView(TextView(requireContext()).apply {
+                ImageViewCompat.setImageTintList(this, ColorStateList.valueOf(main))
+                ViewCompat.setBackgroundTintList(this, ColorStateList.valueOf(color.tint(requireContext())))
+            }
+            ringItem.findViewById<TextView>(R.id.pcRingName).apply {
                 text = pet.name
-                setTextAppearance(R.style.TextAppearance_PetCare_Label)
-                gravity = android.view.Gravity.CENTER
-            })
+                setTextAppearance(
+                    if (selectedPet?.id == pet.id) R.style.TextAppearance_PC_LabelBold
+                    else R.style.TextAppearance_PC_Label,
+                )
+            }
+            ringItem.findViewById<TextView>(R.id.pcRingCount).visibility = View.GONE
+            ringItem.isClickable = false
+            ringItem.isFocusable = false
+            column.addView(ringItem)
             column.setOnClickListener {
                 selectedPet = pet
                 binding.petErrorText.visibility = View.GONE
@@ -304,7 +318,6 @@ class AddCareTaskFragment : Fragment() {
             },
             onSaved = { savedCareTask ->
                 CareReminderScheduler(requireContext()).schedule(savedCareTask)
-                requestNotificationPermission()
                 runCatching {
                     findNavController().getBackStackEntry(R.id.homeDashboardFragment)
                         .savedStateHandle[SAVED_TASK_RESULT_KEY] = savedCareTask.id
@@ -315,17 +328,6 @@ class AddCareTaskFragment : Fragment() {
                         formatDate(savedCareTask.dueDateEpochDay)), Snackbar.LENGTH_LONG).show()
             }
         )
-    }
-
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
     }
 
     private fun formatDate(epochDay: Long): String {

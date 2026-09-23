@@ -6,6 +6,9 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +27,7 @@ import com.example.petcare.data.local.BiometricPreferences
 import com.example.petcare.data.local.AccountDataRepository
 import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.PetCareRepositories
+import com.example.petcare.data.local.user.AuthRepository
 import com.example.petcare.reminders.CareReminderScheduler
 import com.example.petcare.widget.CareWidgetProvider
 import androidx.appcompat.app.AppCompatDelegate
@@ -55,6 +59,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, state: Bundle?) {
         view.applySystemBarTopPadding()
         val auth = AuthPreferences(requireContext())
+        val authRepository = AuthRepository(requireContext())
         val settings = SettingsPreferences(requireContext())
         val accountName = auth.userName().orEmpty()
         binding.accountText.text = accountName
@@ -128,6 +133,20 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+        binding.changePasswordButton.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val email = authRepository.currentUser()?.email.orEmpty()
+                findNavController().navigate(
+                    R.id.action_settings_to_forgot_password,
+                    Bundle().apply { putString("email", email) },
+                )
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.accountRecoveryButton.visibility =
+                if (authRepository.currentUser()?.securityQuestion.isNullOrBlank()) View.VISIBLE else View.GONE
+        }
+        binding.accountRecoveryButton.setOnClickListener { showRecoveryDialog(authRepository) }
         binding.clearDataButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.clear_care_data)
@@ -156,8 +175,37 @@ class SettingsFragment : Fragment() {
         }
         binding.signOutButton.setOnClickListener {
             auth.signOut()
-            findNavController().navigate(R.id.action_settings_to_login)
+            findNavController().navigate(R.id.action_settings_to_welcome)
         }
+    }
+
+    private fun showRecoveryDialog(repository: AuthRepository) {
+        val content = layoutInflater.inflate(R.layout.dialog_account_recovery, null)
+        val question = content.findViewById<AutoCompleteTextView>(R.id.recovery_question_input)
+        val answer = content.findViewById<EditText>(R.id.recovery_answer_input)
+        val questions = resources.getStringArray(R.array.pc_security_questions)
+        question.setAdapter(ArrayAdapter(requireContext(), R.layout.pc_item_dropdown, questions))
+        question.setText(questions.firstOrNull().orEmpty(), false)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_account_recovery)
+            .setView(content)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save_changes) { _, _ ->
+                val selected = question.text?.toString()?.trim().orEmpty()
+                val response = answer.text?.toString()?.trim().orEmpty()
+                if (selected.isBlank() || response.isBlank()) return@setPositiveButton
+                viewLifecycleOwner.lifecycleScope.launch {
+                    if (repository.saveRecovery(selected, response)) {
+                        binding.accountRecoveryButton.visibility = View.GONE
+                        UiSnackbar.make(
+                            binding.root,
+                            R.string.settings_account_recovery_saved,
+                            Snackbar.LENGTH_LONG,
+                        ).show()
+                    }
+                }
+            }
+            .show()
     }
 
     private fun writeBackup(uri: Uri) {

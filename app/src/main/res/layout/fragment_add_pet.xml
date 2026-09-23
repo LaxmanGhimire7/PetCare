@@ -16,21 +16,31 @@
         android:paddingEnd="@dimen/space_24"
         android:paddingBottom="@dimen/layout_36_dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/cancel_button"
-            style="@style/Widget.PetCare.Button.Text"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/cancel" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/pet_form_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_12"
-            android:text="@string/add_pet_title"
-            android:textAppearance="@style/TextAppearance.PetCare.Display"
-            android:textColor="@color/on_surface" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/cancel_button"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="@dimen/touch_target"
+                android:layout_height="@dimen/touch_target"
+                android:contentDescription="@string/cancel"
+                app:icon="@drawable/pc_ic_back"
+                app:iconTint="@color/pc_text_primary" />
+
+            <TextView
+                android:id="@+id/pet_form_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_8"
+                android:layout_weight="1"
+                android:text="@string/pet_form_new_title"
+                android:textAppearance="@style/TextAppearance.PC.Display"
+                android:textColor="@color/pc_text_primary" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/pet_form_subtitle"
@@ -114,6 +124,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_24"
+            android:text="@string/pet_form_basics"
+            android:textAppearance="@style/TextAppearance.PC.Section" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
             android:text="@string/pet_tag_color"
             android:textAppearance="?attr/textAppearanceTitleMedium" />
 
@@ -129,7 +146,7 @@
             style="@style/Widget.PetCare.TextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/layout_22_dp"
+            android:layout_marginTop="@dimen/space_8"
             android:hint="@string/pet_name">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -147,7 +164,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_12"
-            android:hint="@string/pet_species">
+            android:hint="@string/pet_species"
+            android:visibility="gone">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/pet_species_input"
@@ -156,6 +174,37 @@
                 android:imeOptions="actionNext"
                 android:inputType="textCapWords" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/pet_species_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/pet_species_dog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/pet_species_dog"
+                app:chipIcon="@drawable/pc_ic_dog" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/pet_species_cat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pet_species_cat"
+                app:chipIcon="@drawable/pc_ic_cat" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/pet_species_other"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pet_species_other"
+                app:chipIcon="@drawable/pc_ic_paw" />
+        </com.google.android.material.chip.ChipGroup>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -183,9 +232,9 @@
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/pet_weight_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/dietary_preferences">
-            <com.google.android.material.textfield.TextInputEditText android:id="@+id/dietary_preferences_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" />
-        </com.google.android.material.textfield.TextInputLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_24" android:text="@string/pet_form_health"
+            android:textAppearance="@style/TextAppearance.PC.Section" />
 
         <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/vaccination_history">
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/vaccination_history_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" />
@@ -195,16 +244,8 @@
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/allergies_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/favorite_toys">
-            <com.google.android.material.textfield.TextInputEditText android:id="@+id/favorite_toys_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences" />
-        </com.google.android.material.textfield.TextInputLayout>
-
         <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/medical_records">
             <com.google.android.material.textfield.TextInputEditText android:id="@+id/medical_records_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:minLines="2" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/grooming_routine">
-            <com.google.android.material.textfield.TextInputEditText android:id="@+id/grooming_routine_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:minLines="2" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -223,6 +264,22 @@
                 android:gravity="top"
                 android:inputType="textCapSentences|textMultiLine"
                 android:minLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_24" android:text="@string/pet_form_care"
+            android:textAppearance="@style/TextAppearance.PC.Section" />
+
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/dietary_preferences">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/dietary_preferences_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/grooming_routine">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/grooming_routine_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences|textMultiLine" android:minLines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.PetCare.TextInput" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/layout_14_dp" android:hint="@string/favorite_toys">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/favorite_toys_input" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton

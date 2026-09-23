@@ -1,3 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="pc_someone">your caregiver</string>
+    <string name="pc_delegation_sent_title">Checklist sent to %1$s</string>
+    <string name="pc_delegation_sent_body">%1$s</string>
     <string name="pc_retry">Retry</string>
+    <string name="settings_change_password">Change password</string>
+    <string name="settings_account_recovery">Set account recovery</string>
+    <string name="settings_account_recovery_saved">Account recovery saved</string>
+    <string name="pet_species_dog">Dog</string>
+    <string name="pet_species_cat">Cat</string>
+    <string name="pet_species_other">Other</string>
+    <string name="pet_form_basics">Basics</string>
+    <string name="pet_form_health">Health</string>
+    <string name="pet_form_care">Care</string>
+    <string name="pet_form_new_title">New pet</string>
 </resources>

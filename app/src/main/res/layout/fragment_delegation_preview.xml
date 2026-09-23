@@ -32,13 +32,13 @@
         <TextView style="@style/MoneySectionTitle" android:text="@string/delegation_include" />
         <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none">
             <com.google.android.material.chip.ChipGroup android:layout_width="wrap_content" android:layout_height="wrap_content" app:singleLine="true">
-                <com.google.android.material.chip.Chip android:id="@+id/include_feeding" style="@style/Widget.Material3.Chip.Filter"
+                <com.google.android.material.chip.Chip android:id="@+id/include_feeding"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/delegation_feeding" />
-                <com.google.android.material.chip.Chip android:id="@+id/include_walks" style="@style/Widget.Material3.Chip.Filter"
+                <com.google.android.material.chip.Chip android:id="@+id/include_walks"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/delegation_walks" />
-                <com.google.android.material.chip.Chip android:id="@+id/include_medication" style="@style/Widget.Material3.Chip.Filter"
+                <com.google.android.material.chip.Chip android:id="@+id/include_medication"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/delegation_medication" />
-                <com.google.android.material.chip.Chip android:id="@+id/include_notes" style="@style/Widget.Material3.Chip.Filter"
+                <com.google.android.material.chip.Chip android:id="@+id/include_notes"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/delegation_notes" />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>

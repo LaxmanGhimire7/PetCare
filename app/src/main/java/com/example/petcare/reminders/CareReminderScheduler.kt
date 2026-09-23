@@ -35,10 +35,28 @@ class CareReminderScheduler(context: Context) {
             ExistingWorkPolicy.REPLACE,
             request
         )
+
+        val overdueDelay = (reminderTimeMillis(careTask) + TimeUnit.HOURS.toMillis(1) -
+            System.currentTimeMillis()).coerceAtLeast(0L)
+        val overdueRequest = OneTimeWorkRequestBuilder<CareReminderWorker>()
+            .setInitialDelay(overdueDelay, TimeUnit.MILLISECONDS)
+            .setInputData(
+                Data.Builder()
+                    .putLong(CareReminderWorker.KEY_CARE_TASK_ID, careTask.id)
+                    .putBoolean(CareReminderWorker.KEY_OVERDUE_CHECK, true)
+                    .build(),
+            )
+            .build()
+        workManager.enqueueUniqueWork(
+            overdueWorkName(careTask.id),
+            ExistingWorkPolicy.REPLACE,
+            overdueRequest,
+        )
     }
 
     fun cancel(careTaskId: Long) {
         workManager.cancelUniqueWork(workName(careTaskId))
+        workManager.cancelUniqueWork(overdueWorkName(careTaskId))
     }
 
     /** Replaces the scheduled reminder without changing the care task due date. */
@@ -69,6 +87,7 @@ class CareReminderScheduler(context: Context) {
     }
 
     private fun workName(careTaskId: Long): String = "care_reminder_$careTaskId"
+    private fun overdueWorkName(careTaskId: Long): String = "care_overdue_$careTaskId"
 
     private companion object {
         const val MILLIS_PER_DAY = 86_400_000L

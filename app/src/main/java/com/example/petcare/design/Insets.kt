@@ -32,3 +32,31 @@ fun View.applySystemBarTopPadding() {
         })
     }
 }
+
+/**
+ * For full-screen pages without the bottom navigation (welcome, log in, sign up, reset):
+ * pads the top by the status bar and the bottom by the navigation bar, or by the
+ * keyboard while it's open, so buttons and fields are never hidden behind either.
+ */
+fun View.applySystemBarPaddingWithKeyboard() {
+    val baseTop = paddingTop
+    val baseBottom = paddingBottom
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, insets ->
+        val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+        val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+        view.updatePadding(top = baseTop + bars.top, bottom = baseBottom + maxOf(bars.bottom, ime.bottom))
+        insets
+    }
+    if (isAttachedToWindow) {
+        ViewCompat.requestApplyInsets(this)
+    } else {
+        addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                v.removeOnAttachStateChangeListener(this)
+                ViewCompat.requestApplyInsets(v)
+            }
+
+            override fun onViewDetachedFromWindow(v: View) = Unit
+        })
+    }
+}

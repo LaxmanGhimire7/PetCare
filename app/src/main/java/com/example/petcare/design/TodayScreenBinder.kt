@@ -45,6 +45,13 @@ interface TodayActions {
     fun onAddTask()
     fun onAddPet()
     fun onProfile()
+
+    /** Opens the existing SMS delegation flow with today's checklist. */
+    fun onShareChecklist()
+    fun onNewRoutine()
+    fun onImportPlan()
+    fun onExportPlan()
+    fun onOpenNotifications()
 }
 
 /**
@@ -62,6 +69,9 @@ class TodayScreenBinder(
     private val date: TextView = root.findViewById(R.id.pcTodayDate)
     private val greeting: TextView = root.findViewById(R.id.pcTodayGreeting)
     private val avatar: TextView = root.findViewById(R.id.pcTodayAvatar)
+    private val bell: View = root.findViewById(R.id.pcTodayBell)
+    private val badge: TextView = root.findViewById(R.id.pcTodayBadge)
+    private val quickActions: View = root.findViewById(R.id.pcQuickActions)
     private val empty: View = root.findViewById(R.id.pcTodayEmpty)
     private val nextUpRoot: View = root.findViewById(R.id.pcNextUp)
     private val petRings: RecyclerView = root.findViewById(R.id.pcPetRings)
@@ -99,10 +109,16 @@ class TodayScreenBinder(
         timeline.adapter = timelineAdapter
 
         avatar.setOnClickListener { actions.onProfile() }
+        bell.setOnClickListener { actions.onOpenNotifications() }
+        root.findViewById<View>(R.id.pcActionShare).setOnClickListener { actions.onShareChecklist() }
+        root.findViewById<View>(R.id.pcActionRoutine).setOnClickListener { actions.onNewRoutine() }
+        root.findViewById<View>(R.id.pcActionImport).setOnClickListener { actions.onImportPlan() }
+        root.findViewById<View>(R.id.pcActionExport).setOnClickListener { actions.onExportPlan() }
         fab.setOnClickListener { actions.onAddTask() }
         root.findViewById<View>(R.id.pcTodayEmptyAddPet).setOnClickListener { actions.onAddPet() }
 
         startTicker()
+        observeUnread()
     }
 
     fun render(newState: TodayUiState) {
@@ -115,6 +131,7 @@ class TodayScreenBinder(
         empty.visibility = if (newState.hasPets) View.GONE else View.VISIBLE
         nextUpRoot.visibility = content
         petRings.visibility = content
+        quickActions.visibility = content
         weekStrip.visibility = content
         timeline.visibility = content
         fab.visibility = content
@@ -146,6 +163,23 @@ class TodayScreenBinder(
             TimelineBuilder.build(current.tasks, null, null)
         }
         timelineAdapter.submitList(items) { timelineAdapter.refreshConnectors() }
+    }
+
+    /** Keeps the bell's badge in step with the notification centre. */
+    private fun observeUnread() {
+        lifecycleOwner.lifecycleScope.launch {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                InboxStore.get(context).unreadCount.collect { count ->
+                    badge.visibility = if (count > 0) View.VISIBLE else View.GONE
+                    badge.text = if (count > 9) "9+" else count.toString()
+                    bell.contentDescription = if (count > 0) {
+                        context.resources.getQuantityString(R.plurals.pc_a11y_unread, count, count)
+                    } else {
+                        context.getString(R.string.pc_a11y_notifications)
+                    }
+                }
+            }
+        }
     }
 
     /** Ticks only while the screen is visible; stops automatically when backgrounded. */

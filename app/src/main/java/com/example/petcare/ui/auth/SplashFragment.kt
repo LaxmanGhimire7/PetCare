@@ -17,7 +17,7 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         viewLifecycleOwner.lifecycleScope.launch {
             val ownerId = AuthRepository(requireContext()).bootstrap()
             val destination = when {
-                ownerId <= 0 -> R.id.action_splash_to_login
+                ownerId <= 0 -> R.id.action_splash_to_welcome
                 !OnboardingPrefs(requireContext()).isComplete(ownerId) ->
                     R.id.action_splash_to_onboarding
                 else -> R.id.action_splash_to_home

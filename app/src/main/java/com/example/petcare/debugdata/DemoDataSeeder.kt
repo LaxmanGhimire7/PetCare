@@ -18,8 +18,16 @@ class DemoDataSeeder(private val context: Context) {
         val auth = AuthRepository(context)
         val email = context.getString(R.string.demo_email)
         val password = context.getString(R.string.demo_password)
-        if (!auth.register(context.getString(R.string.demo_owner), email, password, true)) {
-            check(auth.signIn(email, password, true))
+        if (!auth.register(
+                context.getString(R.string.demo_owner),
+                email,
+                null,
+                password.toCharArray(),
+                "What was the name of your first pet?",
+                "Max",
+            )
+        ) {
+            check(auth.signIn(email, password.toCharArray(), true))
         }
         val repositories = PetCareRepositories(context)
         repositories.accountData.clear()

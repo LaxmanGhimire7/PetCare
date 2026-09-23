@@ -8,8 +8,8 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout android:id="@+id/task_top_bar" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="@dimen/space_12" android:paddingTop="@dimen/space_8" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
-        <com.google.android.material.button.MaterialButton android:id="@+id/cancel_button" style="@style/Widget.Material3.Button.IconButton" android:layout_width="@dimen/touch_target" android:layout_height="@dimen/touch_target" android:contentDescription="@string/cancel" app:icon="@drawable/ic_close" app:iconTint="@color/text_primary" />
-        <TextView android:id="@+id/care_task_form_title" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:text="@string/new_task" android:textAppearance="@style/TextAppearance.PetCare.Headline" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/cancel_button" style="@style/Widget.Material3.Button.IconButton" android:layout_width="@dimen/touch_target" android:layout_height="@dimen/touch_target" android:contentDescription="@string/cancel" app:icon="@drawable/pc_ic_close" app:iconTint="@color/pc_text_primary" />
+        <TextView android:id="@+id/care_task_form_title" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_8" android:layout_weight="1" android:gravity="start" android:text="@string/new_task" android:textAppearance="@style/TextAppearance.PC.Headline" />
     </LinearLayout>
 
     <ScrollView android:id="@+id/task_form_scroll" android:layout_width="@dimen/layout_zero" android:layout_height="@dimen/layout_zero" android:clipToPadding="false" android:fillViewport="true" android:paddingBottom="@dimen/space_24" app:layout_constraintBottom_toTopOf="@id/save_care_task_button" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/task_top_bar">
@@ -25,7 +25,12 @@
             <TextView android:id="@+id/pet_error_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.PetCare.Supporting" android:textColor="@color/error" android:visibility="gone" />
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_20" android:text="@string/task_category" android:textAppearance="@style/TextAppearance.PetCare.Section" />
-            <com.google.android.material.chip.ChipGroup android:id="@+id/category_chip_group" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8" app:selectionRequired="true" app:singleLine="true" app:singleSelection="true" />
+            <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8" android:scrollbars="none">
+                <com.google.android.material.chip.ChipGroup android:id="@+id/category_chip_group"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    app:selectionRequired="true" app:singleLine="true" app:singleSelection="true" />
+            </HorizontalScrollView>
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_20" android:text="@string/task_when" android:textAppearance="@style/TextAppearance.PetCare.Section" />
             <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_8" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="@dimen/radius_icon_well" app:cardElevation="@dimen/layout_zero">

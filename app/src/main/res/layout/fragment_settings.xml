@@ -69,11 +69,22 @@
         <TextView style="@style/SettingsSectionTitle" android:text="@string/settings_security" />
         <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
             android:layout_width="match_parent" android:layout_height="wrap_content">
-            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/biometric_switch"
-                android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:minHeight="@dimen/touch_target" android:paddingHorizontal="@dimen/space_16"
-                android:paddingVertical="@dimen/space_8" android:text="@string/settings_biometric"
-                android:textAppearance="@style/TextAppearance.PetCare.RowTitle" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:paddingVertical="@dimen/space_4">
+                <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/biometric_switch"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="@dimen/touch_target" android:paddingHorizontal="@dimen/space_16"
+                    android:paddingVertical="@dimen/space_8" android:text="@string/settings_biometric"
+                    android:textAppearance="@style/TextAppearance.PetCare.RowTitle" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/change_password_button"
+                    style="@style/Widget.PetCare.SettingsRow" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="@string/settings_change_password"
+                    app:icon="@drawable/pc_ic_key" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/account_recovery_button"
+                    style="@style/Widget.PetCare.SettingsRow" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="@string/settings_account_recovery"
+                    app:icon="@drawable/pc_ic_shield" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <TextView style="@style/SettingsSectionTitle" android:text="@string/settings_your_data" />

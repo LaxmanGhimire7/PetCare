@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One notification: tinted icon, title, message, time, and an orange dot while unread. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/pc_bg_surface_18"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:padding="14dp">
+
+    <ImageView
+        android:id="@+id/pcInboxIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/pc_bg_oval"
+        android:importantForAccessibility="no"
+        android:padding="10dp"
+        tools:src="@drawable/pc_ic_bell" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pcInboxTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.PC.RowTitle"
+                tools:text="Evening walk is due" />
+
+            <TextView
+                android:id="@+id/pcInboxTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textAppearance="@style/TextAppearance.PC.Meta"
+                tools:text="17:00" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/pcInboxBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textAppearance="@style/TextAppearance.PC.Supporting"
+            tools:text="Max has a walk scheduled now." />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/pcInboxUnread"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/pc_bg_dot_primary" />
+</LinearLayout>

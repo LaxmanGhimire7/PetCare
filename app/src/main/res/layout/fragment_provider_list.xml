@@ -61,7 +61,6 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_all"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -69,21 +68,18 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_vet"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_vets" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_grooming"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_grooming" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_parks"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_parks" />

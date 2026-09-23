@@ -19,7 +19,7 @@ import com.example.petcare.data.local.user.UserEntity
 
 @Database(
     entities = [PetEntity::class, CareTaskEntity::class, ExpenseEntity::class, ProviderEntity::class, UserEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = true
 )
 abstract class PetCareDatabase : RoomDatabase() {
@@ -50,7 +50,8 @@ abstract class PetCareDatabase : RoomDatabase() {
                 MIGRATION_8_9,
                 MIGRATION_9_10,
                 MIGRATION_10_11,
-                MIGRATION_11_12
+                MIGRATION_11_12,
+                MIGRATION_12_13
             ).build().also { instance = it }
         }
 
@@ -203,6 +204,15 @@ abstract class PetCareDatabase : RoomDatabase() {
                     )
                 """.trimIndent())
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_users_email ON users(email)")
+            }
+        }
+
+        /** Adds v3 account recovery without discarding existing local accounts. */
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE users ADD COLUMN phone TEXT")
+                db.execSQL("ALTER TABLE users ADD COLUMN securityQuestion TEXT")
+                db.execSQL("ALTER TABLE users ADD COLUMN securityAnswerHash TEXT")
             }
         }
     }
