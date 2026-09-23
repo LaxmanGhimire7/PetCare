@@ -90,6 +90,7 @@ class NextUpBinder(
     private val onDone: () -> Unit,
     private val onSnooze: () -> Unit,
     private val onPlan: () -> Unit,
+    private val onRoutine: () -> Unit = {},
 ) {
     private val context = root.context
     private val label: TextView = root.findViewById(R.id.pcNextUpLabel)
@@ -104,6 +105,7 @@ class NextUpBinder(
     private val done: MaterialButton = root.findViewById(R.id.pcNextUpDone)
     private val snooze: MaterialButton = root.findViewById(R.id.pcNextUpSnooze)
     private val plan: MaterialButton = root.findViewById(R.id.pcNextUpPlan)
+    private val routine: MaterialButton = root.findViewById(R.id.pcNextUpRoutine)
 
     private var state: NextUpState? = null
 
@@ -114,6 +116,7 @@ class NextUpBinder(
         }
         snooze.setOnClickListener { onSnooze() }
         plan.setOnClickListener { onPlan() }
+        routine.setOnClickListener { onRoutine() }
     }
 
     fun render(newState: NextUpState, animateBar: Boolean) {
@@ -200,5 +203,6 @@ class NextUpBinder(
         this.done.visibility = if (done) View.VISIBLE else View.GONE
         this.snooze.visibility = if (snooze) View.VISIBLE else View.GONE
         this.plan.visibility = if (plan) View.VISIBLE else View.GONE
+        routine.visibility = if (plan) View.VISIBLE else View.GONE
     }
 }

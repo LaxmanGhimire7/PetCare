@@ -22,6 +22,7 @@ import com.example.petcare.design.TaskDetail
 import com.example.petcare.design.TaskDetailActions
 import com.example.petcare.design.TaskDetailSheetBinder
 import com.example.petcare.reminders.CareReminderScheduler
+import com.example.petcare.ui.categoryIcon
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -31,7 +32,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/** Repository-backed implementation of the v3 task-detail sheet. */
+/** Repository-backed task-detail sheet shared by the v4 Today and checklist flows. */
 class TaskDetailSheet : BottomSheetDialogFragment(R.layout.pc_sheet_task_detail), TaskDetailActions {
     private val repositories by lazy { PetCareRepositories(requireContext()) }
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
@@ -164,20 +165,6 @@ class TaskDetailSheet : BottomSheetDialogFragment(R.layout.pc_sheet_task_detail)
         day % 10 == 2 -> "${day}nd"
         day % 10 == 3 -> "${day}rd"
         else -> "${day}th"
-    }
-
-    private fun categoryIcon(category: String, title: String): Int {
-        val words = "$category $title".lowercase(Locale.ROOT)
-        return when {
-            "vaccin" in words -> R.drawable.pc_ic_vaccine
-            "brush" in words -> R.drawable.pc_ic_brush
-            "medicat" in words || "pill" in words || "flea" in words -> R.drawable.pc_ic_pill
-            "vet" in words || "health" in words -> R.drawable.pc_ic_stethoscope
-            "groom" in words -> R.drawable.pc_ic_scissors
-            "feed" in words || "breakfast" in words -> R.drawable.pc_ic_bowl
-            "walk" in words || "exercise" in words -> R.drawable.pc_ic_walk
-            else -> R.drawable.pc_ic_sparkles
-        }
     }
 
     private data class LoadedTask(

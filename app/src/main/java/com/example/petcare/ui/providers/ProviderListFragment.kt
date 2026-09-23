@@ -59,11 +59,13 @@ class ProviderListFragment : Fragment() {
     private var userLocation: Location? = null
     private var map: GoogleMap? = null
     private var clusterManager: ClusterManager<PlaceMarker>? = null
+    private var requestedPlaceId = 0L
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
         if (grants.values.any { it }) loadLocation() else permissionFallback()
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentProviderListBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
+        requestedPlaceId = arguments?.getLong(PLACE_ID) ?: 0L
         view.applySystemBarTopPadding()
         BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_COLLAPSED
         binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_providers_to_add_provider) }
@@ -98,7 +100,12 @@ class ProviderListFragment : Fragment() {
                 when (state) {
                     ScreenState.Loading -> binding.emptyText.visibility = View.GONE
                     ScreenState.Empty -> { places = emptyList(); render(places); updateMarkers() }
-                    is ScreenState.Content -> { places = state.data; render(places); updateMarkers() }
+                    is ScreenState.Content -> {
+                        places = state.data
+                        render(places)
+                        updateMarkers()
+                        openRequestedPlace()
+                    }
                     is ScreenState.Error -> {
                         places = emptyList(); render(places); updateMarkers()
                         UiSnackbar.make(binding.root, state.message, Snackbar.LENGTH_LONG).show()
@@ -272,6 +279,13 @@ class ProviderListFragment : Fragment() {
             if (row != null) binding.placeSheet.smoothScrollTo(0,
                 binding.itemContainer.top + row.top)
         }
+    }
+
+    private fun openRequestedPlace() {
+        val place = places.firstOrNull { it.id == requestedPlaceId } ?: return
+        requestedPlaceId = 0L
+        revealPlace(place.id)
+        PlaceDetailSheet.show(parentFragmentManager, place, userLocation)
     }
 
     private fun searchAddress() {

@@ -194,4 +194,59 @@
     <string name="pc_supplies">Supplies</string>
     <string name="pc_notes">Notes</string>
     <string name="pc_place">Place</string>
+    <!-- v4: Today empty day and At a glance -->
+    <string name="pc_generate_routine">Routine</string>
+    <string name="pc_at_a_glance">At a glance</string>
+    <string name="pc_streak">Streak</string>
+    <plurals name="pc_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="pc_streak_body">Every task done</string>
+    <string name="pc_streak_start">Finish today\'s tasks to start one</string>
+    <string name="pc_this_week">This week</string>
+    <string name="pc_week_percent">%1$d%%</string>
+    <string name="pc_week_empty">None yet</string>
+    <string name="pc_next_health">Next health date</string>
+    <string name="pc_health_today">Today</string>
+    <plurals name="pc_days_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="pc_delegation_title">%1$s has today\'s checklist</string>
+    <string name="pc_delegation_when">Sent by SMS at %1$s</string>
+    <string name="pc_delegation_inbox_title">Checklist sent to %1$s</string>
+    <string name="pc_delegation_inbox_body">Today\'s care checklist was shared by SMS.</string>
+    <string name="pc_share_again">Share again</string>
+    <string name="pc_call">Call</string>
+    <string name="pc_directions">Directions</string>
+
+    <!-- v4: task editor -->
+    <string name="pc_new_task_title">New task</string>
+    <string name="pc_edit_task_title">Edit task</string>
+    <string name="pc_task_hint">What needs doing?</string>
+    <string name="pc_for">For</string>
+    <string name="pc_category">Category</string>
+    <string name="pc_when">When</string>
+    <string name="pc_date">Date</string>
+    <string name="pc_time">Time</string>
+    <string name="pc_choose">Choose</string>
+    <string name="pc_pick_date">Choose a date</string>
+    <string name="pc_pick_time">Choose a time</string>
+    <string name="pc_repeat">Repeat</string>
+    <string name="pc_repeat_once">Once</string>
+    <string name="pc_repeat_daily">Daily</string>
+    <string name="pc_repeat_weekly">Weekly</string>
+    <string name="pc_repeat_monthly">Monthly</string>
+    <string name="pc_details">Details</string>
+    <string name="pc_saved_place">Saved place (optional)</string>
+    <string name="pc_no_place">No linked place</string>
+    <string name="pc_supplies_hint">Supplies (optional)</string>
+    <string name="pc_notes_hint">Instructions or notes (optional)</string>
+    <string name="pc_save_task">Save task</string>
+    <string name="pc_err_task_title">Enter what needs doing</string>
+    <string name="pc_err_pet">Choose a pet</string>
+    <string name="pc_err_category">Choose a category</string>
+    <string name="pc_err_date">Choose a date</string>
+    <string name="pc_a11y_close">Close</string>
 </resources>

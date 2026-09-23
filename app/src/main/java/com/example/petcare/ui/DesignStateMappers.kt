@@ -1,9 +1,12 @@
 package com.example.petcare.ui
 
+import android.location.Location
 import com.example.petcare.R
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.pet.PetEntity
+import com.example.petcare.data.local.provider.ProviderEntity
 import com.example.petcare.design.*
+import com.example.petcare.location.PlaceLocation
 import com.example.petcare.ui.home.LocalDayClock
 import com.example.petcare.ui.home.TodayData
 import com.example.petcare.ui.pets.PetListUi
@@ -36,24 +39,29 @@ private fun PetEntity.speciesIcon() = when (species.lowercase(Locale.ROOT)) {
     else -> R.drawable.pc_ic_paw
 }
 
-private fun CareTaskSummary.categoryIcon(): Int {
+internal fun categoryIcon(category: String, title: String): Int {
     val words = "$category $title".lowercase(Locale.ROOT)
     return when {
         "vaccin" in words -> R.drawable.pc_ic_vaccine
-        "brush" in words -> R.drawable.pc_ic_brush
         "medicat" in words || "pill" in words || "flea" in words -> R.drawable.pc_ic_pill
         "vet" in words || "health" in words -> R.drawable.pc_ic_stethoscope
         "groom" in words -> R.drawable.pc_ic_scissors
         "feed" in words || "breakfast" in words -> R.drawable.pc_ic_bowl
         "walk" in words || "exercise" in words -> R.drawable.pc_ic_walk
-        else -> R.drawable.pc_ic_sparkles
+        else -> R.drawable.pc_ic_paw
     }
 }
+
+private fun CareTaskSummary.categoryIcon() = categoryIcon(category, title)
+
+private fun ProviderEntity.isVet(): Boolean =
+    "vet" in "$type $name".lowercase(Locale.ROOT)
 
 fun TodayData.toTodayUiState(
     userName: String,
     selectedDay: Long,
     selectedPetId: Long?,
+    lastLocation: Location? = null,
     nowMillis: Long = System.currentTimeMillis(),
     today: Long = LocalDayClock.todayEpochDay(),
 ): TodayUiState {
@@ -104,16 +112,63 @@ fun TodayData.toTodayUiState(
     val weekStart = LocalDayClock.weekStart(selectedDay)
     val week = (0..6).map { index ->
         val day = weekStart + index
-        WeekDay(dayLabel(day, "EEE"), dayLabel(day, "d"), all.any {
+        val rows = all.filter {
             it.dueDateEpochDay == day && (selectedPetId == null || it.petId == selectedPetId)
-        }, day == selectedDay, day == today)
+        }
+        WeekDay(dayLabel(day, "EEE"), dayLabel(day, "d"), rows.isNotEmpty(),
+            day == selectedDay, day == today, rows.progress())
     }
+    val tallies = all.asSequence()
+        .filter { it.dueDateEpochDay in (today - 59)..today }
+        .groupBy { it.dueDateEpochDay }
+        .map { (day, rows) -> DayTally(day, rows.count { it.isCompleted }, rows.size) }
+    val healthTask = upcoming.asSequence()
+        .filter { task ->
+            val words = "${task.category} ${task.title}".lowercase(Locale.ROOT)
+            listOf("vaccin", "vet", "medicat", "healthcare").any(words::contains)
+        }
+        .filter { it.dueMillis() in nowMillis..(nowMillis + 30L * 86_400_000L) }
+        .minByOrNull { it.dueMillis() }
+    val health = healthTask?.let { task ->
+        HealthGlance(
+            taskId = task.id,
+            title = "${task.title} for ${task.petName}",
+            whenLabel = "${dayLabel(task.dueDateEpochDay, "EEE d MMMM")}, ${task.timeLabel()}",
+            daysAway = (task.dueDateEpochDay - today).toInt(),
+            petColor = PetColor.fromIndex(task.petColorIndex),
+            icon = task.categoryIcon(),
+        )
+    }
+    val recentPlaceId = all.asSequence().sortedByDescending { it.id }
+        .mapNotNull { it.placeId }.firstOrNull()
+    val savedPlace = places.firstOrNull { it.isVet() && it.latitude != null && it.longitude != null }
+        ?: places.firstOrNull { it.id == recentPlaceId && it.latitude != null && it.longitude != null }
+        ?: places.firstOrNull { it.latitude != null && it.longitude != null }
+    val place = savedPlace?.let { saved ->
+        val latitude = requireNotNull(saved.latitude)
+        val longitude = requireNotNull(saved.longitude)
+        val detail = lastLocation?.let { origin ->
+            String.format(Locale.getDefault(), "%.1f km away", PlaceLocation.distanceKm(
+                origin.latitude, origin.longitude, latitude, longitude,
+            ))
+        } ?: saved.address.ifBlank { null }
+        PlaceGlance(
+            placeId = saved.id,
+            label = if (saved.isVet()) "Your vet" else "Saved place",
+            name = saved.name,
+            detail = detail,
+            phone = saved.phone.ifBlank { null },
+            latitude = latitude,
+            longitude = longitude,
+        )
+    }
+    val glance = GlanceMath.summary(tallies, today).copy(health = health, place = place)
     val firstName = userName.trim().split(Regex("\\s+")).firstOrNull().orEmpty().ifBlank { "Pet parent" }
     val hour = Calendar.getInstance().apply { timeInMillis = nowMillis }.get(Calendar.HOUR_OF_DAY)
     val greeting = when (hour) { in 5..11 -> "Morning"; in 12..17 -> "Afternoon"; else -> "Evening" }
     return TodayUiState(dayLabel(selectedDay, "EEE d MMMM"), "$greeting, $firstName",
         firstName.take(1).uppercase(Locale.getDefault()), pets.isNotEmpty(), selectedDay == today,
-        nextUp, rings, week, tasks)
+        nextUp, rings, week, tasks, glance)
 }
 
 fun PetListUi.toPetsUiState(today: Long = LocalDayClock.todayEpochDay()): PetsUiState {

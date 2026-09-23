@@ -28,11 +28,17 @@ class SegmentedBarView @JvmOverloads constructor(
 
     private val density = resources.displayMetrics.density
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    @ColorInt private val trackColor = ContextCompat.getColor(context, R.color.pc_track)
+    @ColorInt private var trackColor = ContextCompat.getColor(context, R.color.pc_track)
     private val rect = RectF()
     private var segments: List<Segment> = emptyList()
     private var reveal = 1f
     private var animator: ValueAnimator? = null
+
+    /** Colour of unfilled segments, e.g. a darker track on an orange background. */
+    fun setTrackColor(@ColorInt color: Int) {
+        trackColor = color
+        invalidate()
+    }
 
     /** Gap between segments. */
     var gapPx: Float = 3f * density

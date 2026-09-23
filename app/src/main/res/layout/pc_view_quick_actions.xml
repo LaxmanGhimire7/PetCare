@@ -24,11 +24,11 @@
         android:paddingBottom="4dp">
 
         <ImageView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/pc_bg_icon_well"
             android:importantForAccessibility="no"
-            android:padding="15dp"
+            android:padding="13dp"
             android:src="@drawable/pc_ic_share"
             app:tint="@color/pc_text_primary" />
 
@@ -55,11 +55,11 @@
         android:paddingBottom="4dp">
 
         <ImageView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/pc_bg_icon_well"
             android:importantForAccessibility="no"
-            android:padding="15dp"
+            android:padding="13dp"
             android:src="@drawable/pc_ic_checklist"
             app:tint="@color/pc_text_primary" />
 
@@ -86,11 +86,11 @@
         android:paddingBottom="4dp">
 
         <ImageView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/pc_bg_icon_well"
             android:importantForAccessibility="no"
-            android:padding="15dp"
+            android:padding="13dp"
             android:src="@drawable/pc_ic_import"
             app:tint="@color/pc_text_primary" />
 
@@ -117,11 +117,11 @@
         android:paddingBottom="4dp">
 
         <ImageView
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/pc_bg_icon_well"
             android:importantForAccessibility="no"
-            android:padding="15dp"
+            android:padding="13dp"
             android:src="@drawable/pc_ic_export"
             app:tint="@color/pc_text_primary" />
 

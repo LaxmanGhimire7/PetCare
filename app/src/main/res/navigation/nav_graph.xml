@@ -196,7 +196,8 @@
         android:id="@+id/addCareTaskFragment"
         android:name="com.example.petcare.ui.care.AddCareTaskFragment"
         android:label="@string/add_care_task"
-        tools:layout="@layout/fragment_add_care_task">
+        tools:layout="@layout/pc_fragment_task_editor">
+        <argument android:name="preselectPetId" app:argType="long" android:defaultValue="0L" />
         <argument android:name="importedTitle" app:argType="string" android:defaultValue="" />
         <argument android:name="importedDateEpochDay" app:argType="long" android:defaultValue="0L" />
         <argument android:name="importedNotes" app:argType="string" android:defaultValue="" />
@@ -208,7 +209,7 @@
         android:id="@+id/editCareTaskFragment"
         android:name="com.example.petcare.ui.care.EditCareTaskFragment"
         android:label="@string/edit_care_task_title"
-        tools:layout="@layout/fragment_add_care_task">
+        tools:layout="@layout/pc_fragment_task_editor">
         <argument
             android:name="careTaskId"
             app:argType="long" />
@@ -233,6 +234,7 @@
     </dialog>
     <fragment android:id="@+id/providerListFragment" android:name="com.example.petcare.ui.providers.ProviderListFragment"
         android:label="@string/navigation_providers" tools:layout="@layout/fragment_feature_list">
+        <argument android:name="placeId" app:argType="long" android:defaultValue="0L" />
         <action android:id="@+id/action_providers_to_add_provider" app:destination="@id/addProviderFragment" />
     </fragment>
     <fragment android:id="@+id/addProviderFragment" android:name="com.example.petcare.ui.providers.AddProviderFragment"

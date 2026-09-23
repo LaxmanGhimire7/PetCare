@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/pcNowTime"
-        android:layout_width="38dp"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.PC.FigureStrong"
         android:textColor="@color/pc_primary_text"

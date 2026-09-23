@@ -5,14 +5,26 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /** Loads and updates an existing account-scoped care task. */
 class EditCareTaskViewModel(private val careTaskRepository: CareTaskRepository) : ViewModel() {
 
-    fun updateTask(careTask: CareTaskEntity, onSaved: (CareTaskEntity) -> Unit) {
+    fun updateTask(
+        careTask: CareTaskEntity,
+        onError: (Throwable) -> Unit,
+        onSaved: (CareTaskEntity) -> Unit,
+    ) {
         viewModelScope.launch {
-            careTaskRepository.updateTask(careTask)
+            try {
+                careTaskRepository.updateTask(careTask)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                onError(error)
+                return@launch
+            }
             onSaved(careTask)
         }
     }

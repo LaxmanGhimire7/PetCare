@@ -31,6 +31,8 @@ data class TodayUiState(
     val week: List<WeekDay>,
     /** Tasks for the selected day (plus overdue ones when isToday). Any order: the binder sorts by time. */
     val tasks: List<TimelineItem.Task>,
+    /** Streak, week score, next health date and vet. Build the first two with GlanceMath.summary. */
+    val glance: GlanceState = GlanceState.EMPTY,
 )
 
 /** Every interaction on Today. Implement by delegating to your existing ViewModel methods. */
@@ -52,6 +54,9 @@ interface TodayActions {
     fun onImportPlan()
     fun onExportPlan()
     fun onOpenNotifications()
+
+    /** Tapping the vet card: open that saved place. */
+    fun onOpenPlace(placeId: Long) = Unit
 }
 
 /**
@@ -72,6 +77,13 @@ class TodayScreenBinder(
     private val bell: View = root.findViewById(R.id.pcTodayBell)
     private val badge: TextView = root.findViewById(R.id.pcTodayBadge)
     private val quickActions: View = root.findViewById(R.id.pcQuickActions)
+    private val glanceRoot: View = root.findViewById(R.id.pcGlance)
+    private val glance = GlanceBinder(
+        glanceRoot,
+        onOpenTask = { actions.onOpenTask(it) },
+        onShareAgain = { actions.onShareChecklist() },
+        onOpenPlace = { actions.onOpenPlace(it) },
+    )
     private val empty: View = root.findViewById(R.id.pcTodayEmpty)
     private val nextUpRoot: View = root.findViewById(R.id.pcNextUp)
     private val petRings: RecyclerView = root.findViewById(R.id.pcPetRings)
@@ -93,6 +105,7 @@ class TodayScreenBinder(
         onDone = actions::onNextUpDone,
         onSnooze = actions::onNextUpSnooze,
         onPlan = actions::onPlanTask,
+        onRoutine = actions::onNewRoutine,
     )
 
     private val clock = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -132,6 +145,7 @@ class TodayScreenBinder(
         nextUpRoot.visibility = content
         petRings.visibility = content
         quickActions.visibility = content
+        glanceRoot.visibility = content
         weekStrip.visibility = content
         timeline.visibility = content
         fab.visibility = content
@@ -148,6 +162,7 @@ class TodayScreenBinder(
         nextUp.tick(System.currentTimeMillis())
         ringAdapter.submit(newState.petRings, animateFromEmpty = sweep)
         WeekStripBinder.bind(weekStrip, newState.week) { actions.onSelectDay(it) }
+        glance.render(newState.glance)
 
         timelineEmpty.visibility = if (newState.tasks.isEmpty()) View.VISIBLE else View.GONE
         timeline.visibility = if (newState.tasks.isEmpty()) View.GONE else View.VISIBLE
@@ -193,6 +208,7 @@ class TodayScreenBinder(
                     if (minute != lastMinute) {
                         lastMinute = minute
                         submitTimeline(now)
+                        glance.refreshDelegation()
                     }
                     delay(1_000L - now % 1_000L)
                 }

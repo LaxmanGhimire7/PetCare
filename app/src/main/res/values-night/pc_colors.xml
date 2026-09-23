@@ -7,8 +7,9 @@
     <color name="pc_surface_muted">#222226</color>
     <color name="pc_hairline">#27272A</color>
 
-    <color name="pc_text_primary">#FFFFFF</color>
-    <color name="pc_text_secondary">#A1A1AA</color>
+    <!-- Off-white, not pure white: pure white on true black "glows" and reads as blur. -->
+    <color name="pc_text_primary">#F4F4F5</color>
+    <color name="pc_text_secondary">#B4B4BC</color>
 
     <color name="pc_primary">#FF6B00</color>
     <color name="pc_primary_text">#FF6B00</color>

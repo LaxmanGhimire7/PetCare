@@ -15,8 +15,7 @@ import androidx.core.app.ShareCompat
 import androidx.fragment.app.Fragment
 import com.example.petcare.R
 import com.example.petcare.data.local.CaregiverPreferences
-import com.example.petcare.design.InboxStore
-import com.example.petcare.design.InboxType
+import com.example.petcare.design.DelegationLog
 import com.example.petcare.databinding.FragmentDelegationPreviewBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -79,7 +78,9 @@ class DelegationPreviewFragment : Fragment() {
         try {
             startActivity(Intent(Intent.ACTION_SENDTO, Uri.fromParts("smsto", number, null))
                 .putExtra("sms_body", message))
-            recordDelegation(message)
+            val caregiver = binding.caregiverNameInput.text?.toString()?.trim().orEmpty()
+                .ifBlank { getString(R.string.pc_someone) }
+            DelegationLog.record(requireContext(), caregiver)
         } catch (_: ActivityNotFoundException) { share() }
     }
 
@@ -90,19 +91,6 @@ class DelegationPreviewFragment : Fragment() {
             .setText(binding.messageInput.text?.toString().orEmpty())
             .setChooserTitle(R.string.share_checklist_title)
             .startChooser()
-    }
-
-    /** Records a successful hand-off to the phone's SMS app in the in-app inbox. */
-    private fun recordDelegation(message: String) {
-        val caregiver = binding.caregiverNameInput.text?.toString()?.trim().orEmpty()
-            .ifBlank { getString(R.string.pc_someone) }
-        val summary = message.lineSequence().drop(1).firstOrNull()?.trim().orEmpty()
-            .ifBlank { message.lineSequence().firstOrNull()?.trim().orEmpty() }
-        InboxStore.get(requireContext()).add(
-            type = InboxType.DELEGATION,
-            title = getString(R.string.pc_delegation_sent_title, caregiver),
-            body = getString(R.string.pc_delegation_sent_body, summary),
-        )
     }
 
     private fun showContactError() {

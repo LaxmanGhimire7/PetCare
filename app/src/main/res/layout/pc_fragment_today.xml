@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Today screen, matched to the approved mockup.
-    Order: header (bell + avatar), Next-up countdown, pet rings, quick actions, week strip, timeline, FAB.
+    Order: header (bell + avatar), Next-up countdown, pet rings, quick actions, week strip, timeline, at a glance, FAB.
     The root takes the status-bar inset in code, so nothing draws under the status bar.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -180,6 +180,14 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:visibility="gone" />
+
+            <!-- At a glance: streak, this week, next health date, delegation, your vet. -->
+            <include
+                android:id="@+id/pcGlance"
+                layout="@layout/pc_view_glance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

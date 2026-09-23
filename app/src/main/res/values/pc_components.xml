@@ -39,7 +39,7 @@
         <item name="android:textAppearance">@style/TextAppearance.PC.Button</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0</item>
-        <item name="android:minHeight">40dp</item>
+        <item name="android:minHeight">42dp</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
@@ -59,7 +59,7 @@
         <item name="android:textAppearance">@style/TextAppearance.PC.ButtonSecondary</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0</item>
-        <item name="android:minHeight">40dp</item>
+        <item name="android:minHeight">42dp</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
@@ -68,6 +68,33 @@
         <item name="iconSize">16dp</item>
         <item name="shapeAppearance">@style/ShapeAppearance.PC.Pill</item>
         <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Compact secondary button for card actions (Share again, Call, Directions). -->
+    <style name="Widget.PC.Button.Compact" parent="Widget.PC.Button.Secondary">
+        <item name="android:minHeight">36dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="iconSize">15dp</item>
+        <item name="iconPadding">6dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PC.LabelStrong</item>
+    </style>
+
+    <!-- One option in a segmented control (Once / Daily / Weekly / Monthly). -->
+    <style name="Widget.PC.Button.Segment" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="backgroundTint">@color/pc_segment_bg</item>
+        <item name="android:textColor">@color/pc_segment_text</item>
+        <item name="strokeColor">@color/pc_hairline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.PC.ButtonSecondary</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingEnd">4dp</item>
     </style>
 
     <style name="Widget.PC.Button.Text" parent="Widget.Material3.Button.TextButton">

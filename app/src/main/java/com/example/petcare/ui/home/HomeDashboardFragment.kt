@@ -1,12 +1,16 @@
 package com.example.petcare.ui.home
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.os.Build
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -33,6 +37,7 @@ import com.example.petcare.ui.toTodayUiState
 import com.example.petcare.widget.CareWidgetProvider
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -45,8 +50,9 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
     private var binder: TodayScreenBinder? = null
     private var touchHelper: ItemTouchHelper? = null
-    private var data = TodayData(emptyList(), emptyList(), emptyList())
+    private var data = TodayData(emptyList(), emptyList(), emptyList(), emptyList())
     private var rendered: TodayUiState? = null
+    private var lastLocation: Location? = null
     private var pendingTaskId = 0L
     private var pendingExport: String? = null
     private val permissionRequester = NotificationPermissionRequester(this)
@@ -87,6 +93,7 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
         pendingTaskId = arguments?.getLong("taskId") ?: 0L
         val screen = TodayScreenBinder(view, viewLifecycleOwner, this) { image, uri -> image.load(uri) }
         binder = screen
+        loadLastKnownLocation()
         val permissionPrefs = requireContext().getSharedPreferences("pc_notification_permission", 0)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             !permissionPrefs.getBoolean("requested_after_sign_in", false)
@@ -124,7 +131,10 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
                                     pendingTaskId = 0L
                                 }
                             }
-                            ScreenState.Empty -> { data = TodayData(emptyList(), emptyList(), emptyList()); render() }
+                            ScreenState.Empty -> {
+                                data = TodayData(emptyList(), emptyList(), emptyList(), emptyList())
+                                render()
+                            }
                             is ScreenState.Error -> UiSnackbar.make(view, state.message, Snackbar.LENGTH_LONG)
                                 .setAction(R.string.pc_retry) { viewModel.refresh() }.show()
                             ScreenState.Loading -> Unit
@@ -149,7 +159,7 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
         if (viewModel.selectedPetId != null && data.pets.none { it.id == viewModel.selectedPetId })
             viewModel.selectedPetId = null
         rendered = data.toTodayUiState(AuthPreferences(requireContext()).userName().orEmpty(),
-            viewModel.selectedEpochDay, viewModel.selectedPetId).also {
+            viewModel.selectedEpochDay, viewModel.selectedPetId, lastLocation).also {
                 binder?.render(it)
                 view?.let(PcTypography::apply)
             }
@@ -199,7 +209,12 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
         }
     }
     override fun onPlanTask() = onAddTask()
-    override fun onAddTask() { findNavController().navigate(R.id.action_home_to_add_care_task) }
+    override fun onAddTask() {
+        findNavController().navigate(
+            R.id.action_home_to_add_care_task,
+            Bundle().apply { putLong("preselectPetId", viewModel.selectedPetId ?: 0L) },
+        )
+    }
     override fun onAddPet() { findNavController().navigate(R.id.action_home_to_add_pet) }
     override fun onProfile() { findNavController().navigate(R.id.settingsFragment) }
 
@@ -257,6 +272,32 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
 
     override fun onOpenNotifications() {
         findNavController().navigate(R.id.action_home_to_notifications)
+    }
+
+    override fun onOpenPlace(placeId: Long) {
+        findNavController().navigate(
+            R.id.providerListFragment,
+            Bundle().apply { putLong("placeId", placeId) },
+        )
+    }
+
+    private fun loadLastKnownLocation() {
+        val granted = ContextCompat.checkSelfPermission(
+            requireContext(), Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+            requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!granted) return
+        try {
+            LocationServices.getFusedLocationProviderClient(requireActivity()).lastLocation
+                .addOnSuccessListener { location ->
+                    if (view == null || location == null) return@addOnSuccessListener
+                    lastLocation = location
+                    render()
+                }
+        } catch (_: SecurityException) {
+            // Permission can be revoked between the check and the Play Services call.
+        }
     }
 
     private fun deleteTask(id: Long) {

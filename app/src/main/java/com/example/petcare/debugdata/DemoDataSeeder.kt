@@ -9,6 +9,8 @@ import com.example.petcare.data.local.care.CARE_FREQUENCY_ONE_TIME
 import com.example.petcare.data.local.care.CARE_FREQUENCY_WEEKLY
 import com.example.petcare.data.local.user.AuthRepository
 import com.example.petcare.data.local.provider.ProviderEntity
+import com.example.petcare.design.DelegationLog
+import com.example.petcare.design.InboxStore
 import com.example.petcare.ui.home.LocalDayClock
 import java.util.Calendar
 
@@ -98,6 +100,8 @@ class DemoDataSeeder(private val context: Context) {
             repositories.expenses.add(petId, category, amount, today - index * 12L,
                 context.getString(R.string.demo_expense_note))
         }
+        InboxStore.get(context).clear()
+        DelegationLog.record(context, "Daniel")
     }
 
 }

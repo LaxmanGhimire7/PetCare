@@ -1,21 +1,24 @@
 package com.example.petcare.design
 
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
+import androidx.core.graphics.ColorUtils
 import com.example.petcare.R
 
-/** One day cell. [weekday] e.g. "Tue", [date] e.g. "22". */
+/**
+ * One day cell. [weekday] e.g. "Tue", [date] e.g. "22".
+ * [progress] = share of that day's tasks done (0..1); the bar hides when [hasTasks] is false.
+ */
 data class WeekDay(
     val weekday: String,
     val date: String,
     val hasTasks: Boolean,
     val selected: Boolean,
     val isToday: Boolean,
+    val progress: Float = 0f,
 )
 
 /** Fills the week strip container with seven day cells and applies the selected state. */
@@ -34,11 +37,22 @@ object WeekStripBinder {
         }
     }
 
+    private fun bindBar(bar: SegmentedBarView, day: WeekDay, fill: Int) {
+        val done = day.progress.coerceIn(0f, 1f)
+        bar.setSegments(
+            listOf(SegmentedBarView.Segment(done, fill), SegmentedBarView.Segment(1f - done, null)),
+            animate = false,
+        )
+    }
+
+    private const val SELECTED_TRACK_ALPHA = 64
+
     private fun bindCell(cell: View, day: WeekDay, onClick: () -> Unit) {
         val ctx = cell.context
         val name: TextView = cell.findViewById(R.id.pcDayName)
         val date: TextView = cell.findViewById(R.id.pcDayDate)
-        val dot: View = cell.findViewById(R.id.pcDayDot)
+        val bar: SegmentedBarView = cell.findViewById(R.id.pcDayBar)
+        bar.gapPx = 0f
 
         name.text = day.weekday
         date.text = day.date
@@ -48,19 +62,18 @@ object WeekStripBinder {
             val onPrimary = ContextCompat.getColor(ctx, R.color.pc_on_primary)
             name.setTextColor(onPrimary)
             date.setTextColor(onPrimary)
-            ViewCompat.setBackgroundTintList(dot, ColorStateList.valueOf(onPrimary))
+            bar.setTrackColor(ColorUtils.setAlphaComponent(onPrimary, SELECTED_TRACK_ALPHA))
+            bindBar(bar, day, onPrimary)
         } else {
             cell.background = null
             name.setTextColor(ContextCompat.getColor(ctx, R.color.pc_text_secondary))
             date.setTextColor(
                 ContextCompat.getColor(ctx, if (day.isToday) R.color.pc_primary_text else R.color.pc_text_primary),
             )
-            ViewCompat.setBackgroundTintList(
-                dot,
-                ColorStateList.valueOf(ContextCompat.getColor(ctx, R.color.pc_text_secondary)),
-            )
+            bar.setTrackColor(ContextCompat.getColor(ctx, R.color.pc_track))
+            bindBar(bar, day, ContextCompat.getColor(ctx, R.color.pc_text_primary))
         }
-        dot.visibility = if (day.hasTasks) View.VISIBLE else View.INVISIBLE
+        bar.visibility = if (day.hasTasks) View.VISIBLE else View.INVISIBLE
         cell.isSelected = day.selected
         cell.contentDescription = "${day.weekday} ${day.date}"
         cell.setOnClickListener {
