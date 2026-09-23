@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The live "Now" line, placed between the last past task and the first upcoming one. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingBottom="14dp">
+
+    <TextView
+        android:id="@+id/pcNowTime"
+        android:layout_width="38dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.PC.FigureStrong"
+        android:textColor="@color/pc_primary_text"
+        tools:text="13:02" />
+
+    <FrameLayout
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_gravity="center"
+            android:background="@drawable/pc_bg_dot_primary" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:background="@color/pc_primary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:importantForAccessibility="no"
+        android:text="@string/pc_now"
+        android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+        android:textColor="@color/pc_primary_text" />
+</LinearLayout>

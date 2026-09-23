@@ -89,22 +89,6 @@
         <item name="android:textColor">@color/text_secondary</item>
     </style>
 
-    <!-- 56dp icon well used by the Today quick action row. -->
-    <style name="Widget.PetCare.QuickActionButton" parent="Widget.Material3.Button.TonalButton">
-        <item name="backgroundTint">@color/surface_muted</item><item name="iconTint">@color/text_primary</item>
-        <item name="cornerRadius">@dimen/radius_icon_well</item><item name="iconPadding">0dp</item>
-        <item name="android:insetLeft">0dp</item><item name="android:insetRight">0dp</item>
-        <item name="android:minWidth">@dimen/quick_action_size</item><item name="android:minHeight">@dimen/quick_action_size</item>
-    </style>
-
-    <!-- Circular completion control placed inside a 48dp touch target. -->
-    <style name="Widget.PetCare.TaskCheckbox" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="cornerRadius">@dimen/radius_pill</item><item name="strokeWidth">@dimen/task_checkbox_stroke</item>
-        <item name="android:insetLeft">@dimen/space_12</item><item name="android:insetRight">@dimen/space_12</item>
-        <item name="android:insetTop">@dimen/space_12</item><item name="android:insetBottom">@dimen/space_12</item>
-        <item name="iconPadding">0dp</item><item name="android:minWidth">@dimen/touch_target</item><item name="android:minHeight">@dimen/touch_target</item>
-    </style>
-
     <style name="Widget.PetCare.TextInput" parent="Widget.Material3.TextInputLayout.FilledBox">
         <item name="boxBackgroundColor">@color/surface_muted</item>
         <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
@@ -129,9 +113,5 @@
         <item name="strokeWidth">0dp</item>
     </style>
 
-    <!-- Squared-off floating action shape used by the instrument-inspired Today screen. -->
-    <style name="ShapeAppearance.PetCare.Fab" parent="ShapeAppearance.Material3.Corner.Medium">
-        <item name="cornerSize">@dimen/radius_icon_well</item>
-    </style>
 
 </resources>

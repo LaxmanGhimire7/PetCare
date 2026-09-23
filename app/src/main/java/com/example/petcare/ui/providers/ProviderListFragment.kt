@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.provider.ProviderEntity
 import com.example.petcare.databinding.FragmentProviderListBinding
 import com.example.petcare.databinding.ItemPlaceRowBinding
@@ -63,6 +64,7 @@ class ProviderListFragment : Fragment() {
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentProviderListBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
+        view.applySystemBarTopPadding()
         BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_COLLAPSED
         binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_providers_to_add_provider) }
         binding.placeSearchButton.setOnClickListener { searchAddress() }

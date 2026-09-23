@@ -23,7 +23,7 @@
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_8" android:text="@string/gallery_countdown"
                     android:textAppearance="@style/TextAppearance.PetCare.Countdown" />
-                <com.example.petcare.ui.home.SegmentedProgressView android:id="@+id/gallery_segments"
+                <com.example.petcare.design.SegmentedBarView android:id="@+id/gallery_segments"
                     android:layout_width="match_parent" android:layout_height="@dimen/space_8"
                     android:layout_marginTop="@dimen/space_16" />
             </LinearLayout>

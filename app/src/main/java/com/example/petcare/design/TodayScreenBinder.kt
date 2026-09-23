@@ -1,0 +1,168 @@
+package com.example.petcare.design
+
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.petcare.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+/** Everything the Today screen shows. Your ViewModel maps its data into this. */
+data class TodayUiState(
+    val dateLabel: String,
+    val greeting: String,
+    val userInitial: String,
+    val hasPets: Boolean,
+    /** True when the selected week-strip day is today: turns on the countdown and Now marker. */
+    val isToday: Boolean,
+    val nextUp: NextUpState,
+    val petRings: List<PetRingItem>,
+    val week: List<WeekDay>,
+    /** Tasks for the selected day (plus overdue ones when isToday). Any order: the binder sorts by time. */
+    val tasks: List<TimelineItem.Task>,
+)
+
+/** Every interaction on Today. Implement by delegating to your existing ViewModel methods. */
+interface TodayActions {
+    fun onToggleTask(taskId: Long, done: Boolean)
+    fun onOpenTask(taskId: Long)
+    fun onSelectPet(key: String)
+    fun onSelectDay(index: Int)
+    fun onNextUpDone()
+    fun onNextUpSnooze()
+    fun onPlanTask()
+    fun onAddTask()
+    fun onAddPet()
+    fun onProfile()
+}
+
+/**
+ * Binds pc_fragment_today.xml. Create once in onViewCreated with viewLifecycleOwner,
+ * then call [render] whenever your state changes. It owns the countdown tick and
+ * the minute-by-minute Now marker; you never need to refresh those yourself.
+ */
+class TodayScreenBinder(
+    root: View,
+    private val lifecycleOwner: LifecycleOwner,
+    private val actions: TodayActions,
+    loadPhoto: (ImageView, String) -> Unit,
+) {
+    private val context = root.context
+    private val date: TextView = root.findViewById(R.id.pcTodayDate)
+    private val greeting: TextView = root.findViewById(R.id.pcTodayGreeting)
+    private val avatar: TextView = root.findViewById(R.id.pcTodayAvatar)
+    private val empty: View = root.findViewById(R.id.pcTodayEmpty)
+    private val nextUpRoot: View = root.findViewById(R.id.pcNextUp)
+    private val petRings: RecyclerView = root.findViewById(R.id.pcPetRings)
+    private val weekStrip: LinearLayout = root.findViewById(R.id.pcWeekStrip)
+    private val timeline: RecyclerView = root.findViewById(R.id.pcTimeline)
+    private val timelineEmpty: View = root.findViewById(R.id.pcTimelineEmpty)
+    private val fab: View = root.findViewById(R.id.pcTodayFab)
+
+    private val ringAdapter = PetRingAdapter(loadPhoto) { actions.onSelectPet(it) }
+
+    /** Exposed so you can attach your existing ItemTouchHelper swipe gestures to it. */
+    val timelineAdapter = TimelineAdapter(
+        onToggle = { task, done -> actions.onToggleTask(task.id, done) },
+        onOpen = { task -> actions.onOpenTask(task.id) },
+    )
+
+    private val nextUp = NextUpBinder(
+        nextUpRoot,
+        onDone = actions::onNextUpDone,
+        onSnooze = actions::onNextUpSnooze,
+        onPlan = actions::onPlanTask,
+    )
+
+    private val clock = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private var state: TodayUiState? = null
+    private var firstContentRender = true
+    private var lastMinute = -1L
+
+    init {
+        root.applySystemBarTopPadding()
+
+        petRings.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        petRings.adapter = ringAdapter
+        timeline.layoutManager = LinearLayoutManager(context)
+        timeline.adapter = timelineAdapter
+
+        avatar.setOnClickListener { actions.onProfile() }
+        fab.setOnClickListener { actions.onAddTask() }
+        root.findViewById<View>(R.id.pcTodayEmptyAddPet).setOnClickListener { actions.onAddPet() }
+
+        startTicker()
+    }
+
+    fun render(newState: TodayUiState) {
+        state = newState
+        date.text = newState.dateLabel
+        greeting.text = newState.greeting
+        avatar.text = newState.userInitial
+
+        val content = if (newState.hasPets) View.VISIBLE else View.GONE
+        empty.visibility = if (newState.hasPets) View.GONE else View.VISIBLE
+        nextUpRoot.visibility = content
+        petRings.visibility = content
+        weekStrip.visibility = content
+        timeline.visibility = content
+        fab.visibility = content
+        if (!newState.hasPets) {
+            timelineEmpty.visibility = View.GONE
+            return
+        }
+
+        // The one orchestrated moment: rings and progress sweep up once per screen creation.
+        val sweep = firstContentRender && MotionPrefs.animationsEnabled(context)
+        firstContentRender = false
+
+        nextUp.render(newState.nextUp, animateBar = sweep)
+        nextUp.tick(System.currentTimeMillis())
+        ringAdapter.submit(newState.petRings, animateFromEmpty = sweep)
+        WeekStripBinder.bind(weekStrip, newState.week) { actions.onSelectDay(it) }
+
+        timelineEmpty.visibility = if (newState.tasks.isEmpty()) View.VISIBLE else View.GONE
+        timeline.visibility = if (newState.tasks.isEmpty()) View.GONE else View.VISIBLE
+        submitTimeline(System.currentTimeMillis())
+    }
+
+    private fun submitTimeline(nowMillis: Long) {
+        val current = state ?: return
+        if (!current.hasPets || current.tasks.isEmpty()) return
+        val items = if (current.isToday) {
+            TimelineBuilder.build(current.tasks, nowMillis, clock.format(Date(nowMillis)))
+        } else {
+            TimelineBuilder.build(current.tasks, null, null)
+        }
+        timelineAdapter.submitList(items) { timelineAdapter.refreshConnectors() }
+    }
+
+    /** Ticks only while the screen is visible; stops automatically when backgrounded. */
+    private fun startTicker() {
+        lifecycleOwner.lifecycleScope.launch {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    val now = System.currentTimeMillis()
+                    nextUp.tick(now)
+                    val minute = now / 60_000L
+                    if (minute != lastMinute) {
+                        lastMinute = minute
+                        submitTimeline(now)
+                    }
+                    delay(1_000L - now % 1_000L)
+                }
+            }
+        }
+    }
+}

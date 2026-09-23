@@ -29,6 +29,6 @@
     </com.google.android.material.card.MaterialCardView>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_16" android:orientation="horizontal">
         <com.google.android.material.button.MaterialButton android:id="@+id/task_mark_done_button" style="@style/Widget.PetCare.Button.Primary" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/mark_done" app:icon="@drawable/ic_check" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/task_share_button" style="@style/Widget.PetCare.Button.Tonal" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_8" android:layout_weight="1" android:text="@string/share_list" app:icon="@drawable/ic_share" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/task_share_button" style="@style/Widget.PetCare.Button.Tonal" android:layout_width="@dimen/layout_zero" android:layout_height="wrap_content" android:layout_marginStart="@dimen/space_8" android:layout_weight="1" android:text="@string/share_list" app:icon="@drawable/pc_ic_share" />
     </LinearLayout>
 </LinearLayout>

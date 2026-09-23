@@ -17,6 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.util.TreeIterables
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -71,15 +72,15 @@ class CareJourneyUiTest {
             onView(withId(R.id.password_input)).perform(scrollTo(),
                 replaceText(password), closeSoftKeyboard())
             onView(withId(R.id.sign_in_button)).perform(scrollTo(), click())
-            waitFor(withId(R.id.today_empty_action))
-            onView(withId(R.id.today_empty_action)).perform(scrollTo(), click())
+            waitFor(withId(R.id.pcTodayEmptyAddPet))
+            onView(withId(R.id.pcTodayEmptyAddPet)).perform(scrollTo(), click())
 
             onView(withId(R.id.pet_name_input)).perform(scrollTo(), replaceText(petName))
             onView(withId(R.id.pet_species_input)).perform(scrollTo(),
                 replaceText("Cat"), closeSoftKeyboard())
             onView(withId(R.id.save_pet_button)).perform(scrollTo(), click())
-            waitFor(withId(R.id.add_task_fab))
-            onView(withId(R.id.add_task_fab)).perform(click())
+            waitFor(withId(R.id.pcTodayFab))
+            onView(withId(R.id.pcTodayFab)).perform(click())
 
             onView(withId(R.id.care_task_title_input)).perform(scrollTo(),
                 replaceText(taskTitle), closeSoftKeyboard())
@@ -98,28 +99,24 @@ class CareJourneyUiTest {
             val dao = PetCareDatabase.getInstance(context).careTaskDao()
             val taskId = runBlocking { dao.observeUpcoming(ownerId).first()
                 .first { it.title == taskTitle }.id }
-            onView(withId(R.id.complete_task_button)).perform(scrollTo(), click())
+            onView(withId(R.id.pcTimelineNode)).perform(scrollTo(), click())
             val completedInRoom = (0 until 30).any {
                 if (runBlocking { dao.getById(taskId, ownerId)?.isCompleted } == true) true
                 else { Thread.sleep(100); false }
             }
             assertTrue("Completion tap did not update the saved task", completedInRoom)
-            waitFor(withId(R.id.completed_header))
-            onView(withId(R.id.completed_header)).perform(scrollTo(), click())
             onView(withText(taskTitle)).check(matches(
                 withEffectiveVisibility(androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE)))
 
-            // A future appointment must remain visible in Upcoming after it is saved.
+            // A future appointment must not leak into the selected day's timeline.
             val original = runBlocking { dao.getById(taskId, ownerId)!! }
             val futureTitle = "Journey future appointment"
             runBlocking {
                 PetCareRepositories(context).tasks.addTask(original.petId, futureTitle,
                     original.dueDateEpochDay + 7, 10 * 60)
             }
-            waitFor(withText(futureTitle))
-            onView(withText(futureTitle)).check(matches(withEffectiveVisibility(
-                androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE)))
-            onView(withId(R.id.today_empty_card)).check(matches(withEffectiveVisibility(
+            onView(withText(futureTitle)).check(doesNotExist())
+            onView(withId(R.id.pcTodayEmpty)).check(matches(withEffectiveVisibility(
                 androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE)))
         }
     }

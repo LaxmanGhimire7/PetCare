@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Next task, live countdown, today's progress in pet-coloured segments, and two actions. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pc_bg_surface_24"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pcNextUpLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="@style/TextAppearance.PC.LabelStrong"
+            android:textColor="@color/pc_text_secondary"
+            tools:text="Next up" />
+
+        <TextView
+            android:id="@+id/pcNextUpOverdue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pc_bg_pill_error"
+            android:paddingStart="9dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="9dp"
+            android:paddingBottom="3dp"
+            android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+            android:textColor="@color/pc_on_error_container"
+            android:visibility="gone"
+            tools:text="1 overdue"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/pcNextUpPet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/pc_bg_pill"
+            android:paddingStart="9dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="9dp"
+            android:paddingBottom="3dp"
+            android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+            tools:text="Luna" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/pcNextUpTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.PC.Headline"
+        tools:text="Brushing" />
+
+    <TextView
+        android:id="@+id/pcNextUpCountdown"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.PC.Countdown"
+        tools:text="00:57:48" />
+
+    <TextView
+        android:id="@+id/pcNextUpUntil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textAppearance="@style/TextAppearance.PC.Supporting"
+        tools:text="until 14:00" />
+
+    <com.example.petcare.design.SegmentedBarView
+        android:id="@+id/pcNextUpBar"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginTop="14dp" />
+
+    <TextView
+        android:id="@+id/pcNextUpProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textAppearance="@style/TextAppearance.PC.Meta"
+        tools:text="3 of 6 done today" />
+
+    <LinearLayout
+        android:id="@+id/pcNextUpActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcNextUpDone"
+            style="@style/Widget.PC.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="@string/pc_mark_done"
+            app:icon="@drawable/pc_ic_check"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcNextUpSnooze"
+            style="@style/Widget.PC.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/pc_snooze" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcNextUpPlan"
+            style="@style/Widget.PC.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="@string/pc_plan_task"
+            android:visibility="gone"
+            app:icon="@drawable/pc_ic_plus"
+            app:iconGravity="textStart" />
+    </LinearLayout>
+</LinearLayout>

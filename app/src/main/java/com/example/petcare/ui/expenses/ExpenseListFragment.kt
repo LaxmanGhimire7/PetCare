@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.expense.ExpenseCsv
 import com.example.petcare.data.local.expense.ExpenseInsights
 import com.example.petcare.data.local.expense.ExpenseSummary
@@ -61,6 +62,7 @@ class ExpenseListFragment : Fragment() {
         FragmentExpenseListBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, state: Bundle?) {
+        view.applySystemBarTopPadding()
         binding.monthButton.text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date())
         binding.addButton.setOnClickListener {
             findNavController().navigate(R.id.action_expenses_to_add_expense)

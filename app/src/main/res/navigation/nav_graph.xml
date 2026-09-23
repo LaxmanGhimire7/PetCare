@@ -76,7 +76,7 @@
         android:id="@+id/homeDashboardFragment"
         android:name="com.example.petcare.ui.home.HomeDashboardFragment"
         android:label="@string/navigation_dashboard"
-        tools:layout="@layout/fragment_today">
+        tools:layout="@layout/pc_fragment_today">
         <argument android:name="taskId" app:argType="long" android:defaultValue="0L" />
         <deepLink app:uri="petcare://task/{taskId}" />
         <action
@@ -109,7 +109,7 @@
         android:id="@+id/petListFragment"
         android:name="com.example.petcare.ui.pets.PetListFragment"
         android:label="@string/nav_pets"
-        tools:layout="@layout/fragment_pet_list">
+        tools:layout="@layout/pc_fragment_pets">
         <action android:id="@+id/action_pets_to_add_pet" app:destination="@id/addPetFragment" />
         <action android:id="@+id/action_pets_to_edit_pet" app:destination="@id/editPetFragment" />
         <action android:id="@+id/action_pets_to_pet_detail" app:destination="@id/petDetailFragment" />

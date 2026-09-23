@@ -53,8 +53,6 @@
     <dimen name="place_preview_height">180dp</dimen>
     <dimen name="place_marker_size">44dp</dimen>
     <dimen name="place_marker_letter">16sp</dimen>
-    <!-- Material reads this token before adding the edge-to-edge navigation inset. -->
-    <dimen name="m3_bottom_nav_min_height">64dp</dimen>
     <dimen name="timeline_time_width">44dp</dimen>
     <dimen name="timeline_node_size">22dp</dimen>
     <dimen name="timeline_connector_width">2dp</dimen>

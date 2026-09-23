@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PetCare design kit: all user-facing text for the Today and Pets screens. -->
+<resources>
+    <!-- Today: next-up card -->
+    <string name="pc_next_up">Next up</string>
+    <string name="pc_first_up">First up</string>
+    <string name="pc_today">Today</string>
+    <string name="pc_all_done">All done for today</string>
+    <string name="pc_nothing_planned">Nothing planned today</string>
+    <string name="pc_plan_task">Plan a task</string>
+    <string name="pc_mark_done">Mark done</string>
+    <string name="pc_snooze">Snooze</string>
+    <string name="pc_due_now">Due now</string>
+    <string name="pc_until">until %1$s</string>
+    <string name="pc_done_of_total">%1$d of %2$d done today</string>
+    <plurals name="pc_overdue_count">
+        <item quantity="one">%d overdue</item>
+        <item quantity="other">%d overdue</item>
+    </plurals>
+
+    <!-- Today: timeline -->
+    <string name="pc_now">Now</string>
+    <string name="pc_overdue">Overdue</string>
+    <string name="pc_timeline_empty_title">Nothing planned</string>
+    <string name="pc_timeline_empty_body">Tap + to add a task for this day.</string>
+
+
+    <!-- Today: no pets -->
+    <string name="pc_empty_title">Add your first pet</string>
+    <string name="pc_empty_body">Feeding, walks, grooming and vet visits will run on a timeline here.</string>
+    <string name="pc_add_pet">Add a pet</string>
+    <string name="pc_new_task">New task</string>
+
+    <!-- Pets -->
+    <string name="pc_your_pets">Your pets</string>
+    <string name="pc_coming_up">Coming up</string>
+    <string name="pc_coming_up_empty">Nothing scheduled in the next 7 days.</string>
+    <string name="pc_this_month">This month</string>
+    <string name="pc_spent_on_care">spent on care</string>
+    <string name="pc_no_spending">No spending logged this month.</string>
+    <string name="pc_add_expense">Add expense</string>
+
+    <!-- Accessibility -->
+    <string name="pc_a11y_profile">Profile and settings</string>
+    <string name="pc_a11y_mark_done">Mark %1$s done</string>
+    <string name="pc_a11y_mark_not_done">Mark %1$s as not done</string>
+    <string name="pc_state_done">Done</string>
+    <string name="pc_state_not_done">Not done</string>
+    <string name="pc_a11y_countdown">%1$s in %2$s</string>
+    <string name="pc_a11y_due_now">%1$s is due now</string>
+    <string name="pc_a11y_ring">%1$s, %2$s</string>
+    <string name="pc_a11y_pet_card">%1$s, %2$s</string>
+    <string name="pc_a11y_now">Current time %1$s</string>
+    <plurals name="pc_hours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+    <plurals name="pc_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+</resources>

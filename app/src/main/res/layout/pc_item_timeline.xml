@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    One task on the timeline: time, node, title, detail line.
+    The node IS the checkbox; it is 20dp so it matches the mockup, and the adapter
+    gives it a 48dp TouchDelegate so the tap target still meets accessibility guidance.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="horizontal"
+    android:paddingBottom="14dp">
+
+    <TextView
+        android:id="@+id/pcTimelineTime"
+        android:layout_width="38dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="1dp"
+        android:textAppearance="@style/TextAppearance.PC.Figure"
+        tools:text="08:00" />
+
+    <com.example.petcare.design.TimelineNodeView
+        android:id="@+id/pcTimelineNode"
+        android:layout_width="20dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="10dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/pcTimelineTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.PC.RowTitle"
+            tools:text="Morning feed" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/pcTimelinePetDot"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/pc_bg_oval" />
+
+            <TextView
+                android:id="@+id/pcTimelinePetName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:textAppearance="@style/TextAppearance.PC.Meta"
+                tools:text="Max" />
+
+            <ImageView
+                android:id="@+id/pcTimelineCategory"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="7dp"
+                android:importantForAccessibility="no"
+                app:tint="@color/pc_text_secondary" />
+
+            <TextView
+                android:id="@+id/pcTimelineOverdue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="9dp"
+                android:text="@string/pc_overdue"
+                android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+                android:textColor="@color/pc_error"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

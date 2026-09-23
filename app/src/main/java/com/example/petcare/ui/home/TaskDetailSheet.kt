@@ -21,6 +21,7 @@ import com.example.petcare.databinding.SheetTaskDetailBinding
 import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.UiSnackbar
+import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.example.petcare.data.local.pet.PetColor
 import com.example.petcare.reminders.CareReminderScheduler
 import com.google.android.material.snackbar.Snackbar
@@ -148,10 +149,11 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
         binding.taskShareButton.setOnClickListener {
             val body = getString(R.string.task_share_body, data.getString("pet"),
                 data.getString("title"), day, time, notes)
-            startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, body)
-            }, getString(R.string.share_list)))
+            findNavController().navigate(R.id.delegationPreviewFragment, Bundle().apply {
+                putString(DelegationPreviewFragment.MESSAGE, body)
+                putLongArray(DelegationPreviewFragment.PET_IDS, longArrayOf(data.getLong("petId")))
+            })
+            dismiss()
         }
         binding.taskMoreButton.setOnClickListener { anchor ->
             PopupMenu(requireContext(), anchor).apply {
@@ -243,6 +245,7 @@ class TaskDetailSheet : BottomSheetDialogFragment() {
             arguments = Bundle().apply {
                 putString("title", task.title)
                 putLong("id", task.id)
+                putLong("petId", task.petId)
                 putString("pet", task.petName)
                 putString("category", task.category)
                 putString("supplies", task.requiredSupplies)

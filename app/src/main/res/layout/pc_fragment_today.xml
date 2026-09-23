@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Today screen, matched to the approved mockup.
+    Order: header, Next-up countdown, pet rings, week strip, timeline, FAB.
+    The root takes the status-bar inset in code, so nothing draws under the status bar.
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pcTodayRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pc_canvas">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/pcTodayScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="96dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Header: date and greeting on the left, avatar on the right. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="20dp"
+                android:paddingEnd="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/pcTodayDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.PC.Supporting"
+                        tools:text="Tue 22 September" />
+
+                    <TextView
+                        android:id="@+id/pcTodayGreeting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:textAppearance="@style/TextAppearance.PC.Display"
+                        tools:text="Afternoon, Lakxh" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/pcTodayAvatar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/pc_bg_avatar"
+                    android:clickable="true"
+                    android:contentDescription="@string/pc_a11y_profile"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:textAppearance="@style/TextAppearance.PC.Avatar"
+                    tools:text="L" />
+            </LinearLayout>
+
+            <!-- Shown only when the user has no pets yet. -->
+            <include
+                android:id="@+id/pcTodayEmpty"
+                layout="@layout/pc_view_today_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="12dp"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/pcNextUp"
+                layout="@layout/pc_view_next_up"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="12dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/pcPetRings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingStart="16dp"
+                android:paddingEnd="4dp" />
+
+            <!-- Seven day cells are added by WeekStripBinder. -->
+            <LinearLayout
+                android:id="@+id/pcWeekStrip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/pcTimeline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
+
+            <include
+                android:id="@+id/pcTimelineEmpty"
+                layout="@layout/pc_view_timeline_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/pcTodayFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/pc_new_task"
+        app:srcCompat="@drawable/pc_ic_plus" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

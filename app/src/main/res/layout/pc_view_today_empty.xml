@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Today when there are no pets: one clear invitation, nothing else. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pc_bg_surface_24"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <ImageView
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:background="@drawable/pc_bg_avatar"
+        android:importantForAccessibility="no"
+        android:padding="13dp"
+        android:src="@drawable/pc_ic_paw"
+        app:tint="@color/pc_primary_text" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/pc_empty_title"
+        android:textAppearance="@style/TextAppearance.PC.Headline" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/pc_empty_body"
+        android:textAppearance="@style/TextAppearance.PC.Body"
+        android:textColor="@color/pc_text_secondary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/pcTodayEmptyAddPet"
+        style="@style/Widget.PC.Button.Primary"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="18dp"
+        android:text="@string/pc_add_pet"
+        app:icon="@drawable/pc_ic_plus"
+        app:iconGravity="textStart" />
+</LinearLayout>

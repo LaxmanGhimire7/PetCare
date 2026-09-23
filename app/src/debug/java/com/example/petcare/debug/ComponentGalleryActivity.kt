@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.example.petcare.R
 import com.example.petcare.ui.PetAvatarView
-import com.example.petcare.ui.home.SegmentedProgressView
-import com.example.petcare.data.local.pet.PetColor
+import com.example.petcare.design.SegmentedBarView
+import com.example.petcare.design.PetColor
 
 /** Debug-only catalogue for physical-device review of the shared XML component system. */
 class ComponentGalleryActivity : AppCompatActivity() {
@@ -23,12 +23,9 @@ class ComponentGalleryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_component_gallery)
         findViewById<PetAvatarView>(R.id.gallery_pet_avatar).setPet(
             getString(R.string.gallery_luna), 1, 2, 3, true)
-        findViewById<SegmentedProgressView>(R.id.gallery_segments).setSegments(listOf(
-            PetColor.SKY.color(this) to true,
-            PetColor.VIOLET.color(this) to true,
-            PetColor.SKY.color(this) to false,
-            PetColor.VIOLET.color(this) to false
-        ))
+        findViewById<SegmentedBarView>(R.id.gallery_segments).setEqualSegments(listOf(
+            PetColor.SKY.main(this), PetColor.VIOLET.main(this), null, null
+        ), animate = false)
     }
 
     private companion object { const val EXTRA_LIGHT = "light" }

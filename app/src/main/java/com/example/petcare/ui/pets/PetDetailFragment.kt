@@ -28,6 +28,7 @@ import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.ScreenState
 import com.example.petcare.ui.UiSnackbar
 import com.example.petcare.ui.home.LocalDayClock
+import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialContainerTransform
 import kotlinx.coroutines.launch
@@ -70,6 +71,23 @@ class PetDetailFragment : Fragment() {
         currentPetId = requireArguments().getLong("petId")
         binding.petDetailCard.transitionName = "pet_$currentPetId"
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
+        binding.shareChecklistButton.setOnClickListener {
+            val pet = currentPet ?: return@setOnClickListener
+            val rows = petTasks(pet).filterNot { it.isCompleted }
+                .sortedWith(compareBy(CareTaskSummary::dueDateEpochDay, CareTaskSummary::reminderMinutesOfDay))
+            if (rows.isEmpty()) {
+                UiSnackbar.make(view, R.string.nothing_to_share, Snackbar.LENGTH_SHORT).show()
+            } else {
+                val message = rows.joinToString("\n\n") { task ->
+                    getString(R.string.task_share_body, pet.name, task.title,
+                        date(task.dueDateEpochDay), time(task), task.notes)
+                }
+                findNavController().navigate(R.id.delegationPreviewFragment, Bundle().apply {
+                    putString(DelegationPreviewFragment.MESSAGE, message)
+                    putLongArray(DelegationPreviewFragment.PET_IDS, longArrayOf(pet.id))
+                })
+            }
+        }
         binding.editPetButton.setOnClickListener {
             findNavController().navigate(R.id.action_pet_detail_to_edit, Bundle().apply {
                 putLong("petId", currentPetId)
@@ -162,6 +180,7 @@ class PetDetailFragment : Fragment() {
 
     /** Converts live Room data into the selected Care, Health, Profile, or Spending tab. */
     private fun renderSelectedTab(pet: PetEntity) {
+        binding.shareChecklistButton.visibility = if (binding.petTabCare.isChecked) View.VISIBLE else View.GONE
         when {
             binding.petTabHealth.isChecked -> renderProfileFields(listOf(
                 R.string.vaccination_history to pet.vaccinationHistory,

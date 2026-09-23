@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PetCare design kit: typography, matched to the approved mockup.
+    Every style points at ONE exact font file. Never use textStyle="bold" or fontWeight
+    to pick a weight: that is unreliable on OEM skins such as MIUI, and it is why earlier
+    builds rendered headings thin.
+    Barlow Condensed = display, times, countdown, money. Barlow = everything else.
+-->
+<resources>
+
+    <style name="TextAppearance.PC" parent="">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/pc_text_primary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <!-- Countdown on the Next-up card: the one loud element in the app. -->
+    <style name="TextAppearance.PC.Countdown">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="android:textSize">54sp</item>
+        <item name="lineHeight">52sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Greeting, "Your pets". -->
+    <style name="TextAppearance.PC.Display">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="android:textSize">32sp</item>
+        <item name="lineHeight">32sp</item>
+    </style>
+
+    <!-- Welcome / onboarding headline on other screens. -->
+    <style name="TextAppearance.PC.Hero">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="android:textSize">44sp</item>
+        <item name="lineHeight">44sp</item>
+    </style>
+
+    <!-- Next-up task name, single-pet card name, sheet titles. -->
+    <style name="TextAppearance.PC.Headline">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="android:textSize">24sp</item>
+        <item name="lineHeight">26sp</item>
+    </style>
+
+    <!-- Pet name on a grid card. -->
+    <style name="TextAppearance.PC.CardTitle">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="android:textSize">23sp</item>
+        <item name="lineHeight">25sp</item>
+    </style>
+
+    <!-- Money total. -->
+    <style name="TextAppearance.PC.Amount">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_extrabold</item>
+        <item name="android:textSize">34sp</item>
+        <item name="lineHeight">34sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Date in a Coming up row. -->
+    <style name="TextAppearance.PC.FigureDate">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="lineHeight">20sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Date in the week strip. -->
+    <style name="TextAppearance.PC.FigureLarge">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="android:textSize">17sp</item>
+        <item name="lineHeight">18sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Time on a timeline row. -->
+    <style name="TextAppearance.PC.Figure">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_semibold</item>
+        <item name="android:textSize">15sp</item>
+        <item name="lineHeight">17sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- Time on the Now marker. -->
+    <style name="TextAppearance.PC.FigureStrong">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="lineHeight">15sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <!-- "2 of 3" under a pet ring. -->
+    <style name="TextAppearance.PC.FigureSmall">
+        <item name="android:fontFamily">@font/pc_barlow_condensed_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_condensed_semibold</item>
+        <item name="android:textSize">13sp</item>
+        <item name="lineHeight">14sp</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <style name="TextAppearance.PC.Section">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="lineHeight">20sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.RowTitle">
+        <item name="android:fontFamily">@font/pc_barlow_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="lineHeight">18sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.Body">
+        <item name="android:fontFamily">@font/pc_barlow_regular</item>
+        <item name="fontFamily">@font/pc_barlow_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="lineHeight">20sp</item>
+    </style>
+
+    <!-- Date line, breed, "until 14:00", "spent on care". -->
+    <style name="TextAppearance.PC.Supporting">
+        <item name="android:fontFamily">@font/pc_barlow_medium</item>
+        <item name="fontFamily">@font/pc_barlow_medium</item>
+        <item name="android:textSize">12sp</item>
+        <item name="lineHeight">16sp</item>
+        <item name="android:textColor">@color/pc_text_secondary</item>
+    </style>
+
+    <!-- Detail lines under a task, progress counts, spending legend. -->
+    <style name="TextAppearance.PC.Meta">
+        <item name="android:fontFamily">@font/pc_barlow_medium</item>
+        <item name="fontFamily">@font/pc_barlow_medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="lineHeight">14sp</item>
+        <item name="android:textColor">@color/pc_text_secondary</item>
+    </style>
+
+    <!-- Pills, "Now", "2 of 3 today". -->
+    <style name="TextAppearance.PC.MetaStrong">
+        <item name="android:fontFamily">@font/pc_barlow_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_semibold</item>
+        <item name="android:textSize">11sp</item>
+        <item name="lineHeight">14sp</item>
+    </style>
+
+    <!-- Pet name under a ring, weekday in the strip. -->
+    <style name="TextAppearance.PC.Label">
+        <item name="android:fontFamily">@font/pc_barlow_medium</item>
+        <item name="fontFamily">@font/pc_barlow_medium</item>
+        <item name="android:textSize">12sp</item>
+        <item name="lineHeight">15sp</item>
+    </style>
+
+    <!-- "Next up". -->
+    <style name="TextAppearance.PC.LabelStrong">
+        <item name="android:fontFamily">@font/pc_barlow_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="lineHeight">15sp</item>
+    </style>
+
+    <!-- Selected pet name under a ring. -->
+    <style name="TextAppearance.PC.LabelBold">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="lineHeight">15sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.Button">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.ButtonSecondary">
+        <item name="android:fontFamily">@font/pc_barlow_semibold</item>
+        <item name="fontFamily">@font/pc_barlow_semibold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.Avatar">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/pc_on_primary_container</item>
+    </style>
+
+    <style name="TextAppearance.PC.NavLabel">
+        <item name="android:fontFamily">@font/pc_barlow_medium</item>
+        <item name="fontFamily">@font/pc_barlow_medium</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="TextAppearance.PC.NavLabel.Active">
+        <item name="android:fontFamily">@font/pc_barlow_bold</item>
+        <item name="fontFamily">@font/pc_barlow_bold</item>
+    </style>
+</resources>

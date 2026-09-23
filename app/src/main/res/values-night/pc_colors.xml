@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PetCare design kit: colour tokens, DARK theme (default). True black canvas. -->
+<resources>
+    <color name="pc_canvas">#000000</color>
+    <color name="pc_surface">#111113</color>
+    <color name="pc_surface_raised">#1A1A1D</color>
+    <color name="pc_surface_muted">#222226</color>
+    <color name="pc_hairline">#27272A</color>
+
+    <color name="pc_text_primary">#FFFFFF</color>
+    <color name="pc_text_secondary">#A1A1AA</color>
+
+    <color name="pc_primary">#FF6B00</color>
+    <color name="pc_primary_text">#FF6B00</color>
+    <color name="pc_on_primary">#000000</color>
+    <color name="pc_primary_container">#2A1408</color>
+    <color name="pc_on_primary_container">#FFB28A</color>
+
+    <color name="pc_error">#FF3B5C</color>
+    <color name="pc_on_error">#000000</color>
+    <color name="pc_error_container">#3A0F18</color>
+    <color name="pc_on_error_container">#FF8A9E</color>
+    <!-- Unfilled part of rings and progress segments. -->
+    <color name="pc_track">#2A2A2E</color>
+</resources>

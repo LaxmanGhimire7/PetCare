@@ -16,7 +16,7 @@ object UiSnackbar {
 
     private fun anchor(snackbar: Snackbar, source: View): Snackbar {
         val root = source.rootView
-        val fab = root.findViewById<View?>(R.id.add_task_fab)
+        val fab = root.findViewById<View?>(R.id.pcTodayFab)
         val navigation = root.findViewById<BottomNavigationView?>(R.id.bottom_navigation)
         val target = fab?.takeIf { it.isShown && it.visibility == View.VISIBLE } ?: navigation?.takeIf { it.isShown }
         if (target != null) snackbar.setAnchorView(target)

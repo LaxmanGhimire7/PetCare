@@ -84,6 +84,11 @@
                         android:textAppearance="@style/TextAppearance.PetCare.Body" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.button.MaterialButton android:id="@+id/share_checklist_button"
+                style="@style/Widget.PC.Button.Secondary" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginHorizontal="@dimen/space_20"
+                android:layout_marginTop="@dimen/space_20" android:text="@string/share_checklist"
+                app:icon="@drawable/pc_ic_share" app:iconTint="@color/pc_text_primary" />
             <com.google.android.material.button.MaterialButton android:id="@+id/edit_pet_button"
                 style="@style/Widget.PetCare.Button.Tonal" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_marginHorizontal="@dimen/space_20"

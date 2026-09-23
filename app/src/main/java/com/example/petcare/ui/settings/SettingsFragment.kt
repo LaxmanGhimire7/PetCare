@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.SettingsPreferences
 import com.example.petcare.data.local.backup.CareDataBackup
@@ -52,6 +53,7 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, state: Bundle?) {
+        view.applySystemBarTopPadding()
         val auth = AuthPreferences(requireContext())
         val settings = SettingsPreferences(requireContext())
         val accountName = auth.userName().orEmpty()

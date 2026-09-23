@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/homeDashboardFragment" android:icon="@drawable/ic_calendar" android:title="@string/nav_today" />
-    <item android:id="@+id/petListFragment" android:icon="@drawable/ic_pets" android:title="@string/nav_pets" />
-    <item android:id="@+id/expenseListFragment" android:icon="@drawable/ic_wallet" android:title="@string/nav_money" />
-    <item android:id="@+id/providerListFragment" android:icon="@drawable/ic_location" android:title="@string/nav_places" />
-    <item android:id="@+id/settingsFragment" android:icon="@drawable/ic_settings" android:title="@string/nav_settings" />
+    <item android:id="@+id/homeDashboardFragment" android:icon="@drawable/pc_ic_nav_today" android:title="@string/nav_today" />
+    <item android:id="@+id/petListFragment" android:icon="@drawable/pc_ic_nav_pets" android:title="@string/nav_pets" />
+    <item android:id="@+id/expenseListFragment" android:icon="@drawable/pc_ic_nav_money" android:title="@string/nav_money" />
+    <item android:id="@+id/providerListFragment" android:icon="@drawable/pc_ic_nav_places" android:title="@string/nav_places" />
+    <item android:id="@+id/settingsFragment" android:icon="@drawable/pc_ic_nav_settings" android:title="@string/nav_settings" />
 </menu>

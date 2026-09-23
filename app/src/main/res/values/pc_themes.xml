@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PetCare design kit: app theme.
+    Set android:theme="@style/Theme.PetCareDesign" on <application> in AndroidManifest.xml.
+
+    Every Material 3 colour role is mapped explicitly. Unmapped roles fall back to Material's
+    defaults or derived tints, which is what turned the nav bar and FAB cream in an earlier build.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base.Theme.PetCareDesign" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Brand: orange is for actions and time only. -->
+        <item name="colorPrimary">@color/pc_primary</item>
+        <item name="colorOnPrimary">@color/pc_on_primary</item>
+        <item name="colorPrimaryContainer">@color/pc_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/pc_on_primary_container</item>
+        <item name="colorPrimaryInverse">@color/pc_primary</item>
+
+        <!-- Secondary and tertiary deliberately mirror primary: one accent, no drift. -->
+        <item name="colorSecondary">@color/pc_primary</item>
+        <item name="colorOnSecondary">@color/pc_on_primary</item>
+        <item name="colorSecondaryContainer">@color/pc_primary_container</item>
+        <item name="colorOnSecondaryContainer">@color/pc_on_primary_container</item>
+        <item name="colorTertiary">@color/pc_primary</item>
+        <item name="colorOnTertiary">@color/pc_on_primary</item>
+        <item name="colorTertiaryContainer">@color/pc_primary_container</item>
+        <item name="colorOnTertiaryContainer">@color/pc_on_primary_container</item>
+
+        <item name="colorError">@color/pc_error</item>
+        <item name="colorOnError">@color/pc_on_error</item>
+        <item name="colorErrorContainer">@color/pc_error_container</item>
+        <item name="colorOnErrorContainer">@color/pc_on_error_container</item>
+
+        <!-- Surfaces. -->
+        <item name="android:colorBackground">@color/pc_canvas</item>
+        <item name="colorOnBackground">@color/pc_text_primary</item>
+        <item name="colorSurface">@color/pc_canvas</item>
+        <item name="colorOnSurface">@color/pc_text_primary</item>
+        <item name="colorSurfaceVariant">@color/pc_surface_muted</item>
+        <item name="colorOnSurfaceVariant">@color/pc_text_secondary</item>
+        <item name="colorSurfaceInverse">@color/pc_text_primary</item>
+        <item name="colorOnSurfaceInverse">@color/pc_canvas</item>
+        <item name="colorSurfaceBright">@color/pc_surface_raised</item>
+        <item name="colorSurfaceDim">@color/pc_canvas</item>
+        <item name="colorSurfaceContainerLowest">@color/pc_surface</item>
+        <item name="colorSurfaceContainerLow">@color/pc_surface</item>
+        <item name="colorSurfaceContainer">@color/pc_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/pc_surface_raised</item>
+        <item name="colorSurfaceContainerHighest">@color/pc_surface_muted</item>
+        <item name="colorOutline">@color/pc_text_secondary</item>
+        <item name="colorOutlineVariant">@color/pc_hairline</item>
+        <item name="elevationOverlayEnabled">false</item>
+
+        <item name="android:textColorPrimary">@color/pc_text_primary</item>
+        <item name="android:textColorSecondary">@color/pc_text_secondary</item>
+        <item name="android:textColorHint">@color/pc_text_secondary</item>
+
+        <!-- Default font for anything not explicitly styled. -->
+        <item name="android:fontFamily">@font/pc_barlow_regular</item>
+        <item name="fontFamily">@font/pc_barlow_regular</item>
+
+        <!-- Material type roles mapped onto the kit's styles, so Material widgets match. -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.PC.Countdown</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.PC.Display</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.PC.Display</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.PC.Headline</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.PC.Headline</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.PC.CardTitle</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.PC.Section</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.PC.RowTitle</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.PC.RowTitle</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.PC.Body</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.PC.Body</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.PC.Supporting</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.PC.Button</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.PC.Label</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.PC.Label</item>
+
+        <!-- Default component styles. -->
+        <item name="materialButtonStyle">@style/Widget.PC.Button.Primary</item>
+        <item name="floatingActionButtonStyle">@style/Widget.PC.FAB</item>
+        <item name="extendedFloatingActionButtonStyle">@style/Widget.PC.ExtendedFAB</item>
+        <item name="bottomNavigationStyle">@style/Widget.PC.BottomNav</item>
+        <item name="textInputStyle">@style/Widget.PC.TextInput</item>
+        <item name="materialCardViewStyle">@style/Widget.PC.Card</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.PC.BottomSheet</item>
+
+        <!-- Edge to edge: transparent bars, no scrim behind 3-button navigation. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
+        <!-- Stop MIUI and other skins from auto-darkening the app with their own filter. -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <!-- Light theme: dark status and navigation icons. -->
+    <style name="Theme.PetCareDesign" parent="Base.Theme.PetCareDesign">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+    </style>
+</resources>

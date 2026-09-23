@@ -19,7 +19,8 @@ class TaskSwipeCallback(
     private val onDragStart: () -> Unit,
     private val onDragMove: (Int, Int) -> Boolean,
     private val onDragFinish: () -> Unit,
-    private val completeColor: (RecyclerView.ViewHolder) -> Int
+    private val completeColor: (RecyclerView.ViewHolder) -> Int,
+    private val canSwipe: (RecyclerView.ViewHolder) -> Boolean = { true }
 ) : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
     ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -27,6 +28,9 @@ class TaskSwipeCallback(
     private var dragging = false
 
     override fun isLongPressDragEnabled() = false
+
+    override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
+        if (canSwipe(viewHolder)) super.getSwipeDirs(recyclerView, viewHolder) else 0
 
     override fun onMove(
         recyclerView: RecyclerView,
