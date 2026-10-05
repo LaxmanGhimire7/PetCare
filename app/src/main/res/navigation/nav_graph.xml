@@ -32,6 +32,9 @@
         tools:layout="@layout/pc_fragment_welcome">
         <action android:id="@+id/action_welcome_to_login" app:destination="@id/loginFragment" />
         <action android:id="@+id/action_welcome_to_register" app:destination="@id/registerFragment" />
+        <action android:id="@+id/action_welcome_to_home"
+            app:destination="@id/homeDashboardFragment"
+            app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

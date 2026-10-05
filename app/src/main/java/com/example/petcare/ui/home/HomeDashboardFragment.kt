@@ -1,13 +1,20 @@
 package com.example.petcare.ui.home
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Build
+import android.os.SystemClock
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.core.content.ContextCompat
@@ -31,12 +38,14 @@ import com.example.petcare.reminders.CareReminderScheduler
 import com.example.petcare.integration.CarePlanEntry
 import com.example.petcare.integration.CarePlanIcsCodec
 import com.example.petcare.ui.ScreenState
+import com.example.petcare.ui.GestureHaptics
 import com.example.petcare.ui.UiSnackbar
 import com.example.petcare.ui.PcTypography
 import com.example.petcare.ui.toTodayUiState
 import com.example.petcare.widget.CareWidgetProvider
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,7 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Connects the approved Today design to existing account data and task actions. */
-class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions {
+class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions, SensorEventListener {
     private val viewModel: TodayViewModel by viewModels()
     private val scheduler by lazy { CareReminderScheduler(requireContext()) }
     private var binder: TodayScreenBinder? = null
@@ -55,6 +64,13 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
     private var lastLocation: Location? = null
     private var pendingTaskId = 0L
     private var pendingExport: String? = null
+    private val shakeDetector = ShakeDetector()
+    private val sensorManager by lazy {
+        requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    }
+    private var lastScrollAt = 0L
+    private var resetDialogShowing = false
+    private var resetDialog: AlertDialog? = null
     private val permissionRequester = NotificationPermissionRequester(this)
     private val importPlan = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
@@ -117,6 +133,11 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
             },
             canSwipe = { screen.timelineAdapter.taskAt(it.bindingAdapterPosition) != null },
         )).also { it.attachToRecyclerView(view.findViewById(R.id.pcTimeline)) }
+        view.findViewById<androidx.core.widget.NestedScrollView>(R.id.pcTodayScroll)
+            .setOnScrollChangeListener { _, _, _, _, _ ->
+                lastScrollAt = SystemClock.elapsedRealtime()
+                shakeDetector.clearWindow()
+            }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -152,6 +173,80 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        shakeDetector.clearWindow()
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        }
+    }
+
+    override fun onPause() {
+        sensorManager.unregisterListener(this)
+        shakeDetector.clearWindow()
+        super.onPause()
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type != Sensor.TYPE_ACCELEROMETER || view == null || resetDialogShowing) return
+        if (SystemClock.elapsedRealtime() - lastScrollAt < 850L) {
+            shakeDetector.clearWindow()
+            return
+        }
+        if (shakeDetector.addSample(event.values[0], event.values[1], event.values[2],
+                event.timestamp / 1_000_000L)) {
+            view?.let(GestureHaptics::confirm)
+            confirmChecklistReset()
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    private fun confirmChecklistReset() {
+        if (resetDialogShowing) return
+        val root = view ?: return
+        if (data.completed.none { it.dueDateEpochDay == LocalDayClock.todayEpochDay() }) {
+            UiSnackbar.make(root, R.string.reset_today_empty, Snackbar.LENGTH_SHORT).show()
+            return
+        }
+        resetDialogShowing = true
+        resetDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.reset_today_title)
+            .setMessage(R.string.reset_today_message)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.reset_today_confirm) { _, _ -> resetChecklist() }
+            .show().also { dialog ->
+                dialog.setOnDismissListener {
+                    resetDialog = null
+                    resetDialogShowing = false
+                    shakeDetector.clearWindow()
+                }
+            }
+    }
+
+    private fun resetChecklist() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val snapshots = viewModel.resetCompleted(LocalDayClock.todayEpochDay())
+            val root = view ?: return@launch
+            if (snapshots.isEmpty()) {
+                UiSnackbar.make(root, R.string.reset_today_empty, Snackbar.LENGTH_SHORT).show()
+                return@launch
+            }
+            val now = System.currentTimeMillis()
+            val scheduled = snapshots.filter {
+                LocalDayClock.dueMillis(it.dueDateEpochDay, it.reminderMinutesOfDay) > now
+            }
+            scheduled.forEach { scheduler.schedule(it.copy(isCompleted = false)) }
+            UiSnackbar.make(root, R.string.reset_today_done, Snackbar.LENGTH_LONG)
+                .setAction(R.string.undo) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        scheduled.forEach { scheduler.cancel(it.id) }
+                        viewModel.restoreCompleted(snapshots)
+                    }
+                }.show()
         }
     }
 
@@ -317,6 +412,9 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
     }
 
     override fun onDestroyView() {
+        resetDialog?.dismiss()
+        view?.findViewById<androidx.core.widget.NestedScrollView>(R.id.pcTodayScroll)
+            ?.setOnScrollChangeListener(null as androidx.core.widget.NestedScrollView.OnScrollChangeListener?)
         touchHelper?.attachToRecyclerView(null)
         touchHelper = null
         view?.findViewById<RecyclerView>(R.id.pcTimeline)?.adapter = null

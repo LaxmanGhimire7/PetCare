@@ -89,6 +89,9 @@ class TodayScreenBinder(
     private val petRings: RecyclerView = root.findViewById(R.id.pcPetRings)
     private val weekStrip: LinearLayout = root.findViewById(R.id.pcWeekStrip)
     private val timeline: RecyclerView = root.findViewById(R.id.pcTimeline)
+    private val timelineHeader: View = root.findViewById(R.id.pcTimelineHeader)
+    private val timelineTitle: TextView = root.findViewById(R.id.pcTimelineTitle)
+    private val timelineCount: TextView = root.findViewById(R.id.pcTimelineCount)
     private val timelineEmpty: View = root.findViewById(R.id.pcTimelineEmpty)
     private val fab: View = root.findViewById(R.id.pcTodayFab)
 
@@ -146,6 +149,7 @@ class TodayScreenBinder(
         petRings.visibility = content
         quickActions.visibility = content
         glanceRoot.visibility = content
+        timelineHeader.visibility = content
         weekStrip.visibility = content
         timeline.visibility = content
         fab.visibility = content
@@ -163,6 +167,7 @@ class TodayScreenBinder(
         ringAdapter.submit(newState.petRings, animateFromEmpty = sweep)
         WeekStripBinder.bind(weekStrip, newState.week) { actions.onSelectDay(it) }
         glance.render(newState.glance)
+        bindPlanHeader(newState)
 
         timelineEmpty.visibility = if (newState.tasks.isEmpty()) View.VISIBLE else View.GONE
         timeline.visibility = if (newState.tasks.isEmpty()) View.GONE else View.VISIBLE
@@ -178,6 +183,23 @@ class TodayScreenBinder(
             TimelineBuilder.build(current.tasks, null, null)
         }
         timelineAdapter.submitList(items) { timelineAdapter.refreshConnectors() }
+    }
+
+    /** "Today's plan  3 left", or "Plan for Wed 30" when another day is selected. */
+    private fun bindPlanHeader(state: TodayUiState) {
+        val selected = state.week.firstOrNull { it.selected }
+        timelineTitle.text = if (state.isToday || selected == null) {
+            context.getString(R.string.pc_plan_today)
+        } else {
+            context.getString(R.string.pc_plan_for, "${selected.weekday} ${selected.date}")
+        }
+        val open = state.tasks.count { !it.done }
+        timelineCount.visibility = if (state.tasks.isEmpty()) View.GONE else View.VISIBLE
+        timelineCount.text = if (open == 0) {
+            context.getString(R.string.pc_all_done_short)
+        } else {
+            context.resources.getQuantityString(R.plurals.pc_left_count, open, open)
+        }
     }
 
     /** Keeps the bell's badge in step with the notification centre. */

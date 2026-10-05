@@ -28,4 +28,9 @@
     <color name="pc_success">#4ADE80</color>
     <color name="pc_warning_container">#2E2208</color>
     <color name="pc_success_container">#0F2A18</color>
+    <color name="pc_card_stroke">#00000000</color>
+    <!-- "Continue with Google" button, per Google's sign-in branding guidelines (dark theme). -->
+    <color name="pc_google_fill">#131314</color>
+    <color name="pc_google_stroke">#8E918F</color>
+    <color name="pc_google_text">#E3E3E3</color>
 </resources>

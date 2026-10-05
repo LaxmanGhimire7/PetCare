@@ -60,6 +60,7 @@ class AuthRepository(private val context: Context) {
         withContext(Dispatchers.IO) {
             migrateLegacy()
             val user = users.getByEmail(email.trim().lowercase(Locale.ROOT)) ?: return@withContext false
+            if (user.authProvider == "google") return@withContext false
             val match = passwordMatch(password, user)
             if (!match.first) return@withContext false
             if (match.second) {
@@ -68,6 +69,32 @@ class AuthRepository(private val context: Context) {
             prefs.setSession(user.id, user.name, staySignedIn)
             true
         }
+
+    suspend fun usesGoogle(email: String): Boolean = withContext(Dispatchers.IO) {
+        migrateLegacy()
+        users.getByEmail(email.trim().lowercase(Locale.ROOT))?.authProvider == "google"
+    }
+
+    suspend fun signInWithGoogle(email: String, name: String?): Boolean = withContext(Dispatchers.IO) {
+        migrateLegacy()
+        val normalized = email.trim().lowercase(Locale.ROOT)
+        if (normalized.isBlank()) return@withContext false
+        val existing = users.getByEmail(normalized)
+        val displayName = name?.trim()?.takeIf(String::isNotEmpty)
+            ?: normalized.substringBefore('@')
+        val id = existing?.id ?: runCatching {
+            users.insert(UserEntity(
+                name = displayName,
+                email = normalized,
+                passwordHash = "",
+                passwordSalt = "",
+                authProvider = "google",
+            ))
+        }.getOrElse { return@withContext false }
+        prefs.setSession(id, existing?.name ?: displayName, true)
+        if (existing == null) OnboardingPrefs(context).markComplete(id)
+        true
+    }
 
     suspend fun currentUser(): UserEntity? = withContext(Dispatchers.IO) {
         users.getById(prefs.ownerId())

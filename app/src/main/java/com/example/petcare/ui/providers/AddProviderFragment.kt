@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.ui.SelectionDialog
 import com.example.petcare.data.local.PetCareDatabase
@@ -27,6 +28,7 @@ class AddProviderFragment : Fragment() {
     private var editing: ProviderEntity? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentAddProviderBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
+        view.applySystemBarTopPadding()
         val types = resources.getStringArray(R.array.provider_types).toList()
         binding.typeInput.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types)); binding.typeInput.setText(selectedType, false)
         binding.typeInput.setOnItemClickListener { _, _, position, _ -> selectedType = types[position] }

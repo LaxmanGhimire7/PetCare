@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.expense.ExpenseSummary
 import com.example.petcare.data.local.pet.PetColor
@@ -68,6 +69,7 @@ class PetDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, state: Bundle?) {
+        view.applySystemBarTopPadding()
         currentPetId = requireArguments().getLong("petId")
         binding.petDetailCard.transitionName = "pet_$currentPetId"
         binding.backButton.setOnClickListener { findNavController().navigateUp() }

@@ -134,6 +134,21 @@
             android:visibility="gone"
             app:icon="@drawable/pc_ic_fingerprint"
             app:iconGravity="textStart" />
+
+        <include
+            android:id="@+id/pcLoginOr"
+            layout="@layout/pc_view_or_divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcLoginGoogle"
+            style="@style/Widget.PC.Button.Google"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/pc_continue_google"
+            android:visibility="gone" />
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"

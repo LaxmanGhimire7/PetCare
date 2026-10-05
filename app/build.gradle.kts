@@ -1,8 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.devtools.ksp")
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
+
+val localSecrets = Properties().apply {
+    rootProject.file("local.defaults.properties").inputStream().use { load(it) }
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+val googleWebClientId = localSecrets.getProperty("GOOGLE_WEB_CLIENT_ID").orEmpty()
 
 android {
     namespace = "com.example.petcare"
@@ -16,6 +23,7 @@ android {
         versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
     }
 
     // A distributable APK is signed only when the owner's private key is supplied locally.
@@ -48,12 +56,10 @@ android {
     viewBinding {
         enable = true
     }
+    buildFeatures {
+        buildConfig = true
+    }
     sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
-}
-
-secrets {
-    propertiesFileName = "local.properties"
-    defaultPropertiesFileName = "local.defaults.properties"
 }
 
 ksp {
@@ -71,9 +77,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.splashscreen)
     implementation(libs.material)
-    implementation(libs.google.maps)
     implementation(libs.google.location)
-    implementation(libs.maps.utils)
+    implementation("org.maplibre.gl:android-sdk-opengl:13.5.2")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // Database (Room)
     implementation(libs.androidx.room.runtime)

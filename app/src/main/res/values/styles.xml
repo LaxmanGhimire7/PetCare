@@ -106,11 +106,11 @@
     </style>
 
     <style name="Widget.PetCare.Card" parent="Widget.Material3.CardView.Filled">
-        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardBackgroundColor">@color/pc_surface</item>
         <item name="cardCornerRadius">@dimen/radius_card</item>
         <item name="cardElevation">0dp</item>
-        <item name="strokeColor">@color/outline_variant</item>
-        <item name="strokeWidth">0dp</item>
+        <item name="strokeColor">@color/pc_card_stroke</item>
+        <item name="strokeWidth">1dp</item>
     </style>
 
 

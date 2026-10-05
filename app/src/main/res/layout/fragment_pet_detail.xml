@@ -3,9 +3,10 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.PetCare.Card"
     android:id="@+id/pet_detail_card" android:layout_width="match_parent"
     android:layout_height="match_parent" app:cardBackgroundColor="@color/canvas"
-    app:cardCornerRadius="@dimen/layout_zero" app:cardElevation="@dimen/layout_zero">
+    app:cardCornerRadius="@dimen/layout_zero">
     <androidx.core.widget.NestedScrollView android:layout_width="match_parent"
         android:layout_height="match_parent" android:clipToPadding="false">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

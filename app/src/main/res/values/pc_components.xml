@@ -2,6 +2,11 @@
 <!-- PetCare design kit: component styles, matched to the approved mockup. -->
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Plain TextViews default to Body; an explicit android:textAppearance on the view still wins. -->
+    <style name="Widget.PC.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.PC.Body</item>
+    </style>
+
     <!-- Shapes -->
     <style name="ShapeAppearance.PC.Pill" parent="">
         <item name="cornerFamily">rounded</item>
@@ -68,6 +73,29 @@
         <item name="iconSize">16dp</item>
         <item name="shapeAppearance">@style/ShapeAppearance.PC.Pill</item>
         <item name="elevation">0dp</item>
+    </style>
+
+    <!--
+        "Continue with Google", following Google's sign-in branding guidelines:
+        neutral fill, grey outline, Roboto Medium, the official "G" logo in its own colours.
+    -->
+    <style name="Widget.PC.Button.Google" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="backgroundTint">@color/pc_google_fill</item>
+        <item name="strokeColor">@color/pc_google_stroke</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/pc_google_text</item>
+        <item name="android:textAppearance">@style/TextAppearance.PC.GoogleButton</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="icon">@drawable/pc_ic_google</item>
+        <item name="iconTint">@null</item>
+        <item name="iconSize">20dp</item>
+        <item name="iconPadding">10dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.PC.Pill</item>
     </style>
 
     <!-- Compact secondary button for card actions (Share again, Call, Directions). -->

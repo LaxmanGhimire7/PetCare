@@ -55,9 +55,12 @@
         <item name="android:textColorSecondary">@color/pc_text_secondary</item>
         <item name="android:textColorHint">@color/pc_text_secondary</item>
 
-        <!-- Default font for anything not explicitly styled. -->
-        <item name="android:fontFamily">@font/pc_barlow_regular</item>
-        <item name="fontFamily">@font/pc_barlow_regular</item>
+        <!--
+            Default text for plain TextViews. Set through textViewStyle, NOT a theme-level
+            fontFamily: a theme-level fontFamily can override the font inside every
+            textAppearance, which is how headings end up thin.
+        -->
+        <item name="android:textViewStyle">@style/Widget.PC.TextView</item>
 
         <!-- Material type roles mapped onto the kit's styles, so Material widgets match. -->
         <item name="textAppearanceDisplayLarge">@style/TextAppearance.PC.Countdown</item>

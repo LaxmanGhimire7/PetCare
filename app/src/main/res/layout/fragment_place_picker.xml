@@ -7,7 +7,13 @@
         android:text="@string/pin_instruction" android:textAppearance="?attr/textAppearanceTitleMedium" />
     <FrameLayout android:id="@+id/picker_map_frame" android:layout_width="match_parent"
         android:layout_height="@dimen/layout_zero" android:layout_weight="1"
-        android:layout_marginTop="@dimen/space_16" />
+        android:layout_marginTop="@dimen/space_16">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end" android:layout_margin="@dimen/space_8"
+            android:background="@drawable/pc_bg_surface_18"
+            android:padding="@dimen/space_4" android:text="@string/osm_attribution"
+            android:textAppearance="@style/TextAppearance.PC.Meta" />
+    </FrameLayout>
     <TextView android:id="@+id/picker_status" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_12"
         android:textAppearance="?attr/textAppearanceBodyMedium" />

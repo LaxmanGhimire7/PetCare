@@ -2,7 +2,6 @@ package com.example.petcare.location
 
 import android.content.Context
 import android.location.Geocoder
-import android.content.pm.PackageManager
 import android.os.Build
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -17,17 +16,8 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** Shared map and geocoding policy; an empty API key keeps the offline list usable. */
+/** Shared geocoding and distance helpers; only fused location depends on Play services. */
 object PlaceLocation {
-    fun mapsAvailable(context: Context): Boolean {
-        val key = try {
-            @Suppress("DEPRECATION")
-            context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                .metaData?.getString("com.google.android.geo.API_KEY").orEmpty()
-        } catch (_: PackageManager.NameNotFoundException) { "" }
-        return key.isNotBlank() && playServicesAvailable(context)
-    }
-
     fun playServicesAvailable(context: Context): Boolean =
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
 

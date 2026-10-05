@@ -133,7 +133,7 @@
                 android:id="@+id/pcPetRings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
+                android:layout_marginTop="22dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="18dp"
+                android:layout_marginTop="22dp"
                 android:layout_marginEnd="8dp" />
 
             <!-- Seven day cells are added by WeekStripBinder. -->
@@ -156,15 +156,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="22dp"
                 android:layout_marginEnd="10dp"
                 android:orientation="horizontal" />
+
+            <!-- "Today's plan" with how many are left. -->
+            <LinearLayout
+                android:id="@+id/pcTimelineHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/pcTimelineTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.PC.Section"
+                    tools:text="Today's plan" />
+
+                <TextView
+                    android:id="@+id/pcTimelineCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.PC.Supporting"
+                    tools:text="3 left" />
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/pcTimeline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
@@ -187,7 +214,7 @@
                 layout="@layout/pc_view_glance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="28dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

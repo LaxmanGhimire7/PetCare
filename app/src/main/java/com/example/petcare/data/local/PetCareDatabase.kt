@@ -19,7 +19,7 @@ import com.example.petcare.data.local.user.UserEntity
 
 @Database(
     entities = [PetEntity::class, CareTaskEntity::class, ExpenseEntity::class, ProviderEntity::class, UserEntity::class],
-    version = 13,
+    version = 14,
     exportSchema = true
 )
 abstract class PetCareDatabase : RoomDatabase() {
@@ -51,7 +51,8 @@ abstract class PetCareDatabase : RoomDatabase() {
                 MIGRATION_9_10,
                 MIGRATION_10_11,
                 MIGRATION_11_12,
-                MIGRATION_12_13
+                MIGRATION_12_13,
+                MIGRATION_13_14
             ).build().also { instance = it }
         }
 
@@ -213,6 +214,13 @@ abstract class PetCareDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE users ADD COLUMN phone TEXT")
                 db.execSQL("ALTER TABLE users ADD COLUMN securityQuestion TEXT")
                 db.execSQL("ALTER TABLE users ADD COLUMN securityAnswerHash TEXT")
+            }
+        }
+
+        /** Existing accounts keep password sign-in; Google accounts are identified explicitly. */
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE users ADD COLUMN authProvider TEXT NOT NULL DEFAULT 'password'")
             }
         }
     }

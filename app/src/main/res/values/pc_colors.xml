@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    PetCare design kit: colour tokens, LIGHT theme.
+    PetCare design kit: colour tokens, LIGHT theme (v5: refined canvas, text and card edges).
     The dark theme (the default) overrides every value in values-night/pc_colors.xml.
     Rule: orange is for actions and time only. Labels on orange are always black.
 -->
 <resources>
-    <color name="pc_canvas">#F4F4F5</color>
+    <color name="pc_canvas">#F5F5F7</color>
     <color name="pc_surface">#FFFFFF</color>
     <color name="pc_surface_raised">#FFFFFF</color>
-    <color name="pc_surface_muted">#EBEBEE</color>
-    <color name="pc_hairline">#E4E4E7</color>
+    <color name="pc_surface_muted">#EFEFF2</color>
+    <color name="pc_hairline">#E5E5EA</color>
 
-    <color name="pc_text_primary">#09090B</color>
-    <color name="pc_text_secondary">#52525B</color>
+    <color name="pc_text_primary">#0B0B0F</color>
+    <color name="pc_text_secondary">#5B5B66</color>
 
     <color name="pc_primary">#FF6B00</color>
     <!-- Orange used AS TEXT. Darker in light mode so it passes contrast on white. -->
     <color name="pc_primary_text">#C2410C</color>
     <color name="pc_on_primary">#000000</color>
-    <color name="pc_primary_container">#FFEDD5</color>
+    <color name="pc_primary_container">#FFF1E6</color>
     <color name="pc_on_primary_container">#9A3412</color>
 
     <color name="pc_error">#DC2626</color>
@@ -26,10 +26,16 @@
     <color name="pc_error_container">#FEE2E2</color>
     <color name="pc_on_error_container">#991B1B</color>
     <!-- Unfilled part of rings and progress segments. -->
-    <color name="pc_track">#D4D4D8</color>
+    <color name="pc_track">#E2E2E7</color>
     <!-- Status: password strength, success states. -->
     <color name="pc_warning">#B45309</color>
     <color name="pc_success">#15803D</color>
     <color name="pc_warning_container">#FEF3C7</color>
     <color name="pc_success_container">#DCFCE7</color>
+    <!-- Hairline around cards: needed on a light canvas, invisible in dark mode. -->
+    <color name="pc_card_stroke">#E6E6EB</color>
+    <!-- "Continue with Google" button, per Google's sign-in branding guidelines (light theme). -->
+    <color name="pc_google_fill">#FFFFFF</color>
+    <color name="pc_google_stroke">#747775</color>
+    <color name="pc_google_text">#1F1F1F</color>
 </resources>

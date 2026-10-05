@@ -60,6 +60,10 @@ class RegisterScreenBinder(
     private val question: MaterialAutoCompleteTextView = root.findViewById(R.id.pcRegisterQuestion)
     private val answer: EditText = root.findViewById(R.id.pcRegisterAnswer)
     private val submit: MaterialButton = root.findViewById(R.id.pcRegisterSubmit)
+
+    /** Hidden until GoogleAuthFlow.attach(googleButton, googleDivider) shows them. */
+    val googleButton: MaterialButton = root.findViewById(R.id.pcRegisterGoogle)
+    val googleDivider: View = root.findViewById(R.id.pcRegisterOr)
     private val strength = PasswordStrengthBinder(
         root.findViewById(R.id.pcRegisterStrength),
         password,

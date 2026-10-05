@@ -231,4 +231,10 @@
         <item name="android:textSize">10sp</item>
         <item name="android:textColor">@color/pc_on_primary</item>
     </style>
+    <!-- Google's guidelines ask for Roboto Medium on the Google button; sans-serif-medium is Roboto on Android. -->
+    <style name="TextAppearance.PC.GoogleButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

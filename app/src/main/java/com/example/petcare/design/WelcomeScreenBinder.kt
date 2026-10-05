@@ -2,63 +2,47 @@ package com.example.petcare.design
 
 import android.content.res.ColorStateList
 import android.view.View
-import android.widget.TextView
+import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.Lifecycle
+import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.button.MaterialButton
 import com.example.petcare.R
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 /**
- * Binds pc_fragment_welcome.xml, the app's entry point (the brief's "home screen with
- * login or signup"). The Next-up card is a live, ticking preview of the app.
+ * Binds pc_fragment_welcome.xml, the app's front page. Three pet rings sweep in once;
+ * nothing else moves. Wire "Continue with Google" with GoogleAuthFlow.attach(binder.googleButton).
  */
 class WelcomeScreenBinder(
     root: View,
-    private val lifecycleOwner: LifecycleOwner,
+    @Suppress("UNUSED_PARAMETER") lifecycleOwner: LifecycleOwner,
     onCreateAccount: () -> Unit,
     onLogIn: () -> Unit,
 ) {
     private val context = root.context
-    private val countdown: TextView = root.findViewById(R.id.pcWelcomeCountdown)
-    private var target = System.currentTimeMillis() + PREVIEW_MS
+
+    /** Hidden until GoogleAuthFlow.attach() shows it. */
+    val googleButton: MaterialButton = root.findViewById(R.id.pcWelcomeGoogle)
 
     init {
         root.applySystemBarPaddingWithKeyboard()
-
-        val pet: TextView = root.findViewById(R.id.pcWelcomePet)
-        pet.setTextColor(PetColor.SKY.main(context))
-        ViewCompat.setBackgroundTintList(pet, ColorStateList.valueOf(PetColor.SKY.tint(context)))
-
-        root.findViewById<SegmentedBarView>(R.id.pcWelcomeBar).setEqualSegments(
-            listOf(PetColor.SKY.main(context), PetColor.VIOLET.main(context), PetColor.SKY.main(context), null, null, null),
-            animate = true,
-        )
-
+        bindRing(root.findViewById(R.id.pcWelcomeRingDog), PetColor.SKY, progress = 0.75f, strokeDp = 5f, delayMs = 150L)
+        bindRing(root.findViewById(R.id.pcWelcomeRingCat), PetColor.VIOLET, progress = 1f, strokeDp = 4f, delayMs = 290L)
+        bindRing(root.findViewById(R.id.pcWelcomeRingPaw), PetColor.LIME, progress = 0.4f, strokeDp = 3f, delayMs = 430L)
         root.findViewById<View>(R.id.pcWelcomeCreate).setOnClickListener { onCreateAccount() }
         root.findViewById<View>(R.id.pcWelcomeLogIn).setOnClickListener { onLogIn() }
-        startTicker()
     }
 
-    private fun startTicker() {
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (isActive) {
-                    val now = System.currentTimeMillis()
-                    if (target <= now) target = now + PREVIEW_MS
-                    countdown.text = Countdown.format(context, target - now)
-                    delay(1_000L - now % 1_000L)
-                }
-            }
-        }
-    }
-
-    private companion object {
-        /** 00:57:48, the same moment as the approved mockup. */
-        const val PREVIEW_MS = (57 * 60 + 48) * 1_000L
+    private fun bindRing(frame: FrameLayout, color: PetColor, progress: Float, strokeDp: Float, delayMs: Long) {
+        val ring = frame.getChildAt(0) as PetRingView
+        val icon = frame.getChildAt(1) as ImageView
+        val main = color.main(context)
+        ring.setStrokeWidthDp(strokeDp)
+        ring.setRingColor(main)
+        ring.setProgress(0f, animate = false)
+        ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(main))
+        ViewCompat.setBackgroundTintList(icon, ColorStateList.valueOf(color.tint(context)))
+        frame.postDelayed({ ring.setProgress(progress, animate = true) }, delayMs)
     }
 }

@@ -43,6 +43,22 @@
             android:layout_marginTop="6dp"
             android:text="@string/pc_register_body"
             android:textAppearance="@style/TextAppearance.PC.Supporting" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcRegisterGoogle"
+            style="@style/Widget.PC.Button.Google"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/pc_continue_google"
+            android:visibility="gone" />
+
+        <include
+            android:id="@+id/pcRegisterOr"
+            layout="@layout/pc_view_or_divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/pcRegisterNameLayout"
             android:layout_width="match_parent"

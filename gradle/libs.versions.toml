@@ -20,9 +20,7 @@ swiperefreshlayout = "1.2.0"
 viewpager2 = "1.1.0"
 biometric = "1.1.0"
 splashscreen = "1.0.1"
-googleMaps = "20.0.0"
 googleLocation = "21.4.0"
-mapsUtils = "4.5.2"
 ksp = "2.3.10"
 
 [libraries]
@@ -39,9 +37,7 @@ androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefre
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
-google-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "googleMaps" }
 google-location = { module = "com.google.android.gms:play-services-location", version.ref = "googleLocation" }
-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "mapsUtils" }
 kotlinx-serialization-bom = { module = "org.jetbrains.kotlinx:kotlinx-serialization-bom", version.ref = "kotlinxSerializationBom" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 

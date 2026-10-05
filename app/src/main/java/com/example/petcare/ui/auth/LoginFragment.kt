@@ -8,12 +8,15 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.petcare.BuildConfig
 import com.example.petcare.R
 import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.BiometricPreferences
 import com.example.petcare.data.local.user.AuthRepository
 import com.example.petcare.design.LoginActions
 import com.example.petcare.design.LoginScreenBinder
+import com.example.petcare.design.GoogleAuthFlow
+import com.example.petcare.design.GoogleSignInClient
 import com.example.petcare.design.SignInResult
 import com.example.petcare.ui.UiSnackbar
 import com.google.android.material.snackbar.Snackbar
@@ -24,6 +27,7 @@ class LoginFragment : Fragment(R.layout.pc_fragment_login), LoginActions {
     private val repository by lazy { AuthRepository(requireContext()) }
     private val auth by lazy { AuthPreferences(requireContext()) }
     private val biometric by lazy { BiometricPreferences(requireContext()) }
+    private val google by lazy { GoogleSignInClient(BuildConfig.GOOGLE_WEB_CLIENT_ID) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val biometricId = biometric.enabledUserId()
@@ -31,13 +35,18 @@ class LoginFragment : Fragment(R.layout.pc_fragment_login), LoginActions {
             BiometricManager.Authenticators.BIOMETRIC_WEAK or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL,
         ) == BiometricManager.BIOMETRIC_SUCCESS
-        LoginScreenBinder(view, viewLifecycleOwner, this, canUseBiometric).prefill(
-            arguments?.getString(ARG_EMAIL).orEmpty(),
-        )
+        val binder = LoginScreenBinder(view, viewLifecycleOwner, this, canUseBiometric)
+        binder.prefill(arguments?.getString(ARG_EMAIL).orEmpty())
+        GoogleAuthFlow(google, viewLifecycleOwner,
+            onAccount = { account -> repository.signInWithGoogle(account.email, account.displayName) },
+            onSignedIn = { onSignedIn() },
+        ).attach(binder.googleButton, binder.googleDivider)
     }
 
     override suspend fun signIn(email: String, password: CharArray): SignInResult =
-        if (repository.signIn(email, password, auth.staySignedIn())) {
+        if (repository.usesGoogle(email)) {
+            SignInResult.UsesGoogle
+        } else if (repository.signIn(email, password, auth.staySignedIn())) {
             SignInResult.Success
         } else {
             SignInResult.WrongCredentials

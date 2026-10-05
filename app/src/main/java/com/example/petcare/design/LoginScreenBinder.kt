@@ -19,6 +19,9 @@ import kotlin.coroutines.cancellation.CancellationException
 sealed interface SignInResult {
     object Success : SignInResult
     object WrongCredentials : SignInResult
+
+    /** The account was created with Google and has no password. */
+    object UsesGoogle : SignInResult
     data class Failed(val message: String?) : SignInResult
 }
 
@@ -52,6 +55,10 @@ class LoginScreenBinder(
     private val submit: MaterialButton = root.findViewById(R.id.pcLoginSubmit)
     private val lockBanner: View = root.findViewById(R.id.pcLoginLock)
     private val lockText: TextView = root.findViewById(R.id.pcLoginLockText)
+
+    /** Hidden until GoogleAuthFlow.attach(googleButton, googleDivider) shows them. */
+    val googleButton: MaterialButton = root.findViewById(R.id.pcLoginGoogle)
+    val googleDivider: View = root.findViewById(R.id.pcLoginOr)
     private var busy = false
 
     init {
@@ -143,6 +150,10 @@ class LoginScreenBinder(
                             wrong
                         }
                     }
+                }
+                SignInResult.UsesGoogle -> {
+                    password.text?.clear()
+                    passwordLayout.error = context.getString(R.string.pc_err_uses_google)
                 }
                 is SignInResult.Failed -> {
                     passwordLayout.error = result.message ?: context.getString(R.string.pc_err_generic)

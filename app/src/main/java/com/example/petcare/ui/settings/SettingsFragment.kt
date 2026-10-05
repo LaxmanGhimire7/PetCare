@@ -14,6 +14,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
+import com.example.petcare.BuildConfig
+import com.example.petcare.design.GoogleSignInClient
 import com.example.petcare.design.applySystemBarTopPadding
 import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.SettingsPreferences
@@ -174,6 +176,10 @@ class SettingsFragment : Fragment() {
                 }.show()
         }
         binding.signOutButton.setOnClickListener {
+            val app = requireContext().applicationContext
+            requireActivity().lifecycleScope.launch {
+                GoogleSignInClient(BuildConfig.GOOGLE_WEB_CLIENT_ID).signOut(app)
+            }
             auth.signOut()
             findNavController().navigate(R.id.action_settings_to_welcome)
         }

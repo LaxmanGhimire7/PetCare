@@ -11,9 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="@dimen/space_24"
+        android:paddingStart="@dimen/space_16"
         android:paddingTop="@dimen/space_20"
-        android:paddingEnd="@dimen/space_24"
+        android:paddingEnd="@dimen/space_16"
         android:paddingBottom="@dimen/layout_36_dp">
 
         <LinearLayout
@@ -67,11 +67,11 @@
                 android:padding="@dimen/layout_18_dp">
 
                 <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.PetCare.Card"
                     android:layout_width="@dimen/pet_photo_picker_size"
                     android:layout_height="@dimen/pet_photo_picker_size"
                     app:cardBackgroundColor="@color/surface_container_low"
-                    app:cardCornerRadius="@dimen/radius_pill"
-                    app:cardElevation="@dimen/layout_zero">
+                    app:cardCornerRadius="@dimen/radius_pill">
 
                     <ImageView
                         android:id="@+id/pet_photo_preview"

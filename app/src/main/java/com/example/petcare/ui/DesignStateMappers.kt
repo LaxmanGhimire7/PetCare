@@ -86,8 +86,9 @@ fun TodayData.toTodayUiState(
         !it.isCompleted && it.dueDateEpochDay > selectedDay &&
             (selectedPetId == null || it.petId == selectedPetId)
     }
-    // With only overdue care remaining, show Due now rather than incorrectly claiming All done.
-    val actionable = next ?: selected.firstOrNull { !it.isCompleted }
+    val actionable = next ?: selected.asSequence()
+        .filter { !it.isCompleted && it.dueMillis() <= nowMillis }
+        .maxByOrNull { it.dueMillis() }
     val nextUp = when {
         selected.isEmpty() -> NextUpState.NothingPlanned(overdueCount)
         selectedDay != today -> selected.first().let {
@@ -96,7 +97,9 @@ fun TodayData.toTodayUiState(
         }
         actionable != null -> NextUpState.Upcoming(actionable.title, actionable.petName,
             PetColor.fromIndex(actionable.petColorIndex), actionable.dueMillis(),
-            actionable.timeLabel(), overdueCount, progress)
+            actionable.timeLabel(), overdueCount, progress,
+            dueFullLabel = if (actionable.dueMillis() <= nowMillis)
+                "${dayLabel(actionable.dueDateEpochDay, "EEE")} ${actionable.timeLabel()}" else null)
         else -> NextUpState.AllDone(nextLater?.let { "Next: ${it.title} ${it.whenLabel()}" }, progress)
     }
     val rings = buildList {
