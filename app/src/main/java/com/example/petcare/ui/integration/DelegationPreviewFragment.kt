@@ -15,6 +15,7 @@ import androidx.core.app.ShareCompat
 import androidx.fragment.app.Fragment
 import com.example.petcare.R
 import com.example.petcare.data.local.CaregiverPreferences
+import com.example.petcare.design.DelegationLog
 import com.example.petcare.databinding.FragmentDelegationPreviewBinding
 import com.google.android.material.snackbar.Snackbar
 
@@ -46,7 +47,9 @@ class DelegationPreviewFragment : Fragment() {
         FragmentDelegationPreviewBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        binding.messageInput.setText(requireArguments().getString(MESSAGE).orEmpty())
+        val careDetails = requireArguments().getString(MESSAGE).orEmpty().trim()
+        binding.messageInput.setText(if (careDetails.isBlank()) "" else
+            getString(R.string.delegation_message_template, careDetails))
         petIds.firstOrNull()?.let { id ->
             CaregiverPreferences(requireContext()).get(id)?.let { (name, number) ->
                 binding.caregiverNameInput.setText(name)
@@ -77,6 +80,9 @@ class DelegationPreviewFragment : Fragment() {
         try {
             startActivity(Intent(Intent.ACTION_SENDTO, Uri.fromParts("smsto", number, null))
                 .putExtra("sms_body", message))
+            val caregiver = binding.caregiverNameInput.text?.toString()?.trim().orEmpty()
+                .ifBlank { getString(R.string.pc_someone) }
+            DelegationLog.record(requireContext(), caregiver)
         } catch (_: ActivityNotFoundException) { share() }
     }
 

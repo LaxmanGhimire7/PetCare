@@ -1,18 +1,8 @@
 package com.example.petcare.ui.care
 
-import com.example.petcare.ui.UiSnackbar
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20,343 +10,140 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
-import com.example.petcare.ui.SelectionDialog
 import com.example.petcare.data.local.PetCareRepositories
-import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.ReminderPreferences
-import com.example.petcare.data.local.care.CareTaskRepository
-import com.example.petcare.data.local.care.DEFAULT_REMINDER_MINUTES_OF_DAY
-import com.example.petcare.data.local.care.CARE_CATEGORY_GENERAL
-import com.example.petcare.data.local.care.CARE_FREQUENCY_ONE_TIME
-import com.example.petcare.data.local.pet.PetEntity
-import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.provider.ProviderEntity
-import com.example.petcare.data.local.provider.ProviderRepository
-import com.example.petcare.databinding.FragmentAddCareTaskBinding
+import com.example.petcare.design.Repeat
+import com.example.petcare.design.TaskDraft
+import com.example.petcare.design.TaskEditorActions
+import com.example.petcare.design.TaskEditorBinder
 import com.example.petcare.reminders.CareReminderScheduler
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
+import com.example.petcare.ui.UiSnackbar
+import com.example.petcare.ui.home.LocalDayClock
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.chip.Chip
-import com.example.petcare.ui.PetAvatarView
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.text.DateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
 
 internal const val SAVED_TASK_RESULT_KEY = "saved_task_result_id"
 
-/** Edits a new care task and reviews imported appointment fields before saving. */
-class AddCareTaskFragment : Fragment() {
-
-    private var _binding: FragmentAddCareTaskBinding? = null
-    private val binding get() = _binding!!
+/** Connects task creation and imported appointments to the approved v4 editor. */
+class AddCareTaskFragment : Fragment(R.layout.pc_fragment_task_editor), TaskEditorActions {
     private val repositories by lazy { PetCareRepositories(requireContext()) }
-
-    private var pets: List<PetEntity> = emptyList()
-    private var selectedPet: PetEntity? = null
-    private var selectedDueDateEpochDay: Long? = null
-    private var selectedReminderMinutesOfDay = DEFAULT_REMINDER_MINUTES_OF_DAY
-    private var selectedCategory = CARE_CATEGORY_GENERAL
-    private var selectedFrequency = CARE_FREQUENCY_ONE_TIME
-    private var selectedPlace: ProviderEntity? = null
-
-    private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
-
     private val viewModel: AddCareTaskViewModel by viewModels {
-        AddCareTaskViewModelFactory(
-        repositories.tasks
-        )
+        AddCareTaskViewModelFactory(repositories.tasks)
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentAddCareTaskBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    private var binder: TaskEditorBinder? = null
+    private var places: List<ProviderEntity> = emptyList()
+    private var setupComplete = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        selectedReminderMinutesOfDay = ReminderPreferences(requireContext())
-            .defaultReminderMinutesOfDay()
-        configureRoutineFields()
-        applyImportedAppointment()
-        observePets()
-        observePlaces()
-        binding.dueDateInput.setOnClickListener { showDatePicker() }
-        binding.reminderTimeInput.setOnClickListener { showTimePicker() }
-        binding.reminderTimeInput.setText(formatTime(selectedReminderMinutesOfDay))
-        binding.saveCareTaskButton.setOnClickListener {
-            if (isValidInput()) {
-                saveCareTask()
-            }
-        }
-        binding.cancelButton.setOnClickListener {
-            findNavController().navigateUp()
-        }
-    }
-
-    private fun configureRoutineFields() {
-        val categories = resources.getStringArray(R.array.care_categories).toList()
-        val frequencies = resources.getStringArray(R.array.care_frequencies).toList()
-        categories.forEach { category ->
-            binding.categoryChipGroup.addView(Chip(requireContext()).apply {
-                text = category
-                isCheckable = true
-                isChecked = category == selectedCategory
-                setOnClickListener { selectedCategory = category }
-            })
-        }
-        binding.frequencyToggle.addOnButtonCheckedListener { _, checkedId, checked ->
-            if (!checked) return@addOnButtonCheckedListener
-            selectedFrequency = when (checkedId) {
-                R.id.repeat_daily -> frequencies[1]
-                R.id.repeat_weekly -> frequencies[2]
-                R.id.repeat_monthly -> frequencies[3]
-                else -> frequencies[0]
-            }
-        }
-    }
-
-    private fun applyImportedAppointment() {
-        arguments?.getString(IMPORTED_TITLE_ARGUMENT)?.takeIf(String::isNotBlank)?.let {
-            binding.careTaskTitleInput.setText(it)
-        }
-        arguments?.getLong(IMPORTED_DATE_ARGUMENT)?.takeIf { it > 0 }?.let {
-            selectedDueDateEpochDay = it
-            binding.dueDateInput.setText(formatDate(it))
-        }
-        arguments?.getString(IMPORTED_NOTES_ARGUMENT)?.takeIf(String::isNotBlank)?.let {
-            binding.careNotesInput.setText(it)
-        }
-        arguments?.getInt(IMPORTED_TIME_ARGUMENT, -1)?.takeIf { it in 0..1439 }?.let {
-            selectedReminderMinutesOfDay = it
-            binding.reminderTimeInput.setText(formatTime(it))
-        }
-        if (arguments?.containsKey(IMPORTED_TITLE_ARGUMENT) == true) {
-            selectedCategory = getString(R.string.category_healthcare)
-            for (index in 0 until binding.categoryChipGroup.childCount) {
-                (binding.categoryChipGroup.getChildAt(index) as? Chip)?.let { chip ->
-                    chip.isChecked = chip.text.toString() == selectedCategory
-                }
-            }
-        }
-    }
-
-    private fun observePets() {
-        val petRepository = repositories.pets
+        binder = TaskEditorBinder(view, childFragmentManager, this)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                petRepository.observePets().collect { savedPets ->
-                    pets = savedPets
-                    renderPetChoices()
-                }
-            }
-        }
-    }
-
-    /** Builds the visual pet picker from the live account-scoped pet list. */
-    private fun renderPetChoices() {
-        binding.petAvatarContainer.removeAllViews()
-        pets.forEach { pet ->
-            val column = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = android.view.Gravity.CENTER_HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(
-                    resources.getDimensionPixelSize(R.dimen.pet_filter_width),
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                isClickable = true
-                isFocusable = true
-                contentDescription = getString(R.string.select_pet_named, pet.name)
-            }
-            column.addView(PetAvatarView(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar),
-                    resources.getDimensionPixelSize(R.dimen.pet_picker_avatar)
-                )
-                setPet(pet.name, pet.colorIndex, 0, 0, selectedPet?.id == pet.id)
-            })
-            column.addView(TextView(requireContext()).apply {
-                text = pet.name
-                setTextAppearance(R.style.TextAppearance_PetCare_Label)
-                gravity = android.view.Gravity.CENTER
-            })
-            column.setOnClickListener {
-                selectedPet = pet
-                binding.petErrorText.visibility = View.GONE
-                renderPetChoices()
-            }
-            binding.petAvatarContainer.addView(column)
-        }
-    }
-
-    private fun observePlaces() {
-        val repository = repositories.places
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                repository.observeAll().collect { places ->
-                    if (selectedPlace == null) {
-                        val importedClinic = arguments?.getString(IMPORTED_CLINIC_ARGUMENT).orEmpty()
-                        selectedPlace = places.firstOrNull { it.name.equals(importedClinic, true) }
-                    }
-                    val labels = listOf(getString(R.string.no_task_place)) + places.map { it.name }
-                    binding.taskPlaceInput.setAdapter(
-                        ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, labels)
-                    )
-                    binding.taskPlaceInput.setText(
-                        selectedPlace?.name ?: getString(R.string.no_task_place), false
-                    )
-                    binding.taskPlaceInput.setOnItemClickListener { _, _, position, _ ->
-                        selectedPlace = places.getOrNull(position - 1)
-                    }
-                    SelectionDialog.attach(binding.taskPlaceInput, R.string.task_place, labels) {
-                        selectedPlace = places.getOrNull(it - 1)
+                combine(
+                    repositories.pets.observePets(),
+                    repositories.places.observeAll(),
+                ) { pets, savedPlaces -> pets to savedPlaces }.collect { (pets, savedPlaces) ->
+                    places = savedPlaces
+                    if (!setupComplete) {
+                        setupComplete = true
+                        binder?.setup(
+                            pets = pets.map { it.toEditorPet() },
+                            categories = resources.editorCategories(),
+                            places = savedPlaces.map { it.toEditorPlace() },
+                            initial = importedDraft(savedPlaces),
+                            preselectPetId = arguments?.getLong(PRESELECT_PET_ID)
+                                ?.takeIf { it > 0L },
+                        )
                     }
                 }
             }
         }
     }
 
-    private fun showDatePicker() {
-        val picker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText(R.string.select_due_date)
-            .apply {
-                selectedDueDateEpochDay?.let { setSelection(it * MILLIS_PER_DAY) }
-            }
-            .build()
-
-        picker.addOnPositiveButtonClickListener { selectedDateMillis ->
-            selectedDueDateEpochDay = selectedDateMillis / MILLIS_PER_DAY
-            binding.dueDateInput.setText(formatDate(selectedDueDateEpochDay!!))
-            binding.dueDateLayout.error = null
-        }
-        picker.show(parentFragmentManager, DATE_PICKER_TAG)
+    private fun importedDraft(savedPlaces: List<ProviderEntity>): TaskDraft? {
+        val title = arguments?.getString(IMPORTED_TITLE).orEmpty()
+        val date = arguments?.getLong(IMPORTED_DATE) ?: 0L
+        val notes = arguments?.getString(IMPORTED_NOTES).orEmpty()
+        val minutes = arguments?.getInt(IMPORTED_TIME, -1) ?: -1
+        val clinic = arguments?.getString(IMPORTED_CLINIC).orEmpty()
+        val imported = title.isNotBlank() || date > 0L || notes.isNotBlank() || clinic.isNotBlank()
+        if (!imported) return null
+        val time = minutes.takeIf { it in 0..1439 }
+            ?: ReminderPreferences(requireContext()).defaultReminderMinutesOfDay()
+        return TaskDraft(
+            id = null,
+            title = title,
+            petId = null,
+            categoryKey = getString(R.string.category_healthcare),
+            dueAtMillis = date.takeIf { it > 0L }?.let { LocalDayClock.dueMillis(it, time) },
+            repeat = Repeat.ONCE,
+            placeId = savedPlaces.firstOrNull { it.name.equals(clinic, ignoreCase = true) }?.id,
+            supplies = null,
+            notes = notes.ifBlank { null },
+        )
     }
 
-    private fun showTimePicker() {
-        val picker = MaterialTimePicker.Builder()
-            .setTimeFormat(
-                if (android.text.format.DateFormat.is24HourFormat(requireContext())) {
-                    TimeFormat.CLOCK_24H
-                } else {
-                    TimeFormat.CLOCK_12H
-                }
-            )
-            .setHour(selectedReminderMinutesOfDay / MINUTES_PER_HOUR)
-            .setMinute(selectedReminderMinutesOfDay % MINUTES_PER_HOUR)
-            .setTitleText(R.string.select_reminder_time)
-            .build()
-
-        picker.addOnPositiveButtonClickListener {
-            selectedReminderMinutesOfDay = picker.hour * MINUTES_PER_HOUR + picker.minute
-            binding.reminderTimeInput.setText(formatTime(selectedReminderMinutesOfDay))
-        }
-        picker.show(parentFragmentManager, TIME_PICKER_TAG)
-    }
-
-    private fun isValidInput(): Boolean {
-        val title = binding.careTaskTitleInput.text?.toString()?.trim().orEmpty()
-
-        binding.careTaskTitleLayout.error = if (title.isEmpty()) {
-            getString(R.string.error_care_task_title_required)
-        } else {
-            null
-        }
-        binding.petErrorText.visibility = if (selectedPet == null) View.VISIBLE else View.GONE
-        binding.petErrorText.setText(R.string.error_pet_selection_required)
-        binding.dueDateLayout.error = if (selectedDueDateEpochDay == null) {
-            getString(R.string.error_due_date_required)
-        } else {
-            null
-        }
-
-        return binding.careTaskTitleLayout.error == null &&
-            selectedPet != null &&
-            binding.dueDateLayout.error == null
-    }
-
-    private fun saveCareTask() {
-        binding.saveCareTaskButton.isEnabled = false
+    override fun onSave(draft: TaskDraft) {
+        binder?.setSaving(true)
+        val (day, minutes) = taskDueParts(requireNotNull(draft.dueAtMillis))
+        val place = places.firstOrNull { it.id == draft.placeId }
         viewModel.addTask(
-            petId = requireNotNull(selectedPet).id,
-            title = binding.careTaskTitleInput.text?.toString()?.trim().orEmpty(),
-            dueDateEpochDay = requireNotNull(selectedDueDateEpochDay),
-            reminderMinutesOfDay = selectedReminderMinutesOfDay,
-            category = selectedCategory,
-            frequency = selectedFrequency,
-            requiredSupplies = binding.requiredSuppliesInput.text?.toString()?.trim().orEmpty(),
-            notes = binding.careNotesInput.text?.toString()?.trim().orEmpty(),
-            latitude = selectedPlace?.latitude,
-            longitude = selectedPlace?.longitude,
-            placeId = selectedPlace?.id,
+            petId = requireNotNull(draft.petId),
+            title = draft.title,
+            dueDateEpochDay = day,
+            reminderMinutesOfDay = minutes,
+            category = requireNotNull(draft.categoryKey),
+            frequency = draft.repeat.toFrequency(),
+            requiredSupplies = draft.supplies.orEmpty(),
+            notes = draft.notes.orEmpty(),
+            latitude = place?.latitude,
+            longitude = place?.longitude,
+            placeId = place?.id,
             onError = {
-                binding.saveCareTaskButton.isEnabled = true
-                UiSnackbar.make(binding.root, R.string.task_save_failed, Snackbar.LENGTH_LONG).show()
+                binder?.setSaving(false)
+                view?.let { root ->
+                    UiSnackbar.make(root, R.string.task_save_failed, Snackbar.LENGTH_LONG).show()
+                }
             },
-            onSaved = { savedCareTask ->
-                CareReminderScheduler(requireContext()).schedule(savedCareTask)
-                requestNotificationPermission()
+            onSaved = { saved ->
+                CareReminderScheduler(requireContext()).schedule(saved)
                 runCatching {
                     findNavController().getBackStackEntry(R.id.homeDashboardFragment)
-                        .savedStateHandle[SAVED_TASK_RESULT_KEY] = savedCareTask.id
+                        .savedStateHandle[SAVED_TASK_RESULT_KEY] = saved.id
                 }
+                Toast.makeText(requireContext(),
+                    getString(R.string.task_saved_for_date, formatDate(saved.dueDateEpochDay)),
+                    Toast.LENGTH_LONG).show()
                 findNavController().navigateUp()
-                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
-                    getString(R.string.task_saved_for_date,
-                        formatDate(savedCareTask.dueDateEpochDay)), Snackbar.LENGTH_LONG).show()
-            }
+            },
         )
     }
 
-    private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
+    override fun onClose() {
+        findNavController().navigateUp()
     }
 
-    private fun formatDate(epochDay: Long): String {
-        return DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
+    private fun formatDate(epochDay: Long): String =
+        DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
             timeZone = TimeZone.getTimeZone("UTC")
-        }.format(Date(epochDay * MILLIS_PER_DAY))
-    }
-
-    private fun formatTime(minutesOfDay: Int): String {
-        return DateFormat.getTimeInstance(DateFormat.SHORT).format(
-            Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, minutesOfDay / MINUTES_PER_HOUR)
-                set(Calendar.MINUTE, minutesOfDay % MINUTES_PER_HOUR)
-            }.time
-        )
-    }
+        }.format(Date(epochDay * 86_400_000L))
 
     override fun onDestroyView() {
+        binder = null
+        setupComplete = false
         super.onDestroyView()
-        _binding = null
     }
 
     private companion object {
-        const val MILLIS_PER_DAY = 86_400_000L
-        const val MINUTES_PER_HOUR = 60
-        const val DATE_PICKER_TAG = "due_date_picker"
-        const val TIME_PICKER_TAG = "reminder_time_picker"
-        const val IMPORTED_TITLE_ARGUMENT = "importedTitle"
-        const val IMPORTED_DATE_ARGUMENT = "importedDateEpochDay"
-        const val IMPORTED_NOTES_ARGUMENT = "importedNotes"
-        const val IMPORTED_TIME_ARGUMENT = "importedTimeMinutes"
-        const val IMPORTED_CLINIC_ARGUMENT = "importedClinic"
+        const val PRESELECT_PET_ID = "preselectPetId"
+        const val IMPORTED_TITLE = "importedTitle"
+        const val IMPORTED_DATE = "importedDateEpochDay"
+        const val IMPORTED_NOTES = "importedNotes"
+        const val IMPORTED_TIME = "importedTimeMinutes"
+        const val IMPORTED_CLINIC = "importedClinic"
     }
 }

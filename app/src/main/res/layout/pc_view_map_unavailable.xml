@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shown in place of the map when there's no Maps API key, so the Places screen never crashes. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pc_bg_surface_18"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="24dp">
+
+    <ImageView
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:background="@drawable/pc_bg_icon_button"
+        android:importantForAccessibility="no"
+        android:padding="14dp"
+        android:src="@drawable/pc_ic_map_off"
+        app:tint="@color/pc_text_secondary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/pc_map_unavailable_title"
+        android:textAppearance="@style/TextAppearance.PC.Section" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="@string/pc_map_unavailable_body"
+        android:textAppearance="@style/TextAppearance.PC.Supporting" />
+</LinearLayout>

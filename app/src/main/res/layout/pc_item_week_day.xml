@@ -30,10 +30,10 @@
         android:textAppearance="@style/TextAppearance.PC.FigureLarge"
         tools:text="22" />
 
-    <View
-        android:id="@+id/pcDayDot"
-        android:layout_width="4dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="2dp"
-        android:background="@drawable/pc_bg_oval" />
+    <!-- How much of the day got done. Hidden on days with no tasks. -->
+    <com.example.petcare.design.SegmentedBarView
+        android:id="@+id/pcDayBar"
+        android:layout_width="18dp"
+        android:layout_height="3dp"
+        android:layout_marginTop="4dp" />
 </LinearLayout>

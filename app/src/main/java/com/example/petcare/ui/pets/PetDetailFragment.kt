@@ -1,7 +1,6 @@
 package com.example.petcare.ui.pets
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,20 +16,22 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
 import com.example.petcare.R
+import com.example.petcare.design.applySystemBarPaddingWithKeyboard
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.expense.ExpenseSummary
+import com.example.petcare.ui.expenses.ExpenseCategoryBars
 import com.example.petcare.data.local.pet.PetColor
 import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.databinding.FragmentPetDetailBinding
 import com.example.petcare.databinding.ItemPetHeroBinding
+import com.example.petcare.databinding.ItemPetDetailFieldBinding
 import com.example.petcare.ui.GestureHaptics
-import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.ScreenState
 import com.example.petcare.ui.UiSnackbar
 import com.example.petcare.ui.home.LocalDayClock
 import com.example.petcare.ui.integration.DelegationPreviewFragment
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialContainerTransform
+import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -48,19 +49,7 @@ class PetDetailFragment : Fragment() {
     private var currentPetId = 0L
     private var currentPet: PetEntity? = null
     private var pageCallback: ViewPager2.OnPageChangeCallback? = null
-    private var transitionFinished = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (MotionPrefs.animationsEnabled(requireContext())) {
-            sharedElementEnterTransition = MaterialContainerTransform().apply {
-                drawingViewId = R.id.nav_host_fragment
-                duration = 450L
-                scrimColor = Color.TRANSPARENT
-            }
-            postponeEnterTransition()
-        }
-    }
+    private var selectedTab = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View {
         _binding = FragmentPetDetailBinding.inflate(inflater, container, false)
@@ -68,7 +57,9 @@ class PetDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        currentPetId = requireArguments().getLong("petId")
+        binding.petDetailSafeArea.applySystemBarPaddingWithKeyboard()
+        currentPetId = state?.getLong(STATE_PET_ID) ?: requireArguments().getLong("petId")
+        selectedTab = state?.getInt(STATE_TAB)?.coerceIn(0, 3) ?: 0
         binding.petDetailCard.transitionName = "pet_$currentPetId"
         binding.backButton.setOnClickListener { findNavController().navigateUp() }
         binding.shareChecklistButton.setOnClickListener {
@@ -89,14 +80,40 @@ class PetDetailFragment : Fragment() {
             }
         }
         binding.editPetButton.setOnClickListener {
+            if (selectedTab == 3) {
+                findNavController().navigate(R.id.action_pet_detail_to_expenses)
+                return@setOnClickListener
+            }
             findNavController().navigate(R.id.action_pet_detail_to_edit, Bundle().apply {
                 putLong("petId", currentPetId)
+                putString(PetFormSections.ARG_SECTION, when {
+                    selectedTab == 1 -> PetFormSections.HEALTH
+                    selectedTab == 0 -> PetFormSections.CARE
+                    else -> PetFormSections.BASICS
+                })
             })
         }
-        listOf(binding.petTabCare, binding.petTabHealth, binding.petTabProfile,
-            binding.petTabSpending).forEach { tab ->
-            tab.setOnClickListener { currentPet?.let(::renderSelectedTab) }
+        binding.petSectionActionButton.setOnClickListener {
+            when {
+                selectedTab == 0 -> findNavController().navigate(
+                    R.id.action_pet_detail_to_add_care_task,
+                    Bundle().apply { putLong("preselectPetId", currentPetId) },
+                )
+                selectedTab == 3 -> findNavController().navigate(
+                    R.id.action_pet_detail_to_add_expense,
+                    Bundle().apply { putLong("petId", currentPetId) },
+                )
+            }
         }
+        binding.petTabGroup.getTabAt(selectedTab)?.select()
+        binding.petTabGroup.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                selectedTab = tab.position
+                currentPet?.let(::renderSelectedTab)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab) = Unit
+            override fun onTabReselected(tab: TabLayout.Tab) = Unit
+        })
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect(::renderState)
@@ -122,9 +139,10 @@ class PetDetailFragment : Fragment() {
                     leaveUnavailable()
                     return
                 }
-                if (idsChanged || binding.petPager.adapter == null) configurePager(position)
+                val adapter = binding.petPager.adapter as? PetHeroAdapter
+                if (idsChanged || adapter == null) configurePager(position)
+                else adapter.updatePets(pets)
                 showPet(pets[position], position)
-                finishTransition()
             }
         }
     }
@@ -145,19 +163,11 @@ class PetDetailFragment : Fragment() {
     }
 
     private fun leaveUnavailable(showMessage: Boolean = true) {
-        finishTransition()
         if (!isAdded || findNavController().currentDestination?.id != R.id.petDetailFragment) return
         if (showMessage) UiSnackbar.make(requireActivity().findViewById(R.id.main),
             R.string.pet_unavailable, Snackbar.LENGTH_LONG).show()
         findNavController().navigate(R.id.petListFragment, null,
             androidx.navigation.NavOptions.Builder().setPopUpTo(R.id.petDetailFragment, true).build())
-    }
-
-    private fun finishTransition() {
-        if (!transitionFinished) {
-            transitionFinished = true
-            startPostponedEnterTransition()
-        }
     }
 
     private fun showPet(pet: PetEntity, position: Int) {
@@ -180,65 +190,131 @@ class PetDetailFragment : Fragment() {
 
     /** Converts live Room data into the selected Care, Health, Profile, or Spending tab. */
     private fun renderSelectedTab(pet: PetEntity) {
-        binding.shareChecklistButton.visibility = if (binding.petTabCare.isChecked) View.VISIBLE else View.GONE
+        val care = selectedTab == 0
+        val spending = selectedTab == 3
+        binding.shareChecklistButton.visibility = if (care) View.VISIBLE else View.GONE
+        binding.petSectionActionButton.visibility = if (care || spending) View.VISIBLE else View.GONE
+        binding.editPetButton.visibility = View.VISIBLE
         when {
-            binding.petTabHealth.isChecked -> renderProfileFields(listOf(
-                R.string.vaccination_history to pet.vaccinationHistory,
-                R.string.allergies to pet.allergies,
-                R.string.medical_records to pet.medicalRecords
-            ))
-            binding.petTabProfile.isChecked -> renderProfileFields(listOf(
-                R.string.dietary_preferences to pet.dietaryPreferences,
-                R.string.favorite_toys to pet.favoriteToys,
-                R.string.grooming_routine to pet.groomingRoutine,
-                R.string.health_notes to pet.healthNotes
-            ))
-            binding.petTabSpending.isChecked -> renderSpending(pet)
-            else -> renderCare(pet)
+            selectedTab == 1 -> {
+                binding.petSectionTitle.setText(R.string.pet_health_section_title)
+                binding.petSectionIntro.setText(R.string.pet_health_section_intro)
+                binding.editPetButton.setText(R.string.pet_edit_health)
+                renderProfileFields(listOf(
+                    R.string.vaccination_history to pet.vaccinationHistory,
+                    R.string.allergies to pet.allergies,
+                    R.string.medical_records to pet.medicalRecords,
+                    R.string.health_notes to pet.healthNotes,
+                ))
+            }
+            selectedTab == 2 -> {
+                binding.petSectionTitle.setText(R.string.pet_basics_section_title)
+                binding.petSectionIntro.setText(R.string.pet_basics_section_intro)
+                binding.editPetButton.setText(R.string.pet_edit_basics)
+                renderProfileFields(listOf(
+                    R.string.pet_species to pet.species,
+                    R.string.pet_breed to pet.breed,
+                    R.string.pet_age to pet.age,
+                    R.string.pet_weight to pet.weight,
+                ))
+            }
+            spending -> {
+                binding.petSectionTitle.setText(R.string.pet_spending_section_title)
+                binding.petSectionIntro.setText(R.string.pet_spending_section_intro)
+                binding.petSectionActionButton.setText(R.string.pet_add_expense)
+                binding.editPetButton.setText(R.string.pet_manage_expenses)
+                renderSpending(pet)
+            }
+            else -> {
+                binding.petSectionTitle.setText(R.string.pet_care_section_title)
+                binding.petSectionIntro.setText(R.string.pet_care_section_intro)
+                binding.petSectionActionButton.setText(R.string.pet_add_care_task)
+                binding.editPetButton.setText(R.string.pet_edit_care)
+                renderCare(pet)
+            }
         }
+        binding.petSectionFields.post { binding.petSectionFields.requestLayout() }
     }
 
     private fun renderProfileFields(fields: List<Pair<Int, String>>) {
-        val lines = fields.filter { it.second.isNotBlank() }.map {
-            getString(R.string.pet_detail_field, getString(it.first), it.second)
-        }
-        binding.petHealth.text = lines.firstOrNull() ?: getString(R.string.pet_profile_empty)
-        binding.petAllergies.text = lines.drop(1).joinToString("\n\n")
-        binding.petAllergies.visibility = if (lines.size > 1) View.VISIBLE else View.GONE
+        renderRows(fields.map { getString(it.first) to it.second })
+    }
+
+    private fun renderRows(rows: List<Pair<String, String>>) {
+        binding.petSectionFields.removeAllViews()
+        renderRowsAfter(rows)
     }
 
     private fun renderCare(pet: PetEntity) {
         val today = LocalDayClock.todayEpochDay()
         val tasks = petTasks(pet)
-        val todayLines = tasks.filter { it.dueDateEpochDay == today }
+        val todayTasks = tasks.filter { it.dueDateEpochDay == today }
             .sortedBy(CareTaskSummary::reminderMinutesOfDay)
-            .map { task ->
-                getString(R.string.pet_care_task_line, time(task), task.title,
-                    getString(if (task.isCompleted) R.string.pet_care_done else R.string.pet_care_open))
-            }
-        binding.petHealth.text = todayLines.joinToString("\n").ifBlank {
-            getString(R.string.pet_care_empty_today)
-        }
-        val coming = tasks.filter { it.dueDateEpochDay in (today + 1L)..(today + 7L) }
+        val comingTasks = tasks.filter { it.dueDateEpochDay in (today + 1L)..(today + 7L) }
             .sortedWith(compareBy(CareTaskSummary::dueDateEpochDay,
                 CareTaskSummary::reminderMinutesOfDay)).take(5)
-            .map { getString(R.string.pet_care_upcoming_line, date(it.dueDateEpochDay), it.title) }
-        binding.petAllergies.text = if (coming.isEmpty()) getString(R.string.pet_care_empty_upcoming)
-        else getString(R.string.pet_care_coming_up, coming.joinToString("\n"))
-        binding.petAllergies.visibility = View.VISIBLE
+        renderRows(listOf(
+            getString(R.string.pet_care_today_label) to if (todayTasks.isEmpty())
+                getString(R.string.pet_care_empty_today) else getString(R.string.pet_task_tap_to_edit),
+        ))
+        todayTasks.forEach(::addTaskRow)
+        renderRowsAfter(listOf(
+            getString(R.string.pet_care_upcoming_label) to if (comingTasks.isEmpty())
+                getString(R.string.pet_care_empty_upcoming) else getString(R.string.pet_task_tap_to_edit),
+        ))
+        comingTasks.forEach(::addTaskRow)
+        renderRowsAfter(listOf(
+            getString(R.string.dietary_preferences) to pet.dietaryPreferences,
+            getString(R.string.grooming_routine) to pet.groomingRoutine,
+            getString(R.string.favorite_toys) to pet.favoriteToys,
+        ))
+    }
+
+    private fun renderRowsAfter(rows: List<Pair<String, String>>) {
+        rows.forEach { (label, value) ->
+            val row = ItemPetDetailFieldBinding.inflate(layoutInflater, binding.petSectionFields, false)
+            row.fieldLabel.text = label
+            row.fieldValue.text = value.ifBlank { getString(R.string.pet_field_not_added) }
+            binding.petSectionFields.addView(row.root)
+        }
+    }
+
+    private fun addTaskRow(task: CareTaskSummary) {
+        val row = ItemPetDetailFieldBinding.inflate(layoutInflater, binding.petSectionFields, false)
+        row.fieldLabel.text = getString(R.string.pet_care_task_edit_label,
+            date(task.dueDateEpochDay), time(task))
+        row.fieldValue.text = getString(R.string.pet_care_task_edit_value, task.title,
+            getString(if (task.isCompleted) R.string.pet_care_done else R.string.pet_care_open))
+        row.root.isFocusable = true
+        row.root.setOnClickListener {
+            findNavController().navigate(R.id.action_pet_detail_to_edit_care_task,
+                Bundle().apply { putLong("careTaskId", task.id) })
+        }
+        binding.petSectionFields.addView(row.root)
     }
 
     private fun renderSpending(pet: PetEntity) {
         val monthly = detail.expenses.filter { it.petId == pet.id && isCurrentMonth(it) }
         val total = monthly.sumOf(ExpenseSummary::amountCents)
-        binding.petHealth.text = getString(R.string.pet_spending_month, money(total))
-        binding.petAllergies.text = monthly.groupBy(ExpenseSummary::category).entries
-            .sortedByDescending { it.value.sumOf(ExpenseSummary::amountCents) }
-            .joinToString("\n") { (category, rows) ->
-                getString(R.string.pet_spending_category, category,
-                    money(rows.sumOf(ExpenseSummary::amountCents)))
-            }.ifBlank { getString(R.string.expense_empty) }
-        binding.petAllergies.visibility = View.VISIBLE
+        renderRows(listOf(getString(R.string.pet_spending_month_label) to money(total)))
+        if (monthly.isEmpty()) {
+            renderRowsAfter(listOf(getString(R.string.pet_spending_categories_label) to
+                getString(R.string.money_no_expenses_month)))
+        } else {
+            ExpenseCategoryBars.append(binding.petSectionFields, layoutInflater, monthly, ::money)
+        }
+        monthly.sortedByDescending(ExpenseSummary::dateEpochDay).take(5).forEach { expense ->
+            val row = ItemPetDetailFieldBinding.inflate(layoutInflater, binding.petSectionFields, false)
+            row.fieldLabel.text = getString(R.string.pet_expense_edit_label, date(expense.dateEpochDay))
+            row.fieldValue.text = getString(R.string.pet_expense_edit_value,
+                expense.note.ifBlank { expense.category }, money(expense.amountCents))
+            row.root.isFocusable = true
+            row.root.setOnClickListener {
+                findNavController().navigate(R.id.action_pet_detail_to_add_expense,
+                    Bundle().apply { putLong("expenseId", expense.id) })
+            }
+            binding.petSectionFields.addView(row.root)
+        }
     }
 
     private fun petTasks(pet: PetEntity) = detail.tasks.filter { it.petId == pet.id }
@@ -279,10 +355,24 @@ class PetDetailFragment : Fragment() {
         super.onDestroyView()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(STATE_TAB, selectedTab)
+        outState.putLong(STATE_PET_ID, currentPetId)
+        super.onSaveInstanceState(outState)
+    }
+
     /** Displays one pet hero and opens the existing full-screen zoom viewer for real photos. */
     private class PetHeroAdapter(
-        private val pets: List<PetEntity>, private val open: (PetEntity) -> Unit
+        private var pets: List<PetEntity>, private val open: (PetEntity) -> Unit
     ) : RecyclerView.Adapter<PetHeroAdapter.Holder>() {
+        fun updatePets(updated: List<PetEntity>) {
+            val previous = pets
+            pets = updated
+            updated.forEachIndexed { index, pet ->
+                if (pet != previous[index]) notifyItemChanged(index)
+            }
+        }
+
         override fun getItemCount() = pets.size
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder = Holder(
             ItemPetHeroBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -315,5 +405,7 @@ class PetDetailFragment : Fragment() {
 
     private companion object {
         const val DAY = 86_400_000L
+        const val STATE_TAB = "selectedTab"
+        const val STATE_PET_ID = "selectedPetId"
     }
 }

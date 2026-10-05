@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Log in: email and password, show/hide, forgot password, lockout after repeated failures. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pcLoginRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pc_canvas"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="20dp">
+
+        <ImageButton
+            android:id="@+id/pcLoginBack"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/pc_bg_icon_button"
+            android:contentDescription="@string/pc_a11y_back"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/pc_ic_back"
+            app:tint="@color/pc_text_primary" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:includeFontPadding="false"
+            android:text="@string/pc_login_title"
+            android:textAppearance="@style/TextAppearance.PC.Display" />
+
+        <TextView
+            android:id="@+id/pcLoginSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/pc_login_body"
+            android:textAppearance="@style/TextAppearance.PC.Supporting" />
+
+        <!-- Shown while the account is locked after too many failed attempts. -->
+        <LinearLayout
+            android:id="@+id/pcLoginLock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/pc_bg_banner_error"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/pc_ic_lock"
+                app:tint="@color/pc_on_error_container" />
+
+            <TextView
+                android:id="@+id/pcLoginLockText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:accessibilityLiveRegion="polite"
+                android:textAppearance="@style/TextAppearance.PC.Supporting"
+                android:textColor="@color/pc_on_error_container"
+                tools:text="Too many attempts. Try again in 0:28." />
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/pcLoginEmailLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/pc_email"
+            app:startIconDrawable="@drawable/pc_ic_mail">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/pcLoginEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/pcLoginPasswordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/pc_password"
+            app:startIconDrawable="@drawable/pc_ic_lock"
+            app:endIconMode="password_toggle">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/pcLoginPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcLoginForgot"
+            style="@style/Widget.PC.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/pc_forgot_password" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcLoginSubmit"
+            style="@style/Widget.PC.Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/pc_log_in" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcLoginBiometric"
+            style="@style/Widget.PC.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/pc_use_fingerprint"
+            android:visibility="gone"
+            app:icon="@drawable/pc_ic_fingerprint"
+            app:iconGravity="textStart" />
+
+        <include
+            android:id="@+id/pcLoginOr"
+            layout="@layout/pc_view_or_divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcLoginGoogle"
+            style="@style/Widget.PC.Button.Google"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/pc_continue_google"
+            android:visibility="gone" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="24dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pc_new_here"
+                android:textAppearance="@style/TextAppearance.PC.Supporting" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pcLoginCreate"
+                style="@style/Widget.PC.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pc_create_account" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

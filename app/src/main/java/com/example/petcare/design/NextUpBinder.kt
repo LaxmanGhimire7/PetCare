@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.widget.TextViewCompat
 import com.google.android.material.button.MaterialButton
 import com.example.petcare.R
 import java.util.Locale
@@ -27,6 +28,8 @@ sealed interface NextUpState {
         val dueLabel: String,
         val overdueCount: Int,
         val progress: ProgressSummary,
+        /** For a task from an earlier day, e.g. "Sat 09:30"; shown as "was due Sat 09:30". */
+        val dueFullLabel: String? = null,
     ) : NextUpState
 
     /** Another day is selected on the week strip: show its first task, no countdown. */
@@ -90,6 +93,7 @@ class NextUpBinder(
     private val onDone: () -> Unit,
     private val onSnooze: () -> Unit,
     private val onPlan: () -> Unit,
+    private val onRoutine: () -> Unit = {},
 ) {
     private val context = root.context
     private val label: TextView = root.findViewById(R.id.pcNextUpLabel)
@@ -104,8 +108,10 @@ class NextUpBinder(
     private val done: MaterialButton = root.findViewById(R.id.pcNextUpDone)
     private val snooze: MaterialButton = root.findViewById(R.id.pcNextUpSnooze)
     private val plan: MaterialButton = root.findViewById(R.id.pcNextUpPlan)
+    private val routine: MaterialButton = root.findViewById(R.id.pcNextUpRoutine)
 
     private var state: NextUpState? = null
+    private var mode = MODE_UNSET
 
     init {
         done.setOnClickListener {
@@ -114,12 +120,14 @@ class NextUpBinder(
         }
         snooze.setOnClickListener { onSnooze() }
         plan.setOnClickListener { onPlan() }
+        routine.setOnClickListener { onRoutine() }
     }
 
     fun render(newState: NextUpState, animateBar: Boolean) {
         state = newState
         when (newState) {
             is NextUpState.Upcoming -> {
+                mode = MODE_UNSET
                 label.setText(R.string.pc_next_up)
                 showOverdue(newState.overdueCount)
                 showPet(newState.petName, newState.petColor)
@@ -166,12 +174,49 @@ class NextUpBinder(
         }
     }
 
-    /** Called every second by TodayScreenBinder. Recalculated from the clock, never decremented. */
+    /**
+     * Called every second by TodayScreenBinder; recalculated from the clock, never decremented.
+     * Future: the big countdown. Just due: "Due now". Past due: a calm "Overdue" at headline size,
+     * so a late task never shouts across the whole card.
+     */
     fun tick(nowMillis: Long) {
         val upcoming = state as? NextUpState.Upcoming ?: return
         val remaining = upcoming.dueAtMillis - nowMillis
-        countdown.text = Countdown.format(context, remaining)
-        countdown.contentDescription = Countdown.describe(context, upcoming.title, remaining)
+        val newMode = when {
+            remaining > 0L -> MODE_COUNTDOWN
+            remaining > -DUE_NOW_GRACE_MS -> MODE_DUE_NOW
+            else -> MODE_OVERDUE
+        }
+        if (newMode != mode) {
+            mode = newMode
+            TextViewCompat.setTextAppearance(
+                countdown,
+                if (newMode == MODE_COUNTDOWN) R.style.TextAppearance_PC_Countdown else R.style.TextAppearance_PC_Headline,
+            )
+            when (newMode) {
+                MODE_DUE_NOW -> countdown.setTextColor(ContextCompat.getColor(context, R.color.pc_primary_text))
+                MODE_OVERDUE -> countdown.setTextColor(ContextCompat.getColor(context, R.color.pc_error))
+            }
+            until.text = when (newMode) {
+                MODE_COUNTDOWN -> context.getString(R.string.pc_until, upcoming.dueLabel)
+                MODE_DUE_NOW -> context.getString(R.string.pc_due_at, upcoming.dueLabel)
+                else -> context.getString(R.string.pc_was_due, upcoming.dueFullLabel ?: upcoming.dueLabel)
+            }
+        }
+        when (newMode) {
+            MODE_COUNTDOWN -> {
+                countdown.text = Countdown.format(context, remaining)
+                countdown.contentDescription = Countdown.describe(context, upcoming.title, remaining)
+            }
+            MODE_DUE_NOW -> {
+                countdown.setText(R.string.pc_due_now)
+                countdown.contentDescription = context.getString(R.string.pc_a11y_due_now, upcoming.title)
+            }
+            else -> {
+                countdown.setText(R.string.pc_overdue_state)
+                countdown.contentDescription = context.getString(R.string.pc_a11y_overdue, upcoming.title)
+            }
+        }
     }
 
     private fun showOverdue(count: Int) {
@@ -195,10 +240,19 @@ class NextUpBinder(
         progressLabel.text = context.getString(R.string.pc_done_of_total, progress.done, progress.total)
     }
 
+    private companion object {
+        const val MODE_UNSET = -1
+        const val MODE_COUNTDOWN = 0
+        const val MODE_DUE_NOW = 1
+        const val MODE_OVERDUE = 2
+        const val DUE_NOW_GRACE_MS = 5 * 60_000L
+    }
+
     private fun showActions(done: Boolean, snooze: Boolean, plan: Boolean) {
         actions.visibility = if (done || snooze || plan) View.VISIBLE else View.GONE
         this.done.visibility = if (done) View.VISIBLE else View.GONE
         this.snooze.visibility = if (snooze) View.VISIBLE else View.GONE
         this.plan.visibility = if (plan) View.VISIBLE else View.GONE
+        routine.visibility = if (plan) View.VISIBLE else View.GONE
     }
 }

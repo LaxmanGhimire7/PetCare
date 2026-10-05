@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Today screen, matched to the approved mockup.
-    Order: header, Next-up countdown, pet rings, week strip, timeline, FAB.
+    Order: header (bell + avatar), Next-up countdown, pet rings, quick actions, week strip, timeline, at a glance, FAB.
     The root takes the status-bar inset in code, so nothing draws under the status bar.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -60,10 +60,46 @@
                         tools:text="Afternoon, Lakxh" />
                 </LinearLayout>
 
+                <!-- Notification bell with unread badge. -->
+                <FrameLayout
+                    android:layout_width="44dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="6dp">
+
+                    <ImageButton
+                        android:id="@+id/pcTodayBell"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="start|bottom"
+                        android:background="@drawable/pc_bg_icon_button"
+                        android:contentDescription="@string/pc_a11y_notifications"
+                        android:padding="8dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pc_ic_bell"
+                        app:tint="@color/pc_text_primary" />
+
+                    <TextView
+                        android:id="@+id/pcTodayBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="18dp"
+                        android:layout_gravity="top|end"
+                        android:background="@drawable/pc_bg_badge"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:minWidth="18dp"
+                        android:paddingStart="5dp"
+                        android:paddingEnd="5dp"
+                        android:textAppearance="@style/TextAppearance.PC.Badge"
+                        android:visibility="gone"
+                        tools:text="3"
+                        tools:visibility="visible" />
+                </FrameLayout>
+
                 <TextView
                     android:id="@+id/pcTodayAvatar"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
+                    android:layout_marginTop="4dp"
                     android:background="@drawable/pc_bg_avatar"
                     android:clickable="true"
                     android:contentDescription="@string/pc_a11y_profile"
@@ -97,12 +133,32 @@
                 android:id="@+id/pcPetRings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
+                android:layout_marginTop="22dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
                 android:paddingStart="16dp"
                 android:paddingEnd="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pcTodayAddPet"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_16"
+                android:layout_marginTop="@dimen/space_8"
+                android:text="@string/add_pet"
+                app:icon="@drawable/ic_add" />
+
+            <!-- Quick actions: Share (SMS delegation), Routine, Import, Export. -->
+            <include
+                android:id="@+id/pcQuickActions"
+                layout="@layout/pc_view_quick_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="8dp" />
 
             <!-- Seven day cells are added by WeekStripBinder. -->
             <LinearLayout
@@ -110,15 +166,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="22dp"
                 android:layout_marginEnd="10dp"
                 android:orientation="horizontal" />
+
+            <!-- "Today's plan" with how many are left. -->
+            <LinearLayout
+                android:id="@+id/pcTimelineHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    android:id="@+id/pcTimelineTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAppearance="@style/TextAppearance.PC.Section"
+                    tools:text="Today's plan" />
+
+                <TextView
+                    android:id="@+id/pcTimelineCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.PC.Supporting"
+                    tools:text="3 left" />
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/pcTimeline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="14dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
@@ -134,6 +217,14 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:visibility="gone" />
+
+            <!-- At a glance: streak, this week, next health date, delegation, your vet. -->
+            <include
+                android:id="@+id/pcGlance"
+                layout="@layout/pc_view_glance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

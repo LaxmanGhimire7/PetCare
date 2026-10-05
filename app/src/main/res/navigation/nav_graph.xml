@@ -11,8 +11,8 @@
         android:label="@string/navigation_splash"
         tools:layout="@layout/fragment_splash">
         <action
-            android:id="@+id/action_splash_to_login"
-            app:destination="@id/loginFragment"
+            android:id="@+id/action_splash_to_welcome"
+            app:destination="@id/welcomeFragment"
             app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
         <action
@@ -26,10 +26,23 @@
     </fragment>
 
     <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.petcare.ui.auth.WelcomeFragment"
+        android:label="@string/navigation_login"
+        tools:layout="@layout/pc_fragment_welcome">
+        <action android:id="@+id/action_welcome_to_login" app:destination="@id/loginFragment" />
+        <action android:id="@+id/action_welcome_to_register" app:destination="@id/registerFragment" />
+        <action android:id="@+id/action_welcome_to_home"
+            app:destination="@id/homeDashboardFragment"
+            app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.petcare.ui.auth.LoginFragment"
         android:label="@string/navigation_login"
-        tools:layout="@layout/fragment_login">
+        tools:layout="@layout/pc_fragment_login">
+        <argument android:name="email" app:argType="string" android:defaultValue="" />
         <action
             android:id="@+id/action_login_to_register"
             app:destination="@id/registerFragment" />
@@ -38,6 +51,7 @@
             app:destination="@id/homeDashboardFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action android:id="@+id/action_login_to_forgot_password" app:destination="@id/forgotPasswordFragment" />
         <action android:id="@+id/action_login_to_onboarding"
             app:destination="@id/onboardingFragment"
             app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
@@ -47,7 +61,7 @@
         android:id="@+id/registerFragment"
         android:name="com.example.petcare.ui.auth.RegisterFragment"
         android:label="@string/navigation_register"
-        tools:layout="@layout/fragment_register">
+        tools:layout="@layout/pc_fragment_register">
         <action
             android:id="@+id/action_register_to_login"
             app:destination="@id/loginFragment"
@@ -61,6 +75,19 @@
         <action android:id="@+id/action_register_to_onboarding"
             app:destination="@id/onboardingFragment"
             app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.example.petcare.ui.auth.ForgotPasswordFragment"
+        android:label="@string/navigation_login"
+        tools:layout="@layout/pc_fragment_forgot_password">
+        <argument android:name="email" app:argType="string" android:defaultValue="" />
+        <action
+            android:id="@+id/action_forgot_password_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/forgotPasswordFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment android:id="@+id/onboardingFragment"
@@ -98,12 +125,19 @@
         <action android:id="@+id/action_home_to_expenses" app:destination="@id/expenseListFragment" />
         <action android:id="@+id/action_home_to_providers" app:destination="@id/providerListFragment" />
         <action android:id="@+id/action_home_to_delegation" app:destination="@id/delegationPreviewFragment" />
+        <action android:id="@+id/action_home_to_notifications" app:destination="@id/notificationsFragment" />
         <action
             android:id="@+id/action_home_to_login"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.example.petcare.ui.home.NotificationsFragment"
+        android:label="@string/pc_notifications"
+        tools:layout="@layout/pc_fragment_notifications" />
 
     <fragment
         android:id="@+id/petListFragment"
@@ -122,6 +156,10 @@
         <deepLink app:uri="petcare://pet/{petId}" />
         <action android:id="@+id/action_pet_detail_to_edit" app:destination="@id/editPetFragment" />
         <action android:id="@+id/action_pet_detail_to_photos" app:destination="@id/photoViewerFragment" />
+        <action android:id="@+id/action_pet_detail_to_add_care_task" app:destination="@id/addCareTaskFragment" />
+        <action android:id="@+id/action_pet_detail_to_edit_care_task" app:destination="@id/editCareTaskFragment" />
+        <action android:id="@+id/action_pet_detail_to_add_expense" app:destination="@id/addExpenseFragment" />
+        <action android:id="@+id/action_pet_detail_to_expenses" app:destination="@id/expenseListFragment" />
     </fragment>
 
     <fragment android:id="@+id/photoViewerFragment"
@@ -136,7 +174,12 @@
         tools:layout="@layout/fragment_settings">
         <action android:id="@+id/action_settings_to_reminder_settings" app:destination="@id/reminderSettingsFragment" />
         <action android:id="@+id/action_settings_to_search" app:destination="@id/searchFragment" />
+        <action android:id="@+id/action_settings_to_add_location" app:destination="@id/addProviderFragment" />
+        <action android:id="@+id/action_settings_to_saved_locations" app:destination="@id/providerListFragment" />
         <action android:id="@+id/action_settings_to_login" app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
+        <action android:id="@+id/action_settings_to_forgot_password" app:destination="@id/forgotPasswordFragment" />
+        <action android:id="@+id/action_settings_to_welcome" app:destination="@id/welcomeFragment"
             app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
     </fragment>
 
@@ -162,7 +205,8 @@
         android:id="@+id/addCareTaskFragment"
         android:name="com.example.petcare.ui.care.AddCareTaskFragment"
         android:label="@string/add_care_task"
-        tools:layout="@layout/fragment_add_care_task">
+        tools:layout="@layout/pc_fragment_task_editor">
+        <argument android:name="preselectPetId" app:argType="long" android:defaultValue="0L" />
         <argument android:name="importedTitle" app:argType="string" android:defaultValue="" />
         <argument android:name="importedDateEpochDay" app:argType="long" android:defaultValue="0L" />
         <argument android:name="importedNotes" app:argType="string" android:defaultValue="" />
@@ -174,7 +218,7 @@
         android:id="@+id/editCareTaskFragment"
         android:name="com.example.petcare.ui.care.EditCareTaskFragment"
         android:label="@string/edit_care_task_title"
-        tools:layout="@layout/fragment_add_care_task">
+        tools:layout="@layout/pc_fragment_task_editor">
         <argument
             android:name="careTaskId"
             app:argType="long" />
@@ -196,13 +240,16 @@
     <dialog android:id="@+id/addExpenseFragment" android:name="com.example.petcare.ui.expenses.AddExpenseFragment"
         android:label="@string/navigation_add_expense" tools:layout="@layout/fragment_add_expense">
         <argument android:name="expenseId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="petId" app:argType="long" android:defaultValue="0L" />
     </dialog>
     <fragment android:id="@+id/providerListFragment" android:name="com.example.petcare.ui.providers.ProviderListFragment"
         android:label="@string/navigation_providers" tools:layout="@layout/fragment_feature_list">
+        <argument android:name="placeId" app:argType="long" android:defaultValue="0L" />
         <action android:id="@+id/action_providers_to_add_provider" app:destination="@id/addProviderFragment" />
     </fragment>
     <fragment android:id="@+id/addProviderFragment" android:name="com.example.petcare.ui.providers.AddProviderFragment"
         android:label="@string/navigation_add_provider" tools:layout="@layout/fragment_add_provider">
+        <argument android:name="locationOnly" app:argType="boolean" android:defaultValue="false" />
         <action android:id="@+id/action_add_provider_to_picker" app:destination="@id/placePickerFragment" />
     </fragment>
     <fragment android:id="@+id/placePickerFragment" android:name="com.example.petcare.ui.providers.PlacePickerFragment"

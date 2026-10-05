@@ -8,6 +8,7 @@ import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.care.CareTaskEntity
 import com.example.petcare.data.local.care.CareTaskSummary
 import com.example.petcare.data.local.pet.PetEntity
+import com.example.petcare.data.local.provider.ProviderEntity
 import com.example.petcare.ui.ScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +24,8 @@ import kotlinx.coroutines.flow.stateIn
 data class TodayData(
     val pets: List<PetEntity>,
     val upcoming: List<CareTaskSummary>,
-    val completed: List<CareTaskSummary>
+    val completed: List<CareTaskSummary>,
+    val places: List<ProviderEntity>,
 )
 
 /** Retains today's filter, live data, and first-load motion across navigation. */
@@ -35,8 +37,8 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
     val state: StateFlow<ScreenState<TodayData>> = combine(
         repositories.pets.observePets(), repositories.tasks.observeUpcoming(),
-        repositories.tasks.observeCompleted(), refreshTick
-    ) { pets, upcoming, completed, _ -> TodayData(pets, upcoming, completed) }
+        repositories.tasks.observeCompleted(), repositories.places.observeAll(), refreshTick
+    ) { pets, upcoming, completed, places, _ -> TodayData(pets, upcoming, completed, places) }
         .map<TodayData, ScreenState<TodayData>> { rows ->
             if (rows.pets.isEmpty() && rows.upcoming.isEmpty() && rows.completed.isEmpty())
                 ScreenState.Empty else ScreenState.Content(rows)

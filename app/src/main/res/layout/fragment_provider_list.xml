@@ -16,16 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <TextView
+        <include
             android:id="@+id/place_map_unavailable"
+            layout="@layout/pc_view_map_unavailable"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal|top"
-            android:paddingHorizontal="@dimen/space_32"
-            android:paddingTop="@dimen/place_map_height"
-            android:text="@string/map_unavailable_list"
-            android:textAppearance="@style/TextAppearance.PetCare.Supporting"
-            android:textColor="?attr/colorOnSurfaceVariant"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:visibility="gone" />
     </FrameLayout>
 
@@ -33,16 +31,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/space_20"
+        android:paddingHorizontal="@dimen/space_16"
         android:paddingTop="@dimen/space_20">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:shadowColor="@color/canvas"
-            android:shadowDx="@dimen/layout_zero"
-            android:shadowDy="@dimen/layout_1_dp"
-            android:shadowRadius="@dimen/space_4"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="4"
             android:text="@string/nav_places"
             android:textAppearance="@style/TextAppearance.PetCare.Display" />
 
@@ -61,7 +59,6 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_all"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -69,27 +66,37 @@
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_vet"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_vets" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_grooming"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_grooming" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/filter_parks"
-                    style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/place_filter_parks" />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/place_map_attribution"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/space_16"
+        android:layout_marginBottom="@dimen/places_sheet_peek_height"
+        android:background="@drawable/pc_bg_surface_18"
+        android:paddingHorizontal="@dimen/space_8"
+        android:paddingVertical="@dimen/space_4"
+        android:text="@string/osm_attribution"
+        android:textAppearance="@style/TextAppearance.PC.Meta" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/place_sheet"
@@ -141,6 +148,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/search_place" />
+
+            <TextView
+                android:id="@+id/place_search_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_4"
+                android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_search_result_button"
+                style="@style/Widget.PetCare.Button.Tonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8"
+                android:text="@string/location_save_suggestion"
+                android:visibility="gone"
+                app:icon="@drawable/ic_add" />
 
             <TextView
                 android:id="@+id/place_location_status"

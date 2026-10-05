@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    At a glance, below the timeline. Everything comes from data the app already has:
+    streak and weekly score from completed tasks, the next health task, today's SMS
+    hand-over, and the user's vet from saved places. Cards without data hide themselves.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/pc_at_a_glance"
+        android:textAppearance="@style/TextAppearance.PC.Section" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/pcGlanceStreakTile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/pc_bg_surface_18"
+            android:orientation="vertical"
+            android:padding="14dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/pc_ic_flame"
+                    app:tint="@color/pc_primary_text" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/pc_streak"
+                    android:textAppearance="@style/TextAppearance.PC.LabelStrong"
+                    android:textColor="@color/pc_text_secondary" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/pcGlanceStreak"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:includeFontPadding="false"
+                android:textAppearance="@style/TextAppearance.PC.Amount"
+                tools:text="6 days" />
+
+            <TextView
+                android:id="@+id/pcGlanceStreakBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="@style/TextAppearance.PC.Meta"
+                tools:text="Every task done" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pcGlanceWeekTile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/pc_bg_surface_18"
+            android:orientation="vertical"
+            android:padding="14dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/pc_ic_chart"
+                    app:tint="@color/pc_text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/pc_this_week"
+                    android:textAppearance="@style/TextAppearance.PC.LabelStrong"
+                    android:textColor="@color/pc_text_secondary" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/pcGlanceWeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:includeFontPadding="false"
+                android:textAppearance="@style/TextAppearance.PC.Amount"
+                tools:text="86%" />
+
+            <com.example.petcare.design.MiniBarsView
+                android:id="@+id/pcGlanceBars"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Next health date. -->
+    <LinearLayout
+        android:id="@+id/pcGlanceHealth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/pc_bg_surface_18"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+        <ImageView
+            android:id="@+id/pcGlanceHealthIcon"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/pc_bg_oval"
+            android:importantForAccessibility="no"
+            android:padding="11dp"
+            android:src="@drawable/pc_ic_vaccine" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pc_next_health"
+                android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+                android:textColor="@color/pc_text_secondary" />
+
+            <TextView
+                android:id="@+id/pcGlanceHealthTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.PC.RowTitle"
+                tools:text="Rabies booster for Luna" />
+
+            <TextView
+                android:id="@+id/pcGlanceHealthWhen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.PC.Meta"
+                tools:text="Sat 26 September, 10:00" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/pcGlanceHealthDays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textAppearance="@style/TextAppearance.PC.CardTitle"
+                tools:text="2" />
+
+            <TextView
+                android:id="@+id/pcGlanceHealthUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.PC.Meta"
+                tools:text="days" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Today's SMS hand-over. -->
+    <LinearLayout
+        android:id="@+id/pcGlanceDelegation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/pc_bg_surface_18"
+        android:orientation="vertical"
+        android:padding="14dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/pc_bg_success_well"
+                android:importantForAccessibility="no"
+                android:padding="11dp"
+                android:src="@drawable/pc_ic_message"
+                app:tint="@color/pc_success" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/pcGlanceDelegationTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.PC.RowTitle"
+                    tools:text="Daniel has today's checklist" />
+
+                <TextView
+                    android:id="@+id/pcGlanceDelegationWhen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/TextAppearance.PC.Meta"
+                    tools:text="Sent by SMS at 08:12" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcGlanceShareAgain"
+            style="@style/Widget.PC.Button.Compact"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:text="@string/pc_share_again"
+            app:icon="@drawable/pc_ic_share" />
+    </LinearLayout>
+
+    <!-- Your vet (a saved place): geotagging plus call and directions intents. -->
+    <LinearLayout
+        android:id="@+id/pcGlancePlace"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/pc_bg_surface_18"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:padding="14dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/pc_bg_icon_button"
+                android:importantForAccessibility="no"
+                android:padding="11dp"
+                android:src="@drawable/pc_ic_nav_places"
+                app:tint="@color/pc_text_primary" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/pcGlancePlaceLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.PC.MetaStrong"
+                    android:textColor="@color/pc_text_secondary"
+                    tools:text="Your vet" />
+
+                <TextView
+                    android:id="@+id/pcGlancePlaceName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.PC.RowTitle"
+                    tools:text="Riverside Vet Clinic" />
+
+                <TextView
+                    android:id="@+id/pcGlancePlaceDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.PC.Meta"
+                    tools:text="1.8 km away, open until 18:00" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pcGlancePlaceCall"
+                style="@style/Widget.PC.Button.Compact"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/pc_call"
+                app:icon="@drawable/pc_ic_phone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pcGlancePlaceDirections"
+                style="@style/Widget.PC.Button.Compact"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/pc_directions"
+                app:icon="@drawable/pc_ic_directions" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -11,7 +11,7 @@ interface UserDao {
     @Insert
     suspend fun insert(user: UserEntity): Long
 
-    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
+    @Query("SELECT * FROM users WHERE email = :email COLLATE NOCASE LIMIT 1")
     suspend fun getByEmail(email: String): UserEntity?
 
     @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
@@ -19,4 +19,7 @@ interface UserDao {
 
     @Query("UPDATE users SET passwordHash = :hash, passwordSalt = :salt, hashAlgorithm = :algorithm WHERE id = :id")
     suspend fun upgradePassword(id: Long, hash: String, salt: String, algorithm: String)
+
+    @Query("UPDATE users SET securityQuestion = :question, securityAnswerHash = :answerHash WHERE id = :id")
+    suspend fun updateRecovery(id: Long, question: String, answerHash: String)
 }

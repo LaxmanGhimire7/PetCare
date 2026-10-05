@@ -35,6 +35,7 @@ data class PetRingItem(
 class PetRingAdapter(
     private val loadPhoto: (ImageView, String) -> Unit,
     private val onSelect: (key: String) -> Unit,
+    private val onFilter: (key: String) -> Unit,
 ) : ListAdapter<PetRingItem, PetRingAdapter.Holder>(Diff) {
 
     private val sweepFromEmpty = mutableSetOf<String>()
@@ -105,6 +106,11 @@ class PetRingAdapter(
             itemView.setOnClickListener {
                 Haptics.tick(it)
                 onSelect(item.key)
+            }
+            itemView.setOnLongClickListener {
+                Haptics.tick(it)
+                onFilter(item.key)
+                true
             }
         }
     }

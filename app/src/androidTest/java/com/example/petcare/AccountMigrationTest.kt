@@ -41,4 +41,24 @@ class AccountMigrationTest {
             close()
         }
     }
+
+    @Test fun googleProviderMigrationKeepsExistingPasswords() {
+        helper.createDatabase("google-provider-migration", 13).apply {
+            execSQL("""INSERT INTO users (id, name, email, passwordHash, passwordSalt,
+                hashAlgorithm, phone, securityQuestion, securityAnswerHash)
+                VALUES (1, 'Luna Parent', 'parent@example.com', 'stored-hash', '',
+                'PBKDF2', NULL, NULL, NULL)""")
+            close()
+        }
+        helper.runMigrationsAndValidate(
+            "google-provider-migration", 14, true, PetCareDatabase.MIGRATION_13_14
+        ).apply {
+            query("SELECT passwordHash, authProvider FROM users WHERE id = 1").use {
+                it.moveToFirst()
+                assertEquals("stored-hash", it.getString(0))
+                assertEquals("password", it.getString(1))
+            }
+            close()
+        }
+    }
 }

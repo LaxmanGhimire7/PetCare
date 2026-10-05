@@ -48,6 +48,7 @@
     <string name="pc_state_not_done">Not done</string>
     <string name="pc_a11y_countdown">%1$s in %2$s</string>
     <string name="pc_a11y_due_now">%1$s is due now</string>
+    <string name="pc_a11y_overdue">%1$s is overdue</string>
     <string name="pc_a11y_ring">%1$s, %2$s</string>
     <string name="pc_a11y_pet_card">%1$s, %2$s</string>
     <string name="pc_a11y_now">Current time %1$s</string>
@@ -59,4 +60,216 @@
         <item quantity="one">%d minute</item>
         <item quantity="other">%d minutes</item>
     </plurals>
+    <!-- Today: quick actions and notifications bell -->
+    <string name="pc_action_share">Share</string>
+    <string name="pc_action_routine">Routine</string>
+    <string name="pc_action_import">Import</string>
+    <string name="pc_action_export">Export</string>
+    <string name="pc_a11y_share_checklist">Share today\'s checklist by SMS</string>
+    <string name="pc_a11y_new_routine">Generate a care routine</string>
+    <string name="pc_a11y_import">Import an appointment or plan</string>
+    <string name="pc_a11y_export">Export the care plan</string>
+    <string name="pc_a11y_notifications">Notifications</string>
+    <plurals name="pc_a11y_unread">
+        <item quantity="one">Notifications, %d unread</item>
+        <item quantity="other">Notifications, %d unread</item>
+    </plurals>
+
+    <!-- Notification centre -->
+    <string name="pc_notifications">Notifications</string>
+    <string name="pc_mark_all_read">Mark all read</string>
+    <string name="pc_group_today">Today</string>
+    <string name="pc_group_earlier">Earlier</string>
+    <string name="pc_yesterday">Yesterday</string>
+    <string name="pc_inbox_empty_title">All caught up</string>
+    <string name="pc_inbox_empty_body">Reminders, overdue tasks and vet dates will show up here.</string>
+    <string name="pc_notification_removed">Notification removed</string>
+    <string name="pc_undo">Undo</string>
+    <string name="pc_channel_reminders">Care reminders</string>
+    <string name="pc_channel_reminders_desc">Feeding, walks, grooming and medication at their scheduled time</string>
+    <string name="pc_channel_health">Health and vet</string>
+    <string name="pc_channel_health_desc">Vaccinations, vet visits and overdue care</string>
+    <string name="pc_channel_updates">Updates</string>
+    <string name="pc_channel_updates_desc">Checklists you\'ve shared and account changes</string>
+
+    <!-- Welcome -->
+    <string name="pc_brand">PetCare</string>
+    <string name="pc_welcome_title">Every walk,\nfeed and vet visit.\nOn time.</string>
+    <string name="pc_welcome_body">PetCare puts your pets\' care on one timeline, reminds you when it\'s due, and hands the checklist over when you\'re away.</string>
+    <string name="pc_welcome_card_title">Evening walk</string>
+    <string name="pc_welcome_card_pet">Max</string>
+    <string name="pc_create_account">Create account</string>
+    <string name="pc_log_in">Log in</string>
+
+    <!-- Log in -->
+    <string name="pc_login_title">Welcome back</string>
+    <string name="pc_login_body">Log in to see today\'s plan.</string>
+    <string name="pc_email">Email</string>
+    <string name="pc_password">Password</string>
+    <string name="pc_forgot_password">Forgot password?</string>
+    <string name="pc_logging_in">Logging in…</string>
+    <string name="pc_new_here">New to PetCare?</string>
+    <string name="pc_use_fingerprint">Use fingerprint</string>
+    <string name="pc_err_email">Enter a valid email address</string>
+    <string name="pc_err_password_required">Enter your password</string>
+    <string name="pc_err_wrong_credentials">Email or password is incorrect</string>
+    <string name="pc_locked">Too many attempts. Try again in %1$s.</string>
+    <plurals name="pc_attempts_left">
+        <item quantity="one">%d attempt left before a short lock</item>
+        <item quantity="other">%d attempts left before a short lock</item>
+    </plurals>
+
+    <!-- Create account -->
+    <string name="pc_register_title">Create account</string>
+    <string name="pc_register_body">It takes a minute. Everything stays on this phone.</string>
+    <string name="pc_name">Your name</string>
+    <string name="pc_phone">Phone (optional)</string>
+    <string name="pc_phone_helper">Pre-fills your number when you share a checklist</string>
+    <string name="pc_confirm_password">Confirm password</string>
+    <string name="pc_account_recovery">Account recovery</string>
+    <string name="pc_account_recovery_body">If you forget your password, you\'ll answer this to reset it.</string>
+    <string name="pc_security_question">Security question</string>
+    <string name="pc_security_answer">Answer</string>
+    <string name="pc_creating">Creating account…</string>
+    <string name="pc_have_account">Already have an account?</string>
+    <string name="pc_err_name">Enter your name</string>
+    <string name="pc_err_password_weak">Choose a stronger password</string>
+    <string name="pc_err_password_match">Passwords don\'t match</string>
+    <string name="pc_err_question">Choose a question</string>
+    <string name="pc_err_answer">Answer must be at least 2 characters</string>
+    <string name="pc_err_email_taken">An account with this email already exists</string>
+    <string name="pc_err_generic">Something went wrong. Try again.</string>
+    <string-array name="pc_security_questions">
+        <item>What was the name of your first pet?</item>
+        <item>In which town were you born?</item>
+        <item>What is your favourite film?</item>
+        <item>What was the name of your first school?</item>
+        <item>What street did you grow up on?</item>
+        <item>What is your oldest sibling\'s middle name?</item>
+    </string-array>
+
+    <!-- Password strength -->
+    <string name="pc_strength_weak">Weak</string>
+    <string name="pc_strength_fair">Fair</string>
+    <string name="pc_strength_good">Good</string>
+    <string name="pc_strength_strong">Strong</string>
+    <string name="pc_rule_length">At least 8 characters</string>
+    <string name="pc_rule_case">Upper and lower case letters</string>
+    <string name="pc_rule_number">A number</string>
+    <string name="pc_rule_symbol">A symbol, like ! or #</string>
+    <string name="pc_rule_personal">Not a common password or your name</string>
+
+    <!-- Reset password -->
+    <string name="pc_step_of">Step %1$d of %2$d</string>
+    <string name="pc_reset_title">Reset password</string>
+    <string name="pc_reset_body">Enter the email you signed up with.</string>
+    <string name="pc_continue">Continue</string>
+    <string name="pc_security_check">Security check</string>
+    <string name="pc_security_check_body">Answer the question you chose when you signed up.</string>
+    <string name="pc_verify">Verify</string>
+    <string name="pc_new_password">New password</string>
+    <string name="pc_new_password_body">Pick something you don\'t use anywhere else.</string>
+    <string name="pc_save_password">Save new password</string>
+    <string name="pc_reset_done_title">Password updated</string>
+    <string name="pc_reset_done_body">Log in with your new password.</string>
+    <string name="pc_back_to_login">Back to log in</string>
+    <string name="pc_err_no_account">No account on this phone uses that email</string>
+    <string name="pc_err_wrong_answer">That answer doesn\'t match</string>
+    <string name="pc_checking">Checking…</string>
+    <string name="pc_saving">Saving…</string>
+    <string name="pc_a11y_back">Back</string>
+    <string name="pc_inbox_password_changed_title">Password changed</string>
+    <string name="pc_inbox_password_changed_body">Your PetCare password was reset on this phone. If this wasn\'t you, reset it again from the log-in screen.</string>
+
+    <!-- Task detail sheet -->
+    <string name="pc_status_done">Done</string>
+    <string name="pc_status_overdue">Overdue</string>
+    <string name="pc_status_upcoming">Upcoming</string>
+    <string name="pc_mark_not_done">Mark not done</string>
+    <string name="pc_edit">Edit</string>
+    <string name="pc_share">Share</string>
+    <string name="pc_delete">Delete</string>
+    <string name="pc_delete_title">Delete this task?</string>
+    <string name="pc_delete_body">%1$s will be removed from %2$s\'s plan. This can\'t be undone.</string>
+    <string name="pc_cancel">Cancel</string>
+    <string name="pc_supplies">Supplies</string>
+    <string name="pc_notes">Notes</string>
+    <string name="pc_place">Place</string>
+    <!-- v4: Today empty day and At a glance -->
+    <string name="pc_generate_routine">Routine</string>
+    <string name="pc_at_a_glance">At a glance</string>
+    <string name="pc_streak">Streak</string>
+    <plurals name="pc_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="pc_streak_body">Every task done</string>
+    <string name="pc_streak_start">Finish today\'s tasks to start one</string>
+    <string name="pc_this_week">This week</string>
+    <string name="pc_week_percent">%1$d%%</string>
+    <string name="pc_week_empty">None yet</string>
+    <string name="pc_next_health">Next health date</string>
+    <string name="pc_health_today">Today</string>
+    <plurals name="pc_days_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="pc_delegation_title">%1$s has today\'s checklist</string>
+    <string name="pc_delegation_when">Sent by SMS at %1$s</string>
+    <string name="pc_delegation_inbox_title">Checklist sent to %1$s</string>
+    <string name="pc_delegation_inbox_body">Today\'s care checklist was shared by SMS.</string>
+    <string name="pc_share_again">Share again</string>
+    <string name="pc_call">Call</string>
+    <string name="pc_directions">Directions</string>
+
+    <!-- v4: task editor -->
+    <string name="pc_new_task_title">New task</string>
+    <string name="pc_edit_task_title">Edit task</string>
+    <string name="pc_task_hint">What needs doing?</string>
+    <string name="pc_for">For</string>
+    <string name="pc_category">Category</string>
+    <string name="pc_when">When</string>
+    <string name="pc_date">Date</string>
+    <string name="pc_time">Time</string>
+    <string name="pc_choose">Choose</string>
+    <string name="pc_pick_date">Choose a date</string>
+    <string name="pc_pick_time">Choose a time</string>
+    <string name="pc_repeat">Repeat</string>
+    <string name="pc_repeat_once">Once</string>
+    <string name="pc_repeat_daily">Daily</string>
+    <string name="pc_repeat_weekly">Weekly</string>
+    <string name="pc_repeat_monthly">Monthly</string>
+    <string name="pc_details">Details</string>
+    <string name="pc_saved_place">Saved place (optional)</string>
+    <string name="pc_no_place">No linked place</string>
+    <string name="pc_supplies_hint">Supplies (optional)</string>
+    <string name="pc_notes_hint">Instructions or notes (optional)</string>
+    <string name="pc_save_task">Save task</string>
+    <string name="pc_err_task_title">Enter what needs doing</string>
+    <string name="pc_err_pet">Choose a pet</string>
+    <string name="pc_err_category">Choose a category</string>
+    <string name="pc_err_date">Choose a date</string>
+    <string name="pc_a11y_close">Close</string>
+    <!-- v5 -->
+    <string name="pc_welcome_headline">Every walk,\nfeed and vet visit.\nOn time.</string>
+    <string name="pc_welcome_sub">One timeline for all your pets, reminders when care is due, and a checklist you can hand over when you\'re away.</string>
+    <string name="pc_continue_google">Continue with Google</string>
+    <string name="pc_google_connecting">Connecting…</string>
+    <string name="pc_or">or</string>
+    <string name="pc_err_google_no_account">Add a Google account to this phone first, in Settings.</string>
+    <string name="pc_err_google_failed">Couldn\'t sign in with Google. Try again.</string>
+    <string name="pc_err_google_setup">Google sign-in isn\'t set up yet (missing web client ID).</string>
+    <string name="pc_err_uses_google">This account signs in with Google. Use Continue with Google.</string>
+    <string name="pc_plan_today">Today\'s plan</string>
+    <string name="pc_plan_for">Plan for %1$s</string>
+    <plurals name="pc_left_count">
+        <item quantity="one">%d left</item>
+        <item quantity="other">%d left</item>
+    </plurals>
+    <string name="pc_all_done_short">All done</string>
+    <string name="pc_overdue_state">Overdue</string>
+    <string name="pc_was_due">was due %1$s</string>
+    <string name="pc_due_at">due at %1$s</string>
+    <string name="pc_map_unavailable_title">Map unavailable</string>
+    <string name="pc_map_unavailable_body">Map tiles could not load. Your saved places still work.</string>
 </resources>

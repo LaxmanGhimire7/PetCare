@@ -1,139 +1,114 @@
 package com.example.petcare.ui.auth
 
-import com.example.petcare.ui.UiSnackbar
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.example.petcare.R
-import com.example.petcare.data.local.AuthPreferences
-import com.example.petcare.data.local.user.AuthRepository
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
+import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.petcare.BuildConfig
+import com.example.petcare.R
+import com.example.petcare.data.local.AuthPreferences
 import com.example.petcare.data.local.BiometricPreferences
-import com.example.petcare.ui.onboarding.OnboardingPrefs
+import com.example.petcare.data.local.user.AuthRepository
+import com.example.petcare.design.LoginActions
+import com.example.petcare.design.LoginScreenBinder
+import com.example.petcare.design.GoogleAuthFlow
+import com.example.petcare.design.GoogleSignInClient
+import com.example.petcare.design.SignInResult
+import com.example.petcare.ui.UiSnackbar
 import com.google.android.material.snackbar.Snackbar
-import com.example.petcare.databinding.FragmentLoginBinding
-import android.util.Patterns
+import kotlinx.coroutines.launch
 
-/** Signs a local account in with a password or an enabled biometric prompt. */
-class LoginFragment : Fragment() {
-
-    private var _binding: FragmentLoginBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+/** V3 login UI backed by the existing local account and biometric session. */
+class LoginFragment : Fragment(R.layout.pc_fragment_login), LoginActions {
+    private val repository by lazy { AuthRepository(requireContext()) }
+    private val auth by lazy { AuthPreferences(requireContext()) }
+    private val biometric by lazy { BiometricPreferences(requireContext()) }
+    private val google by lazy { GoogleSignInClient(BuildConfig.GOOGLE_WEB_CLIENT_ID) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.signInButton.setOnClickListener {
-            if (isValidInput()) {
-                signIn()
-            }
-        }
-        binding.staySignedInCheck.isChecked = AuthPreferences(requireContext()).staySignedIn()
-        val biometricId = BiometricPreferences(requireContext()).enabledUserId()
-        if (biometricId > 0 && BiometricManager.from(requireContext()).canAuthenticate(
-                BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL
-            ) == BiometricManager.BIOMETRIC_SUCCESS) {
-            binding.biometricButton.visibility = View.VISIBLE
-            binding.biometricButton.setOnClickListener { unlockWithBiometric(biometricId) }
-        }
-
-        binding.signUpButton.setOnClickListener {
-            findNavController().navigate(com.example.petcare.R.id.action_login_to_register)
-        }
+        val biometricId = biometric.enabledUserId()
+        val canUseBiometric = biometricId > 0 && BiometricManager.from(requireContext()).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        ) == BiometricManager.BIOMETRIC_SUCCESS
+        val binder = LoginScreenBinder(view, viewLifecycleOwner, this, canUseBiometric)
+        binder.prefill(arguments?.getString(ARG_EMAIL).orEmpty())
+        GoogleAuthFlow(google, viewLifecycleOwner,
+            onAccount = { account -> repository.signInWithGoogle(account.email, account.displayName) },
+            onSignedIn = { onSignedIn() },
+        ).attach(binder.googleButton, binder.googleDivider)
     }
 
-    private fun isValidInput(): Boolean {
-        val email = binding.emailInput.text?.toString()?.trim().orEmpty()
-        val password = binding.passwordInput.text?.toString().orEmpty()
-
-        binding.emailLayout.error = when {
-            email.isEmpty() -> getString(com.example.petcare.R.string.error_email_required)
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> {
-                getString(com.example.petcare.R.string.error_email_invalid)
-            }
-            else -> null
-        }
-        binding.passwordLayout.error = when {
-            password.isEmpty() -> getString(com.example.petcare.R.string.error_password_required)
-            password.length < MINIMUM_PASSWORD_LENGTH -> {
-                getString(com.example.petcare.R.string.error_password_short)
-            }
-            else -> null
+    override suspend fun signIn(email: String, password: CharArray): SignInResult =
+        if (repository.usesGoogle(email)) {
+            SignInResult.UsesGoogle
+        } else if (repository.signIn(email, password, auth.staySignedIn())) {
+            SignInResult.Success
+        } else {
+            SignInResult.WrongCredentials
         }
 
-        return binding.emailLayout.error == null && binding.passwordLayout.error == null
+    override fun onSignedIn() {
+        Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
+        findNavController().navigate(R.id.action_login_to_home)
     }
 
-    private fun signIn() {
-        val email = binding.emailInput.text?.toString().orEmpty()
-        val password = binding.passwordInput.text?.toString().orEmpty()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            if (AuthRepository(requireContext()).signIn(email, password,
-                    binding.staySignedInCheck.isChecked)) {
-                findNavController().navigate(if (OnboardingPrefs(requireContext()).isComplete())
-                    R.id.action_login_to_home else R.id.action_login_to_onboarding)
-            } else {
-                binding.passwordLayout.error = getString(R.string.error_invalid_credentials)
-            }
-        }
+    override fun onForgotPassword(email: String) {
+        findNavController().navigate(
+            R.id.action_login_to_forgot_password,
+            Bundle().apply { putString(ARG_EMAIL, email) },
+        )
     }
 
-    private fun unlockWithBiometric(userId: Long) {
-        val prompt = BiometricPrompt(this, ContextCompat.getMainExecutor(requireContext()),
+    override fun onCreateAccount() {
+        findNavController().navigate(R.id.action_login_to_register)
+    }
+
+    override fun onBack() {
+        findNavController().navigateUp()
+    }
+
+    override fun onBiometric() {
+        val userId = biometric.enabledUserId()
+        if (userId <= 0) return
+        val prompt = BiometricPrompt(
+            this,
+            ContextCompat.getMainExecutor(requireContext()),
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     viewLifecycleOwner.lifecycleScope.launch {
-                        if (AuthRepository(requireContext()).unlockWithBiometric(userId)) {
-                            findNavController().navigate(if (OnboardingPrefs(requireContext()).isComplete())
-                                R.id.action_login_to_home else R.id.action_login_to_onboarding)
-                        } else {
-                            UiSnackbar.make(binding.root, R.string.biometric_account_unavailable,
-                                Snackbar.LENGTH_LONG).show()
+                        if (repository.unlockWithBiometric(userId)) onSignedIn()
+                        else view?.let {
+                            UiSnackbar.make(it, R.string.biometric_account_unavailable, Snackbar.LENGTH_LONG).show()
                         }
                     }
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
-                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                        UiSnackbar.make(binding.root, R.string.biometric_failed,
-                            Snackbar.LENGTH_LONG).show()
+                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                    ) {
+                        view?.let { UiSnackbar.make(it, R.string.biometric_failed, Snackbar.LENGTH_LONG).show() }
                     }
                 }
-            })
-        val info = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.biometric_unlock))
-            .setSubtitle(getString(R.string.biometric_prompt_subtitle))
-            .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-            .build()
-        prompt.authenticate(info)
+            },
+        )
+        prompt.authenticate(
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle(getString(R.string.biometric_unlock))
+                .setSubtitle(getString(R.string.biometric_prompt_subtitle))
+                .setAllowedAuthenticators(
+                    BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+                )
+                .build(),
+        )
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private companion object {
-        const val MINIMUM_PASSWORD_LENGTH = 6
-    }
+    companion object { const val ARG_EMAIL = "email" }
 }

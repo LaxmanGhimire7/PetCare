@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Today" / "Earlier" group heading in the notification centre. -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pcInboxHeader"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="4dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp"
+    android:textAppearance="@style/TextAppearance.PC.Section"
+    tools:text="Today" />

@@ -27,6 +27,7 @@ import com.example.petcare.ui.care.AddCareTaskFragment
 import com.example.petcare.ui.care.EditCareTaskFragment
 import com.example.petcare.ui.expenses.AddExpenseFragment
 import com.example.petcare.ui.providers.AddProviderFragment
+import com.example.petcare.design.PcNotifier
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigationrail.NavigationRailView
 import java.util.ArrayDeque
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         val safeState = savedInstanceState.takeIf { AuthPreferences(this).isSignedIn() }
         super.onCreate(safeState)
         pendingDeepLinkUri = safeState?.getString(STATE_DEEP_LINK)?.let(Uri::parse)
+        taskUriFrom(intent)?.let { pendingDeepLinkUri = it }
         if (intent.action == Intent.ACTION_VIEW && intent.data?.scheme == DEEP_LINK_SCHEME &&
             !AuthPreferences(this).isSignedIn()) {
             // Navigation would otherwise display private pet data before the login route runs.
@@ -166,6 +168,13 @@ class MainActivity : AppCompatActivity() {
             if (AuthPreferences(this).isSignedIn()) controller.handleDeepLink(intent)
             else pendingDeepLinkUri = intent.data
         }
+        taskUriFrom(intent)?.let { uri ->
+            if (AuthPreferences(this).isSignedIn()) {
+                controller.handleDeepLink(Intent(Intent.ACTION_VIEW, uri))
+            } else {
+                pendingDeepLinkUri = uri
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -195,6 +204,11 @@ class MainActivity : AppCompatActivity() {
             putString("importedClinic", source.getStringExtra(EXTRA_IMPORT_CLINIC).orEmpty())
         })
     }
+
+    private fun taskUriFrom(source: Intent): Uri? =
+        source.getLongExtra(PcNotifier.EXTRA_TASK_ID, -1L)
+            .takeIf { it > 0L }
+            ?.let { Uri.parse("petcare://task/$it") }
 
     companion object {
         const val ACTION_REVIEWED_IMPORT = "com.example.petcare.action.REVIEWED_IMPORT"

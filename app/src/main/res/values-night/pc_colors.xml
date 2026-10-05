@@ -7,8 +7,9 @@
     <color name="pc_surface_muted">#222226</color>
     <color name="pc_hairline">#27272A</color>
 
-    <color name="pc_text_primary">#FFFFFF</color>
-    <color name="pc_text_secondary">#A1A1AA</color>
+    <!-- Off-white, not pure white: pure white on true black "glows" and reads as blur. -->
+    <color name="pc_text_primary">#F4F4F5</color>
+    <color name="pc_text_secondary">#B4B4BC</color>
 
     <color name="pc_primary">#FF6B00</color>
     <color name="pc_primary_text">#FF6B00</color>
@@ -22,4 +23,14 @@
     <color name="pc_on_error_container">#FF8A9E</color>
     <!-- Unfilled part of rings and progress segments. -->
     <color name="pc_track">#2A2A2E</color>
+    <!-- Status: password strength, success states. -->
+    <color name="pc_warning">#FBBF24</color>
+    <color name="pc_success">#4ADE80</color>
+    <color name="pc_warning_container">#2E2208</color>
+    <color name="pc_success_container">#0F2A18</color>
+    <color name="pc_card_stroke">#00000000</color>
+    <!-- "Continue with Google" button, per Google's sign-in branding guidelines (dark theme). -->
+    <color name="pc_google_fill">#131314</color>
+    <color name="pc_google_stroke">#8E918F</color>
+    <color name="pc_google_text">#E3E3E3</color>
 </resources>

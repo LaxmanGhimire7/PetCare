@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
+import com.example.petcare.design.applySystemBarPaddingWithKeyboard
 import coil.load
 import com.google.android.material.snackbar.Snackbar
 
@@ -60,6 +62,9 @@ class AddPetFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.applySystemBarPaddingWithKeyboard()
+        PetFormSections.bind(binding, PetFormSections.BASICS)
+        configureSpecies("Dog")
 
         binding.savePetButton.setOnClickListener {
             if (isValidInput()) {
@@ -73,6 +78,26 @@ class AddPetFragment : Fragment() {
 
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
+        }
+    }
+
+    private fun configureSpecies(initial: String) {
+        val checkedId = when (initial.lowercase()) {
+            "cat" -> R.id.pet_species_cat
+            "dog" -> R.id.pet_species_dog
+            else -> R.id.pet_species_other
+        }
+        binding.petSpeciesGroup.check(checkedId)
+        binding.petSpeciesInput.setText(initial)
+        binding.petSpeciesGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            binding.petSpeciesInput.setText(
+                when (checkedIds.firstOrNull()) {
+                    R.id.pet_species_cat -> "Cat"
+                    R.id.pet_species_dog -> "Dog"
+                    else -> "Other"
+                },
+            )
+            binding.petSpeciesLayout.error = null
         }
     }
 
@@ -91,7 +116,9 @@ class AddPetFragment : Fragment() {
             null
         }
 
-        return binding.petNameLayout.error == null && binding.petSpeciesLayout.error == null
+        val valid = binding.petNameLayout.error == null && binding.petSpeciesLayout.error == null
+        if (!valid) PetFormSections.show(binding, PetFormSections.BASICS)
+        return valid
     }
 
     private fun savePet() {
@@ -116,9 +143,8 @@ class AddPetFragment : Fragment() {
                 UiSnackbar.make(binding.root, R.string.pet_save_failed, Snackbar.LENGTH_LONG).show()
             },
             onSaved = { _ ->
+                Toast.makeText(requireContext(), R.string.pet_saved, Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
-                UiSnackbar.make(requireActivity().findViewById(android.R.id.content),
-                    R.string.pet_saved, Snackbar.LENGTH_SHORT).show()
             }
         )
     }

@@ -6,6 +6,7 @@
         <item>Grooming</item>
         <item>Medication</item>
         <item>Healthcare</item>
+        <item>Vaccination</item>
         <item>Cleaning</item>
         <item>General</item>
     </string-array>
@@ -29,5 +30,6 @@
         <item>Dog park</item>
         <item>Pet supply store</item>
         <item>Animal shelter</item>
+        <item>Other place</item>
     </string-array>
 </resources>

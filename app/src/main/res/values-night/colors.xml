@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Pit Lane dark palette is the product default and uses a true-black canvas. -->
-    <color name="canvas">#000000</color>
-    <color name="surface">#111113</color>
-    <color name="surface_raised">#1A1A1D</color>
-    <color name="surface_muted">#222226</color>
-    <color name="hairline">#27272A</color>
-    <color name="track">#2A2A2E</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#A1A1AA</color>
-    <color name="text_tertiary">#71717A</color>
-    <color name="primary">#FF6B00</color>
-    <color name="primary_text">#FF6B00</color>
-    <color name="on_primary">#000000</color>
-    <color name="primary_container">#2A1408</color>
-    <color name="on_primary_container">#FFB28A</color>
-    <color name="error">#FF3B5C</color>
-    <color name="on_error">#000000</color>
-    <color name="error_container">#3A0F18</color>
-    <color name="on_error_container">#FF8A9E</color>
+    <color name="canvas">@color/pc_canvas</color>
+    <color name="surface">@color/pc_surface</color>
+    <color name="surface_raised">@color/pc_surface_raised</color>
+    <color name="surface_muted">@color/pc_surface_muted</color>
+    <color name="hairline">@color/pc_hairline</color>
+    <color name="track">@color/pc_track</color>
+    <color name="text_primary">@color/pc_text_primary</color>
+    <color name="text_secondary">@color/pc_text_secondary</color>
+    <color name="text_tertiary">@color/pc_text_secondary</color>
+    <color name="primary">@color/pc_primary</color>
+    <color name="primary_text">@color/pc_primary_text</color>
+    <color name="on_primary">@color/pc_on_primary</color>
+    <color name="primary_container">@color/pc_primary_container</color>
+    <color name="on_primary_container">@color/pc_on_primary_container</color>
+    <color name="error">@color/pc_error</color>
+    <color name="on_error">@color/pc_on_error</color>
+    <color name="error_container">@color/pc_error_container</color>
+    <color name="on_error_container">@color/pc_on_error_container</color>
     <color name="error_soft">@color/error_container</color>
     <color name="background">@color/canvas</color>
     <color name="secondary">@color/primary</color>

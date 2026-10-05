@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
@@ -38,6 +39,7 @@ class ReminderSettingsFragment : Fragment() {
         binding.defaultReminderTimeInput.setOnClickListener { showTimePicker() }
         binding.saveReminderSettingsButton.setOnClickListener {
             ReminderPreferences(requireContext()).setDefaultReminderMinutesOfDay(selectedMinutesOfDay)
+            Toast.makeText(requireContext(), R.string.reminder_settings_saved, Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
         }
         binding.cancelButton.setOnClickListener { findNavController().navigateUp() }

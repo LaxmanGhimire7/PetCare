@@ -1,5 +1,6 @@
 package com.example.petcare.data.local.user
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -13,5 +14,9 @@ data class UserEntity(
     val email: String,
     val passwordHash: String,
     val passwordSalt: String,
-    val hashAlgorithm: String = PasswordHasher.SHA256
+    val hashAlgorithm: String = PasswordHasher.SHA256,
+    val phone: String? = null,
+    val securityQuestion: String? = null,
+    val securityAnswerHash: String? = null,
+    @ColumnInfo(defaultValue = "'password'") val authProvider: String = "password",
 )

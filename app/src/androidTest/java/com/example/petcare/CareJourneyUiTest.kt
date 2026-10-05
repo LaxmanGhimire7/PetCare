@@ -15,7 +15,6 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.util.TreeIterables
@@ -28,12 +27,9 @@ import com.example.petcare.ui.GestureCoachPrefs
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.startsWith
 import org.junit.Test
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
-import java.text.DateFormat
-import java.util.Calendar
 
 /** Exercises account, pet, and task navigation through the actual XML UI. */
 @RunWith(AndroidJUnit4::class)
@@ -48,30 +44,32 @@ class CareJourneyUiTest {
         AuthPreferences(context).signOut()
         GestureCoachPrefs(context).markSeen()
         val email = "journey${System.currentTimeMillis()}@petcare.test"
-        val password = "PetCare123"
+        val password = "Distant!Cedar7River"
         val petName = "Journey pet"
         val taskTitle = "Journey feeding"
 
         ActivityScenario.launch(MainActivity::class.java).use {
-            waitFor(withId(R.id.sign_up_button))
-            onView(withId(R.id.sign_up_button)).perform(scrollTo(), click())
-            onView(withId(R.id.name_input)).perform(scrollTo(), replaceText("Journey user"))
-            onView(withId(R.id.email_input)).perform(scrollTo(), replaceText(email))
-            onView(withId(R.id.password_input)).perform(scrollTo(), replaceText(password))
-            onView(withId(R.id.confirm_password_input)).perform(scrollTo(),
+            waitFor(withId(R.id.pcWelcomeCreate))
+            onView(withId(R.id.pcWelcomeCreate)).perform(scrollTo(), click())
+            onView(withId(R.id.pcRegisterName)).perform(scrollTo(), replaceText("Journey user"))
+            onView(withId(R.id.pcRegisterEmail)).perform(scrollTo(), replaceText(email))
+            onView(withId(R.id.pcRegisterPassword)).perform(scrollTo(), replaceText(password))
+            onView(withId(R.id.pcRegisterConfirm)).perform(scrollTo(),
                 replaceText(password), closeSoftKeyboard())
-            onView(withId(R.id.create_account_button)).perform(scrollTo(), click())
-            waitFor(withId(R.id.onboarding_skip))
-            onView(withId(R.id.onboarding_skip)).perform(click())
+            onView(withId(R.id.pcRegisterQuestion)).perform(scrollTo(), click())
+            onView(withText(context.resources.getStringArray(R.array.pc_security_questions)[0])).perform(click())
+            onView(withId(R.id.pcRegisterAnswer)).perform(scrollTo(), replaceText("Mochi"), closeSoftKeyboard())
+            onView(withId(R.id.pcRegisterSubmit)).perform(scrollTo(), click())
             waitFor(withId(R.id.settingsFragment))
             onView(withId(R.id.settingsFragment)).perform(click())
             onView(withId(R.id.sign_out_button)).perform(scrollTo(), click())
 
-            waitFor(withId(R.id.sign_in_button))
-            onView(withId(R.id.email_input)).perform(scrollTo(), replaceText(email))
-            onView(withId(R.id.password_input)).perform(scrollTo(),
+            waitFor(withId(R.id.pcWelcomeLogIn))
+            onView(withId(R.id.pcWelcomeLogIn)).perform(scrollTo(), click())
+            onView(withId(R.id.pcLoginEmail)).perform(scrollTo(), replaceText(email))
+            onView(withId(R.id.pcLoginPassword)).perform(scrollTo(),
                 replaceText(password), closeSoftKeyboard())
-            onView(withId(R.id.sign_in_button)).perform(scrollTo(), click())
+            onView(withId(R.id.pcLoginSubmit)).perform(scrollTo(), click())
             waitFor(withId(R.id.pcTodayEmptyAddPet))
             onView(withId(R.id.pcTodayEmptyAddPet)).perform(scrollTo(), click())
 
@@ -82,17 +80,12 @@ class CareJourneyUiTest {
             waitFor(withId(R.id.pcTodayFab))
             onView(withId(R.id.pcTodayFab)).perform(click())
 
-            onView(withId(R.id.care_task_title_input)).perform(scrollTo(),
+            onView(withId(R.id.pcEditorName)).perform(scrollTo(),
                 replaceText(taskTitle), closeSoftKeyboard())
-            onView(withId(R.id.pet_input)).perform(scrollTo(), click())
-            onView(withText("$petName (Cat)")).perform(click())
-            onView(withId(R.id.due_date_input)).perform(scrollTo(), click())
-            onView(withContentDescription(startsWith("Today "))).perform(click())
+            onView(withText(context.resources.getStringArray(R.array.care_categories)[0])).perform(scrollTo(), click())
+            onView(withId(R.id.pcEditorDateRow)).perform(scrollTo(), click())
             onView(withId(com.google.android.material.R.id.confirm_button)).perform(click())
-            val localToday = DateFormat.getDateInstance(DateFormat.MEDIUM)
-                .format(Calendar.getInstance().time)
-            onView(withId(R.id.due_date_input)).check(matches(withText(localToday)))
-            onView(withId(R.id.save_care_task_button)).perform(scrollTo(), click())
+            onView(withId(R.id.pcEditorSave)).perform(scrollTo(), click())
 
             waitFor(withText(taskTitle))
             val ownerId = AuthPreferences(context).ownerId()

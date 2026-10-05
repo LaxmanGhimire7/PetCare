@@ -107,7 +107,7 @@
             android:id="@+id/pcNextUpDone"
             style="@style/Widget.PC.Button.Primary"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="42dp"
             android:layout_weight="1"
             android:text="@string/pc_mark_done"
             app:icon="@drawable/pc_ic_check"
@@ -117,7 +117,7 @@
             android:id="@+id/pcNextUpSnooze"
             style="@style/Widget.PC.Button.Secondary"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="42dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/pc_snooze" />
@@ -126,11 +126,23 @@
             android:id="@+id/pcNextUpPlan"
             style="@style/Widget.PC.Button.Primary"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="42dp"
             android:layout_weight="1"
             android:text="@string/pc_plan_task"
             android:visibility="gone"
             app:icon="@drawable/pc_ic_plus"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/pcNextUpRoutine"
+            style="@style/Widget.PC.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/pc_generate_routine"
+            android:visibility="gone"
+            app:icon="@drawable/pc_ic_checklist"
             app:iconGravity="textStart" />
     </LinearLayout>
 </LinearLayout>
