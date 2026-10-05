@@ -66,6 +66,30 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <TextView style="@style/SettingsSectionTitle" android:text="@string/settings_locations" />
+        <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:paddingVertical="@dimen/space_8">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/space_16"
+                    android:text="@string/settings_locations_hint"
+                    android:textAppearance="@style/TextAppearance.PetCare.Supporting" />
+                <TextView android:id="@+id/settings_location_count"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/space_16" android:paddingTop="@dimen/space_8"
+                    android:textAppearance="@style/TextAppearance.PetCare.Label" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/add_location_button"
+                    style="@style/Widget.PetCare.SettingsRow" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="@string/settings_add_location"
+                    app:icon="@drawable/ic_add" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/saved_locations_button"
+                    style="@style/Widget.PetCare.SettingsRow" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="@string/settings_saved_locations"
+                    app:icon="@drawable/ic_location" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <TextView style="@style/SettingsSectionTitle" android:text="@string/settings_security" />
         <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
             android:layout_width="match_parent" android:layout_height="wrap_content">

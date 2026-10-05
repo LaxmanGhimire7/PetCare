@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -23,7 +24,6 @@ import com.example.petcare.data.local.expense.ExpenseInsights
 import com.example.petcare.data.local.expense.ExpenseSummary
 import com.example.petcare.data.local.pet.PetColor
 import com.example.petcare.databinding.FragmentExpenseListBinding
-import com.example.petcare.databinding.ItemMoneyCategoryBinding
 import com.example.petcare.databinding.ItemMoneyExpenseBinding
 import com.example.petcare.ui.MotionPrefs
 import com.example.petcare.ui.ScreenState
@@ -180,13 +180,16 @@ class ExpenseListFragment : Fragment() {
 
     private fun buildCategories(current: List<ExpenseSummary>) {
         binding.categoryContainer.removeAllViews()
-        current.groupBy { it.category }.mapValues { (_, rows) -> rows.sumOf(ExpenseSummary::amountCents) }
-            .entries.sortedByDescending { it.value }.forEach { (category, amount) ->
-                val row = ItemMoneyCategoryBinding.inflate(layoutInflater, binding.categoryContainer, false)
-                row.categoryName.text = category
-                row.categoryAmount.text = money(amount)
-                binding.categoryContainer.addView(row.root)
-            }
+        if (current.isEmpty()) {
+            binding.categoryContainer.addView(TextView(requireContext()).apply {
+                setText(R.string.money_no_expenses_month)
+                setTextAppearance(R.style.TextAppearance_PetCare_Supporting)
+                val padding = resources.getDimensionPixelSize(R.dimen.space_16)
+                setPadding(padding, padding, padding, padding)
+            })
+            return
+        }
+        ExpenseCategoryBars.append(binding.categoryContainer, layoutInflater, current, ::money)
     }
 
     private fun buildRecent(recent: List<ExpenseSummary>) {
@@ -238,8 +241,10 @@ class ExpenseListFragment : Fragment() {
                     } ?: error("Document stream unavailable")
                 }.isSuccess
             }
-            UiSnackbar.make(binding.root, if (success) R.string.expense_exported else
-                R.string.expense_export_failed, Snackbar.LENGTH_LONG).show()
+            if (success) android.widget.Toast.makeText(requireContext(), R.string.expense_exported,
+                android.widget.Toast.LENGTH_SHORT).show()
+            else UiSnackbar.make(binding.root, R.string.expense_export_failed,
+                Snackbar.LENGTH_LONG).show()
         }
     }
 

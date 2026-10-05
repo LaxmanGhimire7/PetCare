@@ -140,6 +140,16 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="4dp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pcTodayAddPet"
+                style="@style/Widget.PetCare.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_16"
+                android:layout_marginTop="@dimen/space_8"
+                android:text="@string/add_pet"
+                app:icon="@drawable/ic_add" />
+
             <!-- Quick actions: Share (SMS delegation), Routine, Import, Export. -->
             <include
                 android:id="@+id/pcQuickActions"

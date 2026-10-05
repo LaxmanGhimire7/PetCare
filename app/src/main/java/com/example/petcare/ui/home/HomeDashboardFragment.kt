@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.Build
 import android.os.SystemClock
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -273,7 +274,11 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
                             viewLifecycleOwner.lifecycleScope.launch { viewModel.reopenTask(taskId)?.let(scheduler::schedule) }
                         }.show()
                 }
-            } else viewModel.reopenTask(taskId)?.let(scheduler::schedule)
+            } else viewModel.reopenTask(taskId)?.let {
+                scheduler.schedule(it)
+                Toast.makeText(requireContext(), getString(R.string.task_reopened_message, task.title),
+                    Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -283,7 +288,19 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
         }
     }
 
-    override fun onSelectPet(key: String) { viewModel.selectedPetId = key.toLongOrNull(); render() }
+    override fun onSelectPet(key: String) {
+        val petId = key.toLongOrNull()
+        if (petId == null) {
+            onFilterPet(key)
+        } else if (data.pets.any { it.id == petId }) {
+            findNavController().navigate(R.id.petDetailFragment, Bundle().apply { putLong("petId", petId) })
+        }
+    }
+
+    override fun onFilterPet(key: String) {
+        viewModel.selectedPetId = key.toLongOrNull()
+        render()
+    }
     override fun onSelectDay(index: Int) {
         viewModel.selectedEpochDay = LocalDayClock.weekStart(viewModel.selectedEpochDay) + index
         render()
@@ -300,7 +317,11 @@ class HomeDashboardFragment : Fragment(R.layout.pc_fragment_today), TodayActions
     override fun onNextUpSnooze() {
         val id = nextTaskId() ?: return
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.snoozeTask(id, 30)?.let { scheduler.cancel(id); scheduler.schedule(it) }
+            viewModel.snoozeTask(id, 30)?.let {
+                scheduler.cancel(id)
+                scheduler.schedule(it)
+                Toast.makeText(requireContext(), R.string.snoozed_thirty_minutes, Toast.LENGTH_SHORT).show()
+            }
         }
     }
     override fun onPlanTask() = onAddTask()

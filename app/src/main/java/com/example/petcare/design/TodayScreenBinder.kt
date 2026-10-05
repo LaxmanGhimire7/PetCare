@@ -40,6 +40,7 @@ interface TodayActions {
     fun onToggleTask(taskId: Long, done: Boolean)
     fun onOpenTask(taskId: Long)
     fun onSelectPet(key: String)
+    fun onFilterPet(key: String)
     fun onSelectDay(index: Int)
     fun onNextUpDone()
     fun onNextUpSnooze()
@@ -87,6 +88,7 @@ class TodayScreenBinder(
     private val empty: View = root.findViewById(R.id.pcTodayEmpty)
     private val nextUpRoot: View = root.findViewById(R.id.pcNextUp)
     private val petRings: RecyclerView = root.findViewById(R.id.pcPetRings)
+    private val addPet: View = root.findViewById(R.id.pcTodayAddPet)
     private val weekStrip: LinearLayout = root.findViewById(R.id.pcWeekStrip)
     private val timeline: RecyclerView = root.findViewById(R.id.pcTimeline)
     private val timelineHeader: View = root.findViewById(R.id.pcTimelineHeader)
@@ -95,7 +97,7 @@ class TodayScreenBinder(
     private val timelineEmpty: View = root.findViewById(R.id.pcTimelineEmpty)
     private val fab: View = root.findViewById(R.id.pcTodayFab)
 
-    private val ringAdapter = PetRingAdapter(loadPhoto) { actions.onSelectPet(it) }
+    private val ringAdapter = PetRingAdapter(loadPhoto, actions::onSelectPet, actions::onFilterPet)
 
     /** Exposed so you can attach your existing ItemTouchHelper swipe gestures to it. */
     val timelineAdapter = TimelineAdapter(
@@ -131,6 +133,7 @@ class TodayScreenBinder(
         root.findViewById<View>(R.id.pcActionImport).setOnClickListener { actions.onImportPlan() }
         root.findViewById<View>(R.id.pcActionExport).setOnClickListener { actions.onExportPlan() }
         fab.setOnClickListener { actions.onAddTask() }
+        addPet.setOnClickListener { actions.onAddPet() }
         root.findViewById<View>(R.id.pcTodayEmptyAddPet).setOnClickListener { actions.onAddPet() }
 
         startTicker()
@@ -147,6 +150,7 @@ class TodayScreenBinder(
         empty.visibility = if (newState.hasPets) View.GONE else View.VISIBLE
         nextUpRoot.visibility = content
         petRings.visibility = content
+        addPet.visibility = content
         quickActions.visibility = content
         glanceRoot.visibility = content
         timelineHeader.visibility = content

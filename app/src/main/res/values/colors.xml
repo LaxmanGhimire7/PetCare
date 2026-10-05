@@ -46,4 +46,10 @@
     <color name="on_hero">@color/text_primary</color>
     <color name="hero_muted">@color/text_secondary</color>
     <color name="hero_button">@color/primary</color>
+    <color name="expense_food">#CB7100</color>
+    <color name="expense_grooming">#008876</color>
+    <color name="expense_veterinary">#7950B8</color>
+    <color name="expense_medication">#2875B8</color>
+    <color name="expense_toys">#CD5467</color>
+    <color name="expense_other">#69717F</color>
 </resources>

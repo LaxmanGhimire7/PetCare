@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -58,6 +59,8 @@ class AddExpenseFragment : BottomSheetDialogFragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             pets = repositories.pets.observePets().first()
+            val preselectedPetId = arguments?.getLong("petId") ?: 0L
+            selectedPet = pets.firstOrNull { it.id == preselectedPetId }
             if (expenseId > 0) {
                 editing = repositories.expenses.get(expenseId)
                 val expense = editing ?: run { dismiss(); return@launch }
@@ -157,6 +160,8 @@ class AddExpenseFragment : BottomSheetDialogFragment() {
                     category = selectedCategory, amountCents = cents,
                     dateEpochDay = selectedDate, note = note))
             }
+            Toast.makeText(requireContext(), if (existing == null) R.string.expense_added else
+                R.string.expense_updated, Toast.LENGTH_SHORT).show()
             dismiss()
         }
     }

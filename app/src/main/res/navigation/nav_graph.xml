@@ -156,6 +156,10 @@
         <deepLink app:uri="petcare://pet/{petId}" />
         <action android:id="@+id/action_pet_detail_to_edit" app:destination="@id/editPetFragment" />
         <action android:id="@+id/action_pet_detail_to_photos" app:destination="@id/photoViewerFragment" />
+        <action android:id="@+id/action_pet_detail_to_add_care_task" app:destination="@id/addCareTaskFragment" />
+        <action android:id="@+id/action_pet_detail_to_edit_care_task" app:destination="@id/editCareTaskFragment" />
+        <action android:id="@+id/action_pet_detail_to_add_expense" app:destination="@id/addExpenseFragment" />
+        <action android:id="@+id/action_pet_detail_to_expenses" app:destination="@id/expenseListFragment" />
     </fragment>
 
     <fragment android:id="@+id/photoViewerFragment"
@@ -170,6 +174,8 @@
         tools:layout="@layout/fragment_settings">
         <action android:id="@+id/action_settings_to_reminder_settings" app:destination="@id/reminderSettingsFragment" />
         <action android:id="@+id/action_settings_to_search" app:destination="@id/searchFragment" />
+        <action android:id="@+id/action_settings_to_add_location" app:destination="@id/addProviderFragment" />
+        <action android:id="@+id/action_settings_to_saved_locations" app:destination="@id/providerListFragment" />
         <action android:id="@+id/action_settings_to_login" app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph" app:popUpToInclusive="true" />
         <action android:id="@+id/action_settings_to_forgot_password" app:destination="@id/forgotPasswordFragment" />
@@ -234,6 +240,7 @@
     <dialog android:id="@+id/addExpenseFragment" android:name="com.example.petcare.ui.expenses.AddExpenseFragment"
         android:label="@string/navigation_add_expense" tools:layout="@layout/fragment_add_expense">
         <argument android:name="expenseId" app:argType="long" android:defaultValue="0L" />
+        <argument android:name="petId" app:argType="long" android:defaultValue="0L" />
     </dialog>
     <fragment android:id="@+id/providerListFragment" android:name="com.example.petcare.ui.providers.ProviderListFragment"
         android:label="@string/navigation_providers" tools:layout="@layout/fragment_feature_list">
@@ -242,6 +249,7 @@
     </fragment>
     <fragment android:id="@+id/addProviderFragment" android:name="com.example.petcare.ui.providers.AddProviderFragment"
         android:label="@string/navigation_add_provider" tools:layout="@layout/fragment_add_provider">
+        <argument android:name="locationOnly" app:argType="boolean" android:defaultValue="false" />
         <action android:id="@+id/action_add_provider_to_picker" app:destination="@id/placePickerFragment" />
     </fragment>
     <fragment android:id="@+id/placePickerFragment" android:name="com.example.petcare.ui.providers.PlacePickerFragment"

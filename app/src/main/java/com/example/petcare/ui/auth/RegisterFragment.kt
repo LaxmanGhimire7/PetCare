@@ -2,6 +2,7 @@ package com.example.petcare.ui.auth
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.BuildConfig
@@ -23,7 +24,10 @@ class RegisterFragment : Fragment(R.layout.pc_fragment_register), RegisterAction
         val binder = RegisterScreenBinder(view, viewLifecycleOwner, this)
         GoogleAuthFlow(google, viewLifecycleOwner,
             onAccount = { account -> repository.signInWithGoogle(account.email, account.displayName) },
-            onSignedIn = { onRegistered() },
+            onSignedIn = {
+                Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_register_to_home)
+            },
         ).attach(binder.googleButton, binder.googleDivider)
     }
 
@@ -44,6 +48,7 @@ class RegisterFragment : Fragment(R.layout.pc_fragment_register), RegisterAction
         }
 
     override fun onRegistered() {
+        Toast.makeText(requireContext(), R.string.registration_success, Toast.LENGTH_SHORT).show()
         findNavController().navigate(R.id.action_register_to_home)
     }
 

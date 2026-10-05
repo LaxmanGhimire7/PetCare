@@ -1,49 +1,83 @@
 package com.example.petcare.ui.providers
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withStarted
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
-import com.example.petcare.design.applySystemBarTopPadding
+import com.example.petcare.design.applySystemBarPaddingWithKeyboard
 import com.example.petcare.databinding.FragmentPlacePickerBinding
 import com.example.petcare.location.PlaceLocation
+import com.example.petcare.location.NominatimPlaceSearch
+import com.example.petcare.location.PlaceSearchResult
 import com.example.petcare.location.OpenStreetMapTiles
 import com.example.petcare.location.PlaceMarkerIcon
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.Point
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 
 /** Lets the user drop a pin and reverse-geocodes it before returning to the place form. */
 class PlacePickerFragment : Fragment() {
     private var _binding: FragmentPlacePickerBinding? = null
     private val binding get() = _binding!!
     private var mapView: MapView? = null
+    private var map: MapLibreMap? = null
+    private var mapReady = false
+    private var pendingCenter: LatLng? = null
     private var pinSource: GeoJsonSource? = null
     private var pin: LatLng? = null
     private var address: String? = null
+    private var selectedName: String? = null
+    private val locationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        if (grants.values.any { it }) centerOnCurrentLocation()
+        else _binding?.pickerStatus?.setText(R.string.location_permission_denied)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View =
         FragmentPlacePickerBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        view.applySystemBarTopPadding()
+        view.applySystemBarPaddingWithKeyboard()
+        binding.pickerSearchButton.setOnClickListener { searchPlace() }
+        binding.pickerSearchInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchPlace()
+                true
+            } else false
+        }
+        binding.pickerCurrentLocationButton.setOnClickListener {
+            if (hasLocationPermission()) centerOnCurrentLocation()
+            else locationPermission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
         if (state != null && state.containsKey(LATITUDE) && state.containsKey(LONGITUDE)) {
             pin = LatLng(state.getDouble(LATITUDE), state.getDouble(LONGITUDE))
             address = state.getString(ADDRESS)
+            selectedName = state.getString(PLACE_NAME)
             binding.usePinButton.isEnabled = true
         }
         val mapView = try {
@@ -85,7 +119,7 @@ class PlacePickerFragment : Fragment() {
                         if (_binding == null || this@PlacePickerFragment.mapView !== mapView ||
                             !owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return@setStyle
                         try {
-                            style.addImage(PIN_ICON, PlaceMarkerIcon.create(requireContext(), "shelter"))
+                            style.addImage(PIN_ICON, PlaceMarkerIcon.createSearch(requireContext()))
                             val source = GeoJsonSource(PIN_SOURCE)
                             style.addSource(source)
                             style.addLayer(SymbolLayer(PIN_LAYER, PIN_SOURCE)
@@ -93,30 +127,24 @@ class PlacePickerFragment : Fragment() {
                                     PropertyFactory.iconAnchor("bottom"),
                                     PropertyFactory.iconAllowOverlap(true)))
                             pinSource = source
+                            this@PlacePickerFragment.map = map
+                            mapReady = true
                             pin?.let { selected ->
                                 source.setGeoJson(Feature.fromGeometry(
                                     Point.fromLngLat(selected.longitude, selected.latitude)))
                             }
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                pin ?: LatLng(0.0, 0.0), if (pin == null) 2.0 else 14.0))
+                                pin ?: pendingCenter ?: KATHMANDU,
+                                if (pin == null && pendingCenter == null) 13.5 else 16.0))
+                            if (pin == null && pendingCenter == null && hasLocationPermission()) {
+                                centerOnCurrentLocation()
+                            }
+                            map.addOnMapClickListener { point ->
+                                selectPin(point)
+                                true
+                            }
                             map.addOnMapLongClickListener { point ->
-                                if (_binding != null && owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                                    pin = point
-                                    address = null
-                                    source.setGeoJson(Feature.fromGeometry(
-                                        Point.fromLngLat(point.longitude, point.latitude)))
-                                    binding.usePinButton.isEnabled = true
-                                    binding.pickerStatus.setText(R.string.pin_saved)
-                                    // A later geocoder callback must not replace a newer selected pin.
-                                    owner.lifecycleScope.launch {
-                                        val found = PlaceLocation.reverseGeocode(requireContext(), point.latitude, point.longitude)
-                                        if (_binding != null && pin == point) {
-                                            address = found
-                                            if (found == null) binding.pickerStatus.setText(R.string.geocode_unavailable)
-                                            else binding.pickerStatus.text = found
-                                        }
-                                    }
-                                }
+                                selectPin(point)
                                 true
                             }
                         } catch (e: Exception) {
@@ -137,8 +165,112 @@ class PlacePickerFragment : Fragment() {
                 putDouble(LATITUDE, selected.latitude)
                 putDouble(LONGITUDE, selected.longitude)
                 putString(ADDRESS, address)
+                putString(PLACE_NAME, selectedName)
             })
             findNavController().navigateUp()
+        }
+    }
+
+    private fun hasLocationPermission(): Boolean =
+        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    private fun centerOnCurrentLocation() {
+        if (!hasLocationPermission() || !PlaceLocation.playServicesAvailable(requireContext())) {
+            _binding?.pickerStatus?.setText(R.string.location_picker_current_unavailable)
+            return
+        }
+        try {
+            val client = LocationServices.getFusedLocationProviderClient(requireActivity())
+            client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (_binding == null) return@addOnSuccessListener
+                    if (location != null) {
+                        focus(LatLng(location.latitude, location.longitude))
+                        binding.pickerStatus.setText(R.string.location_picker_current_ready)
+                    } else client.lastLocation.addOnSuccessListener { last ->
+                        if (_binding == null) return@addOnSuccessListener
+                        if (last != null) {
+                            focus(LatLng(last.latitude, last.longitude))
+                            binding.pickerStatus.setText(R.string.location_picker_current_ready)
+                        } else binding.pickerStatus.setText(R.string.location_picker_current_unavailable)
+                    }
+                }.addOnFailureListener {
+                    _binding?.pickerStatus?.setText(R.string.location_picker_current_unavailable)
+                }
+        } catch (_: SecurityException) {
+            _binding?.pickerStatus?.setText(R.string.location_permission_denied)
+        }
+    }
+
+    private fun focus(point: LatLng) {
+        pendingCenter = point
+        if (mapReady) map?.animateCamera(CameraUpdateFactory.newLatLngZoom(point, 16.0))
+    }
+
+    private fun searchPlace() {
+        val query = binding.pickerSearchInput.text?.toString()?.trim().orEmpty()
+        if (query.isBlank()) {
+            binding.pickerStatus.setText(R.string.location_picker_search_required)
+            return
+        }
+        requireContext().getSystemService(InputMethodManager::class.java)
+            ?.hideSoftInputFromWindow(binding.pickerSearchInput.windowToken, 0)
+        binding.pickerSearchInput.clearFocus()
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.pickerSearchButton.isEnabled = false
+            binding.pickerStatus.setText(R.string.place_searching)
+            try {
+                val result = withTimeoutOrNull(12_000L) {
+                    val near = map?.cameraPosition?.takeIf { it.zoom >= 5.0 }?.target
+                        ?.let { it.latitude to it.longitude }
+                    val online = if (NominatimPlaceSearch.usesPublicService(requireContext()))
+                        NominatimPlaceSearch.search(requireContext(), query, near)
+                    else PlaceSearchResult.Unavailable
+                    if (online == PlaceSearchResult.Unavailable) {
+                        PlaceLocation.search(requireContext(), query)?.let {
+                            PlaceSearchResult.Found(it.first, it.second, query)
+                        } ?: PlaceSearchResult.Unavailable
+                    } else online
+                } ?: PlaceSearchResult.Unavailable
+                if (_binding == null) return@launch
+                when (result) {
+                    is PlaceSearchResult.Found -> {
+                        val point = LatLng(result.latitude, result.longitude)
+                        selectPin(point, query, result.label)
+                        focus(point)
+                        binding.pickerStatus.text = getString(R.string.location_picker_search_found,
+                            result.label)
+                    }
+                    PlaceSearchResult.NotFound -> binding.pickerStatus.setText(R.string.place_search_empty)
+                    PlaceSearchResult.Unavailable -> binding.pickerStatus.setText(R.string.place_search_unavailable)
+                }
+            } finally {
+                _binding?.pickerSearchButton?.isEnabled = true
+            }
+        }
+    }
+
+    private fun selectPin(point: LatLng, fallbackAddress: String? = null,
+                          name: String? = null) {
+        if (_binding == null) return
+        pin = point
+        address = fallbackAddress
+        selectedName = name
+        pinSource?.setGeoJson(Feature.fromGeometry(Point.fromLngLat(point.longitude,
+            point.latitude)))
+        binding.usePinButton.isEnabled = true
+        binding.pickerStatus.setText(R.string.pin_saved)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val found = withTimeoutOrNull(5_000L) {
+                PlaceLocation.reverseGeocode(requireContext(), point.latitude, point.longitude)
+            }
+            if (_binding != null && pin == point) {
+                address = found ?: fallbackAddress
+                binding.pickerStatus.text = address ?: getString(R.string.geocode_unavailable)
+            }
         }
     }
 
@@ -149,6 +281,7 @@ class PlacePickerFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         pin?.let { outState.putDouble(LATITUDE, it.latitude); outState.putDouble(LONGITUDE, it.longitude) }
         outState.putString(ADDRESS, address)
+        outState.putString(PLACE_NAME, selectedName)
         mapView?.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
     }
@@ -156,6 +289,8 @@ class PlacePickerFragment : Fragment() {
     override fun onDestroyView() {
         mapView?.onDestroy()
         mapView = null
+        map = null
+        mapReady = false
         pinSource = null
         _binding = null
         super.onDestroyView()
@@ -166,9 +301,11 @@ class PlacePickerFragment : Fragment() {
         const val LATITUDE = "latitude"
         const val LONGITUDE = "longitude"
         const val ADDRESS = "address"
+        const val PLACE_NAME = "placeName"
         private const val TAG = "PetCarePlacePicker"
         private const val PIN_SOURCE = "selected-pin"
         private const val PIN_LAYER = "selected-pin-layer"
         private const val PIN_ICON = "selected-pin-icon"
+        private val KATHMANDU = LatLng(27.7172, 85.3240)
     }
 }

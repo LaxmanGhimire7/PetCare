@@ -36,6 +36,7 @@ import com.example.petcare.location.NearbyLoadResult
 import com.example.petcare.location.NearbyOsmPlace
 import com.example.petcare.location.NearbyOsmPlaces
 import com.example.petcare.data.local.provider.ProviderEntity
+import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.databinding.FragmentProviderListBinding
 import com.example.petcare.databinding.ItemPlaceRowBinding
 import com.example.petcare.ui.ScreenState
@@ -65,6 +66,8 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.CancellationException
+import kotlin.math.abs
 
 /** Saved care places with direct map, dial and booking actions. */
 class ProviderListFragment : Fragment() {
@@ -90,6 +93,7 @@ class ProviderListFragment : Fragment() {
     private var searchTargetLabel: String? = null
     private var manualCameraFocus = false
     private var requestedPlaceId = 0L
+    private val savingSuggestions = mutableSetOf<String>()
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
         if (grants.values.any { it }) loadLocation() else permissionFallback()
     }
@@ -102,6 +106,14 @@ class ProviderListFragment : Fragment() {
         }
         manualCameraFocus = state?.getBoolean(MANUAL_CAMERA_FOCUS) ?: false
         view.applySystemBarTopPadding()
+        binding.saveSearchResultButton.visibility = if (searchTarget == null) View.GONE else View.VISIBLE
+        binding.saveSearchResultButton.setOnClickListener {
+            val target = searchTarget ?: return@setOnClickListener
+            val label = searchTargetLabel.orEmpty()
+            val name = label.substringBefore(',').trim().ifBlank { label }
+            saveSuggestedLocation(name, label, target.latitude, target.longitude,
+                resources.getStringArray(R.array.provider_types).last())
+        }
         BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_COLLAPSED
         binding.addButton.setOnClickListener { findNavController().navigate(R.id.action_providers_to_add_provider) }
         binding.placeSearchButton.setOnClickListener { searchAddress() }
@@ -521,6 +533,7 @@ class ProviderListFragment : Fragment() {
                         val target = LatLng(result.latitude, result.longitude)
                         searchTarget = target
                         searchTargetLabel = result.label
+                        binding.saveSearchResultButton.visibility = View.VISIBLE
                         showSearchTarget(target, result.label)
                         setSearchStatus(getString(R.string.place_search_showing, result.label))
                         UiSnackbar.make(binding.root,
@@ -580,6 +593,7 @@ class ProviderListFragment : Fragment() {
     private fun clearSearchTarget() {
         searchTarget = null
         searchTargetLabel = null
+        _binding?.saveSearchResultButton?.visibility = View.GONE
         searchOverlay?.clear()
         setSearchStatus(null)
     }
@@ -686,11 +700,50 @@ class ProviderListFragment : Fragment() {
         manualCameraFocus = true
         BottomSheetBehavior.from(binding.placeSheet).state = BottomSheetBehavior.STATE_COLLAPSED
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(target, 15.0))
-        UiSnackbar.make(binding.root, getString(R.string.nearby_showing, place.name), Snackbar.LENGTH_LONG)
-            .setAction(R.string.directions) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(place.name)
+            .setMessage(R.string.location_suggestion_message)
+            .setPositiveButton(R.string.location_save_suggestion) { _, _ ->
+                saveSuggestedLocation(place.name, null, place.latitude, place.longitude,
+                    categoryType(place.category))
+            }
+            .setNeutralButton(R.string.directions) { _, _ ->
                 openIntent(Intent(Intent.ACTION_VIEW,
                     Uri.parse("geo:${place.latitude},${place.longitude}?q=${Uri.encode(place.name)}")))
-            }.show()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun saveSuggestedLocation(name: String, address: String?, latitude: Double,
+                                      longitude: Double, type: String) {
+        val key = "$latitude,$longitude"
+        if (!savingSuggestions.add(key)) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                if (places.any { it.latitude != null && it.longitude != null &&
+                        abs(it.latitude - latitude) < 0.00001 && abs(it.longitude - longitude) < 0.00001 }) {
+                    UiSnackbar.make(binding.root, R.string.location_already_saved, Snackbar.LENGTH_SHORT).show()
+                    return@launch
+                }
+                val savedAddress = address?.takeIf(String::isNotBlank)
+                    ?: withTimeoutOrNull(5_000L) {
+                        PlaceLocation.reverseGeocode(requireContext(), latitude, longitude)
+                    }.orEmpty().ifBlank { name }
+                PetCareRepositories(requireContext()).places.add(ProviderEntity(
+                    name = name, type = type, address = savedAddress,
+                    latitude = latitude, longitude = longitude,
+                ))
+                Toast.makeText(requireContext(), R.string.location_saved_for_tasks,
+                    Toast.LENGTH_LONG).show()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                UiSnackbar.make(binding.root, R.string.location_save_failed, Snackbar.LENGTH_LONG).show()
+            } finally {
+                savingSuggestions.remove(key)
+            }
+        }
     }
 
     private fun openMap(provider: ProviderEntity) {

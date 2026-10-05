@@ -47,7 +47,9 @@ class DelegationPreviewFragment : Fragment() {
         FragmentDelegationPreviewBinding.inflate(inflater, container, false).also { _binding = it }.root
 
     override fun onViewCreated(view: View, state: Bundle?) {
-        binding.messageInput.setText(requireArguments().getString(MESSAGE).orEmpty())
+        val careDetails = requireArguments().getString(MESSAGE).orEmpty().trim()
+        binding.messageInput.setText(if (careDetails.isBlank()) "" else
+            getString(R.string.delegation_message_template, careDetails))
         petIds.firstOrNull()?.let { id ->
             CaregiverPreferences(requireContext()).get(id)?.let { (name, number) ->
                 binding.caregiverNameInput.setText(name)

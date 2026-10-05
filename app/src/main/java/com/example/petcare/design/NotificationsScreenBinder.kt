@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
@@ -52,7 +53,10 @@ class NotificationsScreenBinder(
     init {
         root.applySystemBarTopPadding()
         root.findViewById<View>(R.id.pcInboxBack).setOnClickListener { actions.onBack() }
-        markAll.setOnClickListener { store.markAllRead() }
+        markAll.setOnClickListener {
+            store.markAllRead()
+            Toast.makeText(context, R.string.notifications_marked_read, Toast.LENGTH_SHORT).show()
+        }
         list.layoutManager = LinearLayoutManager(context)
         list.adapter = adapter
         ItemTouchHelper(SwipeToRemove()).attachToRecyclerView(list)

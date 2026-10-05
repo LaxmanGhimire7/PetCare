@@ -2,6 +2,7 @@ package com.example.petcare.ui.auth
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -53,6 +54,7 @@ class LoginFragment : Fragment(R.layout.pc_fragment_login), LoginActions {
         }
 
     override fun onSignedIn() {
+        Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
         findNavController().navigate(R.id.action_login_to_home)
     }
 

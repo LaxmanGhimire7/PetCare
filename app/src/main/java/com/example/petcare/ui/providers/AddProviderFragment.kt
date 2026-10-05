@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -17,7 +18,9 @@ import com.example.petcare.data.local.PetCareDatabase
 import com.example.petcare.data.local.provider.ProviderEntity
 import com.example.petcare.data.local.provider.ProviderRepository
 import com.example.petcare.databinding.FragmentAddProviderBinding
+import com.example.petcare.location.PlaceLocation
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Creates or edits a saved place, with coordinates from the map picker. */
 class AddProviderFragment : Fragment() {
@@ -26,16 +29,32 @@ class AddProviderFragment : Fragment() {
     private val repositories by lazy { PetCareRepositories(requireContext()) }
     private var selectedType = "Veterinary clinic"
     private var editing: ProviderEntity? = null
+    private var locationOnly = false
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentAddProviderBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
         view.applySystemBarTopPadding()
         val types = resources.getStringArray(R.array.provider_types).toList()
+        locationOnly = arguments?.getBoolean("locationOnly") == true
+        selectedType = if (locationOnly) types.last() else types.first()
+        if (locationOnly) {
+            binding.formTitle.setText(R.string.location_form_title)
+            binding.saveButton.setText(R.string.location_save_suggestion)
+            binding.nameLayout.hint = getString(R.string.location_name_hint)
+            binding.addressLayout.hint = getString(R.string.location_address_optional)
+            binding.typeLayout.visibility = View.GONE
+            binding.hoursLayout.visibility = View.GONE
+            binding.phoneLayout.visibility = View.GONE
+            binding.urlLayout.visibility = View.GONE
+        }
         binding.typeInput.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types)); binding.typeInput.setText(selectedType, false)
         binding.typeInput.setOnItemClickListener { _, _, position, _ -> selectedType = types[position] }
         SelectionDialog.attach(binding.typeInput, R.string.provider_type, types) {
             selectedType = types[it]
         }
         parentFragmentManager.setFragmentResultListener(PlacePickerFragment.PIN_RESULT, viewLifecycleOwner) { _, result ->
+            result.getString(PlacePickerFragment.PLACE_NAME)?.takeIf(String::isNotBlank)?.let {
+                if (binding.nameInput.text.isNullOrBlank()) binding.nameInput.setText(it)
+            }
             binding.latitudeInput.setText(coordinate(result.getDouble(PlacePickerFragment.LATITUDE)))
             binding.longitudeInput.setText(coordinate(result.getDouble(PlacePickerFragment.LONGITUDE)))
             result.getString(PlacePickerFragment.ADDRESS)?.takeIf(String::isNotBlank)?.let {
@@ -64,7 +83,9 @@ class AddProviderFragment : Fragment() {
         binding.cancelButton.setOnClickListener { findNavController().navigateUp() }; binding.saveButton.setOnClickListener { save() }
     }
     private fun save() {
-        val name = binding.nameInput.text?.toString()?.trim().orEmpty(); val address = binding.addressInput.text?.toString()?.trim().orEmpty()
+        val name = binding.nameInput.text?.toString()?.trim().orEmpty()
+        val typedAddress = binding.addressInput.text?.toString()?.trim().orEmpty()
+        val address = typedAddress.ifBlank { if (locationOnly) name else "" }
         binding.nameLayout.error = if (name.isBlank()) getString(R.string.error_provider_name_required) else null
         binding.addressLayout.error = if (address.isBlank()) getString(R.string.error_provider_address_required) else null
         if (name.isBlank() || address.isBlank()) return
@@ -85,7 +106,15 @@ class AddProviderFragment : Fragment() {
             openingHours = binding.hoursInput.text?.toString()?.trim().orEmpty(), phone = binding.phoneInput.text?.toString()?.trim().orEmpty(), bookingUrl = binding.urlInput.text?.toString()?.trim().orEmpty())
         viewLifecycleOwner.lifecycleScope.launch {
             val repository = repositories.places
-            if (editing == null) repository.add(item) else repository.update(item)
+            val resolved = if (locationOnly && typedAddress.isNotBlank() &&
+                latitude == null && longitude == null) {
+                val coordinates = withTimeoutOrNull(8_000L) { PlaceLocation.search(requireContext(), address) }
+                item.copy(latitude = coordinates?.first, longitude = coordinates?.second)
+            } else item
+            if (editing == null) repository.add(resolved) else repository.update(resolved)
+            Toast.makeText(requireContext(), if (locationOnly) R.string.location_saved_for_tasks else
+                if (editing == null) R.string.place_added else R.string.place_updated,
+                Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
         }
     }

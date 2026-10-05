@@ -3,6 +3,7 @@ package com.example.petcare.design
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -172,6 +173,7 @@ class ForgotPasswordBinder(
             confirm.text?.clear()
             Haptics.confirm(save)
             show(STEP_DONE)
+            Toast.makeText(context, R.string.password_updated, Toast.LENGTH_SHORT).show()
         }
     }
 

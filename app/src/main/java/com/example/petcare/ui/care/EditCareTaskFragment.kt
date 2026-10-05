@@ -2,6 +2,7 @@ package com.example.petcare.ui.care
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -85,6 +86,7 @@ class EditCareTaskFragment : Fragment(R.layout.pc_fragment_task_editor), TaskEdi
                     scheduler.cancel(saved.id)
                     if (!saved.isCompleted) scheduler.schedule(saved)
                 }
+                Toast.makeText(requireContext(), R.string.task_updated, Toast.LENGTH_SHORT).show()
                 findNavController().navigateUp()
             },
         )

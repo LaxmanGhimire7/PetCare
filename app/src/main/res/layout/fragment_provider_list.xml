@@ -157,6 +157,16 @@
                 android:textAppearance="@style/TextAppearance.PetCare.Supporting"
                 android:visibility="gone" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_search_result_button"
+                style="@style/Widget.PetCare.Button.Tonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_8"
+                android:text="@string/location_save_suggestion"
+                android:visibility="gone"
+                app:icon="@drawable/ic_add" />
+
             <TextView
                 android:id="@+id/place_location_status"
                 android:layout_width="match_parent"

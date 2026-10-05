@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +19,7 @@ import com.example.petcare.data.local.pet.PetEntity
 import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
-import com.example.petcare.design.applySystemBarTopPadding
+import com.example.petcare.design.applySystemBarPaddingWithKeyboard
 import kotlinx.coroutines.launch
 
 /** Updates an existing pet profile and its photos without changing its owner. */
@@ -30,12 +31,15 @@ class EditPetFragment : Fragment() {
     private var selectedColorIndex = 0
     private val photoUris = mutableListOf<Uri>()
     private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        if (uris.isEmpty()) return@registerForActivityResult
+        photoUris.clear()
         uris.forEach {
             runCatching {
                 requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             if (it !in photoUris) photoUris += it
         }
+        binding.selectPhotoButton.setText(R.string.change_photos)
         photoUris.firstOrNull()?.let {
             binding.petPhotoPreview.visibility = View.VISIBLE
             binding.petPhotoPreview.setPadding(0, 0, 0, 0)
@@ -50,12 +54,15 @@ class EditPetFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.applySystemBarTopPadding()
+        view.applySystemBarPaddingWithKeyboard()
+        PetFormSections.bind(binding, arguments?.getString(PetFormSections.ARG_SECTION).orEmpty())
         val id = arguments?.getLong("petId") ?: 0L
         if (id == 0L) { findNavController().navigateUp(); return }
         binding.petFormTitle.setText(R.string.edit_pet_title)
         binding.petFormSubtitle.setText(R.string.edit_pet_subtitle)
         binding.savePetButton.setText(R.string.save_changes)
+        binding.savePetButton.isEnabled = false
+        binding.selectPhotoButton.isEnabled = false
         binding.selectPhotoButton.setOnClickListener { photoPicker.launch(arrayOf("image/*")) }
         binding.cancelButton.setOnClickListener { findNavController().navigateUp() }
         binding.savePetButton.setOnClickListener { save() }
@@ -81,12 +88,15 @@ class EditPetFragment : Fragment() {
             binding.healthNotesInput.setText(savedPet.healthNotes)
             photoUris.clear()
             photoUris += savedPet.photos().map(Uri::parse)
+            if (photoUris.isNotEmpty()) binding.selectPhotoButton.setText(R.string.change_photos)
             photoUris.firstOrNull()?.let { uri ->
                 binding.petPhotoPreview.visibility = View.VISIBLE
                 binding.petPhotoPreview.setPadding(0, 0, 0, 0)
                 binding.petPhotoPreview.load(uri)
             }
             updatePhotoCount()
+            binding.savePetButton.isEnabled = true
+            binding.selectPhotoButton.isEnabled = true
         }
     }
 
@@ -115,7 +125,10 @@ class EditPetFragment : Fragment() {
         val species = binding.petSpeciesInput.text?.toString()?.trim().orEmpty()
         binding.petNameLayout.error = if (name.isEmpty()) getString(R.string.error_pet_name_required) else null
         binding.petSpeciesLayout.error = if (species.isEmpty()) getString(R.string.error_pet_species_required) else null
-        if (name.isEmpty() || species.isEmpty()) return
+        if (name.isEmpty() || species.isEmpty()) {
+            PetFormSections.show(binding, PetFormSections.BASICS)
+            return
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             val storedPhotos = photoUris.map(Uri::toString)
             repository.updatePet(savedPet.copy(
@@ -135,6 +148,7 @@ class EditPetFragment : Fragment() {
                 photoUri = storedPhotos.firstOrNull(),
                 photoUris = storedPhotos.joinToString(PetEntity.PHOTO_SEPARATOR)
             ))
+            Toast.makeText(requireContext(), R.string.pet_updated, Toast.LENGTH_SHORT).show()
             findNavController().navigateUp()
         }
     }

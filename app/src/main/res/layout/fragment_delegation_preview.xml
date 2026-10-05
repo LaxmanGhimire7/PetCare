@@ -7,6 +7,9 @@
         android:orientation="vertical" android:padding="@dimen/space_20">
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/delegation_preview_title" android:textAppearance="@style/TextAppearance.PetCare.Display" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_8" android:text="@string/delegation_preview_intro"
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting" />
         <TextView style="@style/MoneySectionTitle" android:text="@string/delegation_contact" />
         <com.google.android.material.card.MaterialCardView style="@style/Widget.PetCare.Card"
             android:layout_width="match_parent" android:layout_height="wrap_content">

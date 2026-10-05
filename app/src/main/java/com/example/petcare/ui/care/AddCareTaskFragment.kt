@@ -2,6 +2,7 @@ package com.example.petcare.ui.care
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -114,13 +115,10 @@ class AddCareTaskFragment : Fragment(R.layout.pc_fragment_task_editor), TaskEdit
                     findNavController().getBackStackEntry(R.id.homeDashboardFragment)
                         .savedStateHandle[SAVED_TASK_RESULT_KEY] = saved.id
                 }
-                val host = requireActivity().findViewById<View>(android.R.id.content)
-                findNavController().navigateUp()
-                UiSnackbar.make(
-                    host,
+                Toast.makeText(requireContext(),
                     getString(R.string.task_saved_for_date, formatDate(saved.dueDateEpochDay)),
-                    Snackbar.LENGTH_LONG,
-                ).show()
+                    Toast.LENGTH_LONG).show()
+                findNavController().navigateUp()
             },
         )
     }

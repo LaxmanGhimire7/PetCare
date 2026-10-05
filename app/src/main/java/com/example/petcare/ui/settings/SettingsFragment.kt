@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +24,7 @@ import com.example.petcare.data.local.backup.CareDataBackup
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import androidx.biometric.BiometricManager
 import com.example.petcare.data.local.BiometricPreferences
@@ -70,6 +72,19 @@ class SettingsFragment : Fragment() {
         binding.reminderSettingsButton.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_reminder_settings)
         }
+        binding.addLocationButton.setOnClickListener {
+            findNavController().navigate(R.id.action_settings_to_add_location,
+                Bundle().apply { putBoolean("locationOnly", true) })
+        }
+        binding.savedLocationsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_settings_to_saved_locations)
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            PetCareRepositories(requireContext()).places.observeAll().collect { places ->
+                binding.settingsLocationCount.text = resources.getQuantityString(
+                    R.plurals.settings_location_count, places.size, places.size)
+            }
+        }
         binding.searchButton.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_search)
         }
@@ -80,25 +95,37 @@ class SettingsFragment : Fragment() {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.settings_theme)
                 .setSingleChoiceItems(labels, modes.indexOf(settings.themeMode())) { dialog, index ->
-                    settings.setThemeMode(modes[index])
+                    if (settings.themeMode() != modes[index]) {
+                        settings.setThemeMode(modes[index])
+                        Toast.makeText(requireContext().applicationContext, R.string.settings_theme_saved,
+                            Toast.LENGTH_SHORT).show()
+                    }
                     dialog.dismiss()
                 }.setNegativeButton(R.string.cancel, null).show()
         }
         binding.notificationsSwitch.isChecked = settings.notificationsEnabled()
         binding.notificationsSwitch.setOnCheckedChangeListener { _, enabled ->
             settings.setNotificationsEnabled(enabled)
+            Toast.makeText(requireContext(), if (enabled) R.string.notifications_enabled else
+                R.string.notifications_disabled, Toast.LENGTH_SHORT).show()
         }
         val biometric = BiometricPreferences(requireContext())
         binding.biometricSwitch.isChecked = biometric.isEnabledFor(auth.ownerId())
         binding.biometricSwitch.setOnCheckedChangeListener { _, enabled ->
             if (!enabled) {
+                val wasEnabled = biometric.isEnabledFor(auth.ownerId())
                 biometric.setEnabledFor(auth.ownerId(), false)
+                if (wasEnabled) Toast.makeText(requireContext(), R.string.biometric_disabled,
+                    Toast.LENGTH_SHORT).show()
             } else {
                 val available = BiometricManager.from(requireContext()).canAuthenticate(
                     BiometricManager.Authenticators.BIOMETRIC_WEAK or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
                 ) == BiometricManager.BIOMETRIC_SUCCESS
-                if (available) biometric.setEnabledFor(auth.ownerId(), true)
+                if (available) {
+                    biometric.setEnabledFor(auth.ownerId(), true)
+                    Toast.makeText(requireContext(), R.string.biometric_enabled, Toast.LENGTH_SHORT).show()
+                }
                 else {
                     binding.biometricSwitch.isChecked = false
                     UiSnackbar.make(binding.root, R.string.biometric_unavailable,
@@ -128,7 +155,8 @@ class SettingsFragment : Fragment() {
                 val loaded = runCatching { DemoDataSeeder(requireContext()).load() }.isSuccess
                 binding.loadDemoButton.isEnabled = true
                 if (loaded) {
-                    UiSnackbar.make(binding.root, R.string.demo_data_loaded, Snackbar.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext().applicationContext, R.string.demo_data_loaded,
+                        Toast.LENGTH_SHORT).show()
                     requireActivity().recreate()
                 } else {
                     UiSnackbar.make(binding.root, R.string.demo_data_failed, Snackbar.LENGTH_LONG).show()
@@ -181,6 +209,7 @@ class SettingsFragment : Fragment() {
                 GoogleSignInClient(BuildConfig.GOOGLE_WEB_CLIENT_ID).signOut(app)
             }
             auth.signOut()
+            Toast.makeText(requireContext(), R.string.signed_out, Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_settings_to_welcome)
         }
     }
@@ -203,11 +232,8 @@ class SettingsFragment : Fragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     if (repository.saveRecovery(selected, response)) {
                         binding.accountRecoveryButton.visibility = View.GONE
-                        UiSnackbar.make(
-                            binding.root,
-                            R.string.settings_account_recovery_saved,
-                            Snackbar.LENGTH_LONG,
-                        ).show()
+                        Toast.makeText(requireContext(), R.string.settings_account_recovery_saved,
+                            Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -225,8 +251,9 @@ class SettingsFragment : Fragment() {
                     } ?: error("Document stream unavailable")
                 }
             }.isSuccess
-            UiSnackbar.make(binding.root, if (success) R.string.backup_saved else
-                R.string.backup_failed, Snackbar.LENGTH_LONG).show()
+            if (success) Toast.makeText(requireContext(), R.string.backup_saved,
+                Toast.LENGTH_SHORT).show()
+            else UiSnackbar.make(binding.root, R.string.backup_failed, Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -245,9 +272,11 @@ class SettingsFragment : Fragment() {
                             } ?: error("Document stream unavailable")
                         }
                     }.getOrNull()
-                    UiSnackbar.make(binding.root, if (count == null) getString(R.string.restore_failed)
-                        else resources.getQuantityString(R.plurals.restore_finished, count, count),
+                    if (count == null) UiSnackbar.make(binding.root, R.string.restore_failed,
                         Snackbar.LENGTH_LONG).show()
+                    else Toast.makeText(requireContext(),
+                        resources.getQuantityString(R.plurals.restore_finished, count, count),
+                        Toast.LENGTH_LONG).show()
                 }
             }.show()
     }

@@ -2,6 +2,7 @@ package com.example.petcare.ui.auth
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.BuildConfig
@@ -25,7 +26,10 @@ class WelcomeFragment : Fragment(R.layout.pc_fragment_welcome) {
         )
         GoogleAuthFlow(google, viewLifecycleOwner,
             onAccount = { account -> repository.signInWithGoogle(account.email, account.displayName) },
-            onSignedIn = { findNavController().navigate(R.id.action_welcome_to_home) },
+            onSignedIn = {
+                Toast.makeText(requireContext(), R.string.login_success, Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_welcome_to_home)
+            },
         ).attach(binder.googleButton)
     }
 }

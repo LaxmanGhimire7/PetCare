@@ -67,8 +67,16 @@ class TaskDetailSheet : BottomSheetDialogFragment(R.layout.pc_sheet_task_detail)
             if (done) {
                 repositories.tasks.completeTask(taskId)?.let(scheduler::schedule)
                 scheduler.cancel(taskId)
+                current?.task?.title?.let { title ->
+                    Toast.makeText(requireContext(), getString(R.string.task_done_message, title),
+                        Toast.LENGTH_SHORT).show()
+                }
             } else {
-                repositories.tasks.reopenTask(taskId)?.let(scheduler::schedule)
+                repositories.tasks.reopenTask(taskId)?.let {
+                    scheduler.schedule(it)
+                    Toast.makeText(requireContext(), getString(R.string.task_reopened_message, it.title),
+                        Toast.LENGTH_SHORT).show()
+                }
             }
             load()
         }
@@ -105,6 +113,7 @@ class TaskDetailSheet : BottomSheetDialogFragment(R.layout.pc_sheet_task_detail)
             repositories.tasks.snoozeTask(taskId, 30)?.let { moved ->
                 scheduler.cancel(taskId)
                 scheduler.schedule(moved)
+                Toast.makeText(requireContext(), R.string.snoozed_thirty_minutes, Toast.LENGTH_SHORT).show()
             }
             load()
         }
@@ -115,18 +124,26 @@ class TaskDetailSheet : BottomSheetDialogFragment(R.layout.pc_sheet_task_detail)
             repositories.tasks.deleteTask(taskId) ?: return@launch
             scheduler.cancel(taskId)
             InboxStore.get(requireContext()).removeForTask(taskId)
+            Toast.makeText(requireContext(), R.string.task_deleted, Toast.LENGTH_SHORT).show()
             dismiss()
         }
     }
 
     override fun onOpenPlace(taskId: Long) {
         val task = current?.task ?: return
-        val latitude = task.latitude ?: return
-        val longitude = task.longitude ?: return
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("geo:$latitude,$longitude?q=$latitude,$longitude")))
-        } catch (_: ActivityNotFoundException) {
-            Toast.makeText(requireContext(), R.string.no_compatible_app, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val place = task.placeId?.let { repositories.places.get(it) }
+            val target = when {
+                task.latitude != null && task.longitude != null ->
+                    "geo:${task.latitude},${task.longitude}?q=${task.latitude},${task.longitude}"
+                place != null -> "geo:0,0?q=${Uri.encode(place.address.ifBlank { place.name })}"
+                else -> return@launch
+            }
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
+            } catch (_: ActivityNotFoundException) {
+                Toast.makeText(requireContext(), R.string.no_compatible_app, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
