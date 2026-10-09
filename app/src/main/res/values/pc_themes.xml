@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    PetCare design kit: app theme.
+    App theme and Material 3 colour role mapping.
     Set android:theme="@style/Theme.PetCareDesign" on <application> in AndroidManifest.xml.
 
     Every Material 3 colour role is mapped explicitly. Unmapped roles fall back to Material's

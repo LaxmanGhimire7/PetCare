@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.petcare.CarePlanIcsCodecTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-20T06:03:51.514Z" hostname="LAXMAN" time="0.13">
-  <properties/>
-  <testcase name="exportedPlanRoundTripsAllTasks" classname="com.example.petcare.CarePlanIcsCodecTest" time="0.116"/>
-  <testcase name="longUnicodeDescriptionsStayFoldedAndReadable" classname="com.example.petcare.CarePlanIcsCodecTest" time="0.004"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

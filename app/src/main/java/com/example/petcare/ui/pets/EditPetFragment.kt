@@ -11,7 +11,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import coil.load
 import com.example.petcare.R
 import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.data.local.PetCareDatabase
@@ -32,20 +31,20 @@ class EditPetFragment : Fragment() {
     private val photoUris = mutableListOf<Uri>()
     private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isEmpty()) return@registerForActivityResult
-        photoUris.clear()
-        uris.forEach {
+        // Keep saved photos in place when the owner adds another picker selection.
+        val updated = PetPhotoSelection.append(photoUris, uris)
+        val added = updated.drop(photoUris.size)
+        added.forEach {
             runCatching {
                 requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            if (it !in photoUris) photoUris += it
         }
-        binding.selectPhotoButton.setText(R.string.change_photos)
-        photoUris.firstOrNull()?.let {
-            binding.petPhotoPreview.visibility = View.VISIBLE
-            binding.petPhotoPreview.setPadding(0, 0, 0, 0)
-            binding.petPhotoPreview.load(it)
+        photoUris.clear()
+        photoUris += updated
+        if (uris.distinct().count { it !in updated } > 0) {
+            Toast.makeText(requireContext(), R.string.pet_photo_limit_reached, Toast.LENGTH_SHORT).show()
         }
-        updatePhotoCount()
+        renderPhotos()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -64,6 +63,10 @@ class EditPetFragment : Fragment() {
         binding.savePetButton.isEnabled = false
         binding.selectPhotoButton.isEnabled = false
         binding.selectPhotoButton.setOnClickListener { photoPicker.launch(arrayOf("image/*")) }
+        binding.clearPhotosButton.setOnClickListener {
+            photoUris.clear()
+            renderPhotos()
+        }
         binding.cancelButton.setOnClickListener { findNavController().navigateUp() }
         binding.savePetButton.setOnClickListener { save() }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -87,14 +90,10 @@ class EditPetFragment : Fragment() {
             binding.groomingRoutineInput.setText(savedPet.groomingRoutine)
             binding.healthNotesInput.setText(savedPet.healthNotes)
             photoUris.clear()
-            photoUris += savedPet.photos().map(Uri::parse)
-            if (photoUris.isNotEmpty()) binding.selectPhotoButton.setText(R.string.change_photos)
-            photoUris.firstOrNull()?.let { uri ->
-                binding.petPhotoPreview.visibility = View.VISIBLE
-                binding.petPhotoPreview.setPadding(0, 0, 0, 0)
-                binding.petPhotoPreview.load(uri)
-            }
-            updatePhotoCount()
+            photoUris += if (savedInstanceState?.containsKey(PHOTO_STATE) == true) {
+                savedInstanceState.getStringArrayList(PHOTO_STATE).orEmpty().map(Uri::parse)
+            } else savedPet.photos().map(Uri::parse)
+            renderPhotos()
             binding.savePetButton.isEnabled = true
             binding.selectPhotoButton.isEnabled = true
         }
@@ -153,13 +152,29 @@ class EditPetFragment : Fragment() {
         }
     }
 
-    private fun updatePhotoCount() {
-        binding.photoCountText.text = if (photoUris.isEmpty()) {
-            getString(R.string.profile_photo_subtitle)
-        } else {
-            resources.getQuantityString(R.plurals.selected_photo_count, photoUris.size, photoUris.size)
-        }
+    private fun renderPhotos() {
+        binding.selectPhotoButton.isEnabled = photoUris.size < PetPhotoSelection.MAX_PHOTOS
+        PetPhotoStrip.render(binding, photoUris, onCoverSelected = { cover ->
+            if (photoUris.firstOrNull() != cover) {
+                val updated = PetPhotoSelection.chooseCover(photoUris, cover)
+                photoUris.clear()
+                photoUris += updated
+                renderPhotos()
+                binding.photoStripScroll.scrollTo(0, 0)
+            }
+        }, onPhotoRemoved = { photo ->
+            photoUris.remove(photo)
+            renderPhotos()
+        })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        // Before the profile loads, Room remains the source of truth after recreation.
+        if (pet != null) outState.putStringArrayList(PHOTO_STATE, ArrayList(photoUris.map(Uri::toString)))
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
+
+    private companion object { const val PHOTO_STATE = "selectedPetPhotos" }
 }

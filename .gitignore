@@ -11,6 +11,7 @@
 /.idea/markdown.xml
 .DS_Store
 /build
+/PetCare-submission.zip
 /captures
 .externalNativeBuild
 .cxx
@@ -23,8 +24,3 @@ local.properties
 .kotlin/
 *.jks
 *.keystore
-/extract_kit.py
-/petcare-design-kit/
-/PetCare_Design_Kit.docx
-/app/PetCare_Design_Kit.docx
-.petcare-kit/

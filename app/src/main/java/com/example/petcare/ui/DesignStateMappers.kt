@@ -17,6 +17,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+/** Converts Room summaries into the display models used by the Today, Pets, and Places binders. */
 private fun dayLabel(day: Long, pattern: String): String =
     SimpleDateFormat(pattern, Locale.getDefault()).apply {
         timeZone = TimeZone.getTimeZone("UTC")
@@ -65,6 +66,7 @@ fun TodayData.toTodayUiState(
     nowMillis: Long = System.currentTimeMillis(),
     today: Long = LocalDayClock.todayEpochDay(),
 ): TodayUiState {
+    // Keep overdue unfinished tasks visible on today, even when their original date has passed.
     val all = (upcoming + completed).distinctBy { it.id }.sortedBy { it.dueMillis() }
     val dayTasks = all.filter {
         it.dueDateEpochDay == selectedDay ||

@@ -180,6 +180,41 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- The first thumbnail is the profile cover; the same order is saved for the gallery. -->
+        <TextView
+            android:id="@+id/photo_selection_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:text="@string/pet_photo_cover_hint"
+            android:textAppearance="@style/TextAppearance.PetCare.Supporting"
+            android:visibility="gone" />
+
+        <HorizontalScrollView
+            android:id="@+id/photo_strip_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_8"
+            android:clipToPadding="false"
+            android:fillViewport="false"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/photo_thumbnail_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/clear_photos_button"
+            style="@style/Widget.PetCare.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/remove_all_pet_photos"
+            android:visibility="gone" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

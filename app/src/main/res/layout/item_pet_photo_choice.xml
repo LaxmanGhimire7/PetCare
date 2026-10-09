@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One tappable gallery thumbnail in the pet form. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="80dp"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/photo_choice_card"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="@dimen/space_12"
+        app:strokeWidth="2dp">
+
+        <ImageView
+            android:id="@+id/photo_choice_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/pet_photo"
+            android:scaleType="centerCrop" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/photo_choice_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_4"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.PetCare.Label" />
+
+    <ImageButton
+        android:id="@+id/remove_photo_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/remove_photo"
+        android:padding="12dp"
+        android:src="@drawable/ic_close"
+        app:tint="@color/on_surface_variant" />
+</LinearLayout>

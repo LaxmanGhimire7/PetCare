@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.petcare.PlaceLocationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-19T15:58:16.476Z" hostname="LAXMAN" time="0.01">
-  <properties/>
-  <testcase name="identicalPointsAreZeroKm" classname="com.example.petcare.PlaceLocationTest" time="0.01"/>
-  <testcase name="oneDegreeOfLatitudeIsAbout111Km" classname="com.example.petcare.PlaceLocationTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

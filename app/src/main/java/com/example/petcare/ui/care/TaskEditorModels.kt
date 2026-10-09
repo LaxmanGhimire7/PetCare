@@ -21,6 +21,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
+/** Bridges stored pet data to the task editor; the first photo is the chosen profile cover. */
 internal fun PetEntity.toEditorPet() = EditorPet(
     id = id,
     name = name,
@@ -30,6 +31,7 @@ internal fun PetEntity.toEditorPet() = EditorPet(
         "cat" -> R.drawable.pc_ic_cat
         else -> R.drawable.pc_ic_paw
     },
+    photoUri = photos().firstOrNull(),
 )
 
 internal fun ProviderEntity.toEditorPlace() = EditorPlace(id, name)
@@ -66,6 +68,7 @@ internal fun Repeat.toFrequency() = when (this) {
 }
 
 internal fun taskDueParts(dueAtMillis: Long): Pair<Long, Int> {
+    // Store the local calendar day as an epoch day and the local clock time as minutes.
     val local = Calendar.getInstance().apply { timeInMillis = dueAtMillis }
     val day = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
         clear()

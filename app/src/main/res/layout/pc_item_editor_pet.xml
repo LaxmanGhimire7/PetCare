@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/pcChoiceIcon"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:layout_gravity="center"
             android:background="@drawable/pc_bg_oval"
             android:importantForAccessibility="no"

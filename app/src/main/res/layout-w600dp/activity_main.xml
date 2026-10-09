@@ -12,6 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?attr/colorSurfaceContainer"
+        app:itemTextAppearanceActive="@style/TextAppearance.PC.NavLabel.Active"
+        app:itemTextAppearanceInactive="@style/TextAppearance.PC.NavLabel"
         app:menu="@menu/main_navigation" />
 
     <androidx.fragment.app.FragmentContainerView

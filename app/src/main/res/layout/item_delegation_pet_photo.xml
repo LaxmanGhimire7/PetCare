@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Photo shown inside the share preview; SMS itself remains text-only. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="112dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/space_12"
+    android:orientation="vertical">
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.PetCare.Card"
+        android:layout_width="112dp"
+        android:layout_height="112dp"
+        app:cardCornerRadius="@dimen/space_12"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        <ImageView
+            android:id="@+id/pet_photo_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </com.google.android.material.card.MaterialCardView>
+    <TextView
+        android:id="@+id/pet_photo_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_4"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAppearance="@style/TextAppearance.PetCare.Label" />
+</LinearLayout>

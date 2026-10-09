@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PetCare design kit: colour tokens, DARK theme (default). True black canvas. -->
+<!-- Dark theme colour tokens with a black canvas. -->
 <resources>
     <color name="pc_canvas">#000000</color>
     <color name="pc_surface">#111113</color>
