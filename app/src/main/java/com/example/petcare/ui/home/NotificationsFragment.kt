@@ -9,7 +9,7 @@ import com.example.petcare.design.InboxItem
 import com.example.petcare.design.NotificationActions
 import com.example.petcare.design.NotificationsScreenBinder
 
-/** In-app notification centre supplied by the v3 design kit. */
+/** Shows the app's notification centre and handles its item actions. */
 class NotificationsFragment : Fragment(R.layout.pc_fragment_notifications), NotificationActions {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         NotificationsScreenBinder(view, viewLifecycleOwner, this)

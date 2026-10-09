@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PetCare design kit: component styles, matched to the approved mockup. -->
+<!-- Shared Material component styles used across the app. -->
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Plain TextViews default to Body; an explicit android:textAppearance on the view still wins. -->
@@ -151,18 +151,18 @@
     </style>
 
     <!--
-        Bottom navigation: 64dp, black, hairline on top, 44x26 orange-tinted active pill.
+        Bottom navigation gives the larger labels and icons room without reducing touch targets.
         It applies the system bottom inset ITSELF, so do not add any insets listener,
         padding or fixed height to it in layouts or code.
     -->
     <style name="Widget.PC.BottomNav" parent="Widget.Material3.BottomNavigationView">
         <item name="android:background">@drawable/pc_bg_nav</item>
         <item name="elevation">0dp</item>
-        <item name="android:minHeight">64dp</item>
-        <item name="itemPaddingTop">8dp</item>
-        <item name="itemPaddingBottom">10dp</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="itemPaddingTop">9dp</item>
+        <item name="itemPaddingBottom">9dp</item>
         <item name="labelVisibilityMode">labeled</item>
-        <item name="itemIconSize">20dp</item>
+        <item name="itemIconSize">24dp</item>
         <item name="itemIconTint">@color/pc_nav_icon</item>
         <item name="itemTextColor">@color/pc_nav_text</item>
         <item name="itemTextAppearanceActive">@style/TextAppearance.PC.NavLabel.Active</item>
@@ -171,12 +171,12 @@
     </style>
     <style name="Widget.PC.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/pc_primary_container</item>
-        <item name="android:width">44dp</item>
-        <item name="android:height">26dp</item>
+        <item name="android:width">48dp</item>
+        <item name="android:height">30dp</item>
         <item name="shapeAppearance">@style/ShapeAppearance.PC.NavIndicator</item>
     </style>
-    <!-- Belt and braces: also shrink Material's default 80dp navigation bar height. -->
-    <dimen name="m3_bottom_nav_min_height" tools:ignore="PrivateResource">64dp</dimen>
+    <!-- Keep Material's internal minimum aligned with the visible navigation height. -->
+    <dimen name="m3_bottom_nav_min_height" tools:ignore="PrivateResource">72dp</dimen>
 
     <!-- Inputs: filled, no underline or outline. Set the hint ONLY on the TextInputLayout. -->
     <style name="Widget.PC.TextInput" parent="Widget.Material3.TextInputLayout.FilledBox">

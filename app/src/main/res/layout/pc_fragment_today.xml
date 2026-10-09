@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Today screen, matched to the approved mockup.
+    Today screen layout.
     Order: header (bell + avatar), Next-up countdown, pet rings, quick actions, week strip, timeline, at a glance, FAB.
     The root takes the status-bar inset in code, so nothing draws under the status bar.
 -->

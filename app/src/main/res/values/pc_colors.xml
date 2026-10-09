@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    PetCare design kit: colour tokens, LIGHT theme (v5: refined canvas, text and card edges).
+    Light theme colour tokens shared by screens and reusable components.
     The dark theme (the default) overrides every value in values-night/pc_colors.xml.
     Rule: orange is for actions and time only. Labels on orange are always black.
 -->

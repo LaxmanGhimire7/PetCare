@@ -19,7 +19,6 @@ import com.example.petcare.data.local.pet.PetRepository
 import com.example.petcare.data.local.pet.PetColorPicker
 import com.example.petcare.databinding.FragmentAddPetBinding
 import com.example.petcare.design.applySystemBarPaddingWithKeyboard
-import coil.load
 import com.google.android.material.snackbar.Snackbar
 
 /** Creates a pet profile with optional photos and a stable identity colour. */
@@ -37,18 +36,19 @@ class AddPetFragment : Fragment() {
     private val selectedPhotoUris = mutableListOf<Uri>()
     private var selectedColorIndex: Int? = null
     private val photoPicker = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-        uris.forEach {
+        val updated = PetPhotoSelection.append(selectedPhotoUris, uris)
+        val added = updated.drop(selectedPhotoUris.size)
+        added.forEach {
             runCatching {
                 requireContext().contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            if (it !in selectedPhotoUris) selectedPhotoUris += it
         }
-        selectedPhotoUris.firstOrNull()?.let {
-            binding.petPhotoPreview.visibility = View.VISIBLE
-            binding.petPhotoPreview.setPadding(0, 0, 0, 0)
-            binding.petPhotoPreview.load(it)
+        selectedPhotoUris.clear()
+        selectedPhotoUris += updated
+        if (uris.distinct().count { it !in updated } > 0) {
+            Toast.makeText(requireContext(), R.string.pet_photo_limit_reached, Toast.LENGTH_SHORT).show()
         }
-        updatePhotoCount()
+        renderPhotos()
     }
 
     override fun onCreateView(
@@ -72,6 +72,15 @@ class AddPetFragment : Fragment() {
             }
         }
         binding.selectPhotoButton.setOnClickListener { photoPicker.launch(arrayOf("image/*")) }
+        binding.clearPhotosButton.setOnClickListener {
+            selectedPhotoUris.clear()
+            renderPhotos()
+        }
+        savedInstanceState?.getStringArrayList(PHOTO_STATE)?.let { saved ->
+            selectedPhotoUris.clear()
+            selectedPhotoUris += saved.map(Uri::parse)
+        }
+        renderPhotos()
         PetColorPicker.bind(binding.petColorGroup, requireContext(), null) {
             selectedColorIndex = it
         }
@@ -149,20 +158,31 @@ class AddPetFragment : Fragment() {
         )
     }
 
-    private fun updatePhotoCount() {
-        binding.photoCountText.text = if (selectedPhotoUris.isEmpty()) {
-            getString(R.string.profile_photo_subtitle)
-        } else {
-            resources.getQuantityString(
-                R.plurals.selected_photo_count,
-                selectedPhotoUris.size,
-                selectedPhotoUris.size
-            )
-        }
+    private fun renderPhotos() {
+        binding.selectPhotoButton.isEnabled = selectedPhotoUris.size < PetPhotoSelection.MAX_PHOTOS
+        PetPhotoStrip.render(binding, selectedPhotoUris, onCoverSelected = { cover ->
+            if (selectedPhotoUris.firstOrNull() != cover) {
+                val updated = PetPhotoSelection.chooseCover(selectedPhotoUris, cover)
+                selectedPhotoUris.clear()
+                selectedPhotoUris += updated
+                renderPhotos()
+                binding.photoStripScroll.scrollTo(0, 0)
+            }
+        }, onPhotoRemoved = { photo ->
+            selectedPhotoUris.remove(photo)
+            renderPhotos()
+        })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putStringArrayList(PHOTO_STATE, ArrayList(selectedPhotoUris.map(Uri::toString)))
+        super.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    private companion object { const val PHOTO_STATE = "selectedPetPhotos" }
 }

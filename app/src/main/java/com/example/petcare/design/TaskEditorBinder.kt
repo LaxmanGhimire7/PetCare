@@ -16,6 +16,7 @@ import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.NestedScrollView
 import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.FragmentManager
+import coil.load
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.chip.Chip
@@ -34,10 +35,16 @@ import java.util.TimeZone
 
 enum class Repeat { ONCE, DAILY, WEEKLY, MONTHLY }
 
-data class EditorPet(val id: Long, val name: String, val petColor: PetColor, @DrawableRes val icon: Int)
+data class EditorPet(
+    val id: Long,
+    val name: String,
+    val petColor: PetColor,
+    @param:DrawableRes val icon: Int,
+    val photoUri: String?,
+)
 
 /** [key] is whatever your database stores for the category, e.g. "FEEDING". */
-data class EditorCategory(val key: String, val label: String, @DrawableRes val icon: Int)
+data class EditorCategory(val key: String, val label: String, @param:DrawableRes val icon: Int)
 
 data class EditorPlace(val id: Long, val name: String)
 
@@ -199,9 +206,26 @@ class TaskEditorBinder(
             val label: TextView = item.findViewById(R.id.pcChoiceName)
             ring.setRingColor(main)
             ring.setProgress(if (chosen) 1f else 0f, animate = chosen)
-            icon.setImageResource(pet.icon)
-            ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(main))
-            ViewCompat.setBackgroundTintList(icon, ColorStateList.valueOf(pet.petColor.tint(context)))
+            if (pet.photoUri.isNullOrBlank()) {
+                icon.scaleType = ImageView.ScaleType.FIT_CENTER
+                icon.clipToOutline = false
+                val padding = context.resources.getDimensionPixelSize(R.dimen.space_8)
+                icon.setPadding(padding, padding, padding, padding)
+                icon.setImageResource(pet.icon)
+                ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(main))
+                ViewCompat.setBackgroundTintList(icon, ColorStateList.valueOf(pet.petColor.tint(context)))
+            } else {
+                icon.scaleType = ImageView.ScaleType.CENTER_CROP
+                icon.clipToOutline = true
+                icon.setPadding(0, 0, 0, 0)
+                ImageViewCompat.setImageTintList(icon, null)
+                ViewCompat.setBackgroundTintList(icon, null)
+                icon.load(pet.photoUri) {
+                    crossfade(true)
+                    fallback(pet.icon)
+                    error(pet.icon)
+                }
+            }
             label.text = pet.name
             TextViewCompat.setTextAppearance(label, if (chosen) R.style.TextAppearance_PC_LabelBold else R.style.TextAppearance_PC_Label)
             label.setTextColor(ContextCompat.getColor(context, if (chosen) R.color.pc_text_primary else R.color.pc_text_secondary))

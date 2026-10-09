@@ -25,6 +25,7 @@ data class PetEntity(
     val photoUri: String? = null,
     val photoUris: String = ""
 ) {
+    /** The first URI is the chosen cover; the remaining URIs are shown in the gallery. */
     fun photos(): List<String> = photoUris
         .split(PHOTO_SEPARATOR)
         .filter(String::isNotBlank)

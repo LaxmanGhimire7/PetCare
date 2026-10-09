@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Pets screen, matched to the approved mockup: two-column grid, a dashed "Add a pet" row,
+    Pets screen: two-column grid, a dashed "Add a pet" row,
     what's coming this week, and this month's spending.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"

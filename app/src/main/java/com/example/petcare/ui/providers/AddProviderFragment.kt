@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.petcare.R
-import com.example.petcare.design.applySystemBarTopPadding
+import com.example.petcare.design.applySystemBarPaddingWithKeyboard
 import com.example.petcare.data.local.PetCareRepositories
 import com.example.petcare.ui.SelectionDialog
 import com.example.petcare.data.local.PetCareDatabase
@@ -32,12 +32,13 @@ class AddProviderFragment : Fragment() {
     private var locationOnly = false
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) = FragmentAddProviderBinding.inflate(inflater, container, false).also { _binding = it }.root
     override fun onViewCreated(view: View, state: Bundle?) {
-        view.applySystemBarTopPadding()
+        view.applySystemBarPaddingWithKeyboard()
         val types = resources.getStringArray(R.array.provider_types).toList()
         locationOnly = arguments?.getBoolean("locationOnly") == true
         selectedType = if (locationOnly) types.last() else types.first()
         if (locationOnly) {
             binding.formTitle.setText(R.string.location_form_title)
+            binding.formSubtitle.setText(R.string.settings_locations_hint)
             binding.saveButton.setText(R.string.location_save_suggestion)
             binding.nameLayout.hint = getString(R.string.location_name_hint)
             binding.addressLayout.hint = getString(R.string.location_address_optional)
@@ -45,6 +46,7 @@ class AddProviderFragment : Fragment() {
             binding.hoursLayout.visibility = View.GONE
             binding.phoneLayout.visibility = View.GONE
             binding.urlLayout.visibility = View.GONE
+            binding.contactSection.visibility = View.GONE
         }
         binding.typeInput.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, types)); binding.typeInput.setText(selectedType, false)
         binding.typeInput.setOnItemClickListener { _, _, position, _ -> selectedType = types[position] }
@@ -68,6 +70,8 @@ class AddProviderFragment : Fragment() {
         if (editId > 0L) viewLifecycleOwner.lifecycleScope.launch {
             editing = repositories.places.get(editId)
             editing?.let { place ->
+                binding.formTitle.setText(R.string.edit_place_title)
+                binding.formSubtitle.setText(R.string.place_edit_intro)
                 binding.nameInput.setText(place.name)
                 selectedType = place.type
                 binding.typeInput.setText(place.type, false)

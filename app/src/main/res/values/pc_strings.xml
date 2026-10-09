@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- PetCare design kit: all user-facing text for the Today and Pets screens. -->
+<!-- User-facing text for the Today and Pets screens. -->
 <resources>
     <!-- Today: next-up card -->
     <string name="pc_next_up">Next up</string>
